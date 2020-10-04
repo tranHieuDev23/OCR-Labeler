@@ -11,7 +11,6 @@ export class LabelComponent implements OnInit {
   public textRegions: TextRegion[] = [];
   public selectedId: number = 0;
   public selectedRegion: TextRegion = null;
-  public canLabelSelected: boolean = false;
   public selectedLabel: string = '';
   public isVisible: boolean = false;
 
@@ -30,7 +29,6 @@ export class LabelComponent implements OnInit {
   showModal(id: number): void {
     this.selectedId = id;
     this.selectedRegion = this.textRegions[id];
-    this.canLabelSelected = false;
     this.selectedLabel = '';
     this.isVisible = true;
   }
@@ -38,13 +36,12 @@ export class LabelComponent implements OnInit {
   hideModal(): void {
     this.selectedId = 0;
     this.selectedRegion = null;
-    this.canLabelSelected = false;
     this.selectedLabel = '';
     this.isVisible = false;
   }
 
-  submit(): void {
-    this.backend.labelRegion(this.selectedRegion, this.canLabelSelected, this.selectedLabel).then(() => {
+  submit(canLabel: boolean): void {
+    this.backend.labelRegion(this.selectedRegion, canLabel, this.selectedLabel).then(() => {
       this.backend.loadRegionsForLabel("123", 1).then((result) => {
         this.textRegions[this.selectedId] = result[0];
         this.hideModal();

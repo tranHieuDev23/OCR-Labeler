@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { LabelComponent } from './label.component';
 import { LabelRoutingModule } from './label-routing.module';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -18,7 +17,6 @@ import { FormsModule } from '@angular/forms';
     CommonModule,
     LabelRoutingModule,
     NzButtonModule,
-    NzCheckboxModule,
     NzSkeletonModule,
     NzInputModule,
     NzGridModule,
