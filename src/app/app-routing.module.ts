@@ -18,6 +18,11 @@ const routes: Routes = [
       import('./pages/label/label.module').then((m) => m.LabelModule),
   },
   {
+    path: 'verify',
+    loadChildren: () =>
+      import('./pages/verify/verify.module').then((m) => m.VerifyModule),
+  },
+  {
     path: 'login',
     loadChildren: () =>
       import('./pages/login/login.module').then((m) => m.LoginModule),

@@ -4,14 +4,13 @@ import { BackendService } from 'src/app/services/backend.service';
 
 @Component({
   selector: 'app-label',
-  templateUrl: './label.component.html',
-  styleUrls: ['./label.component.scss']
+  templateUrl: './verify.component.html',
+  styleUrls: ['./verify.component.scss']
 })
-export class LabelComponent implements OnInit {
+export class VerifyComponent implements OnInit {
   public textRegions: TextRegion[] = [];
   public selectedId: number = 0;
   public selectedRegion: TextRegion = null;
-  public selectedLabel: string = '';
   public isVisible: boolean = false;
 
   constructor(
@@ -19,7 +18,7 @@ export class LabelComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.backend.loadRegionsForLabeling('123', 10).then((result) => {
+    this.backend.loadRegionsForVerifying('123', 10).then((result) => {
       this.textRegions = result;
     }, (reason) => {
 
@@ -29,20 +28,18 @@ export class LabelComponent implements OnInit {
   showModal(id: number): void {
     this.selectedId = id;
     this.selectedRegion = this.textRegions[id];
-    this.selectedLabel = '';
     this.isVisible = true;
   }
 
   hideModal(): void {
     this.selectedId = 0;
     this.selectedRegion = null;
-    this.selectedLabel = '';
     this.isVisible = false;
   }
 
-  submit(canLabel: boolean): void {
-    this.backend.labelRegion(this.selectedRegion, canLabel, this.selectedLabel).then(() => {
-      this.backend.loadRegionsForLabeling("123", 1).then((result) => {
+  submit(isCorrect: boolean): void {
+    this.backend.verifyLabel(this.selectedRegion, isCorrect).then((result) => {
+      this.backend.loadRegionsForVerifying('123', 1).then((result) => {
         this.textRegions[this.selectedId] = result[0];
         this.hideModal();
       }, (reason) => {

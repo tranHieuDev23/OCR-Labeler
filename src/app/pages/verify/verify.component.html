@@ -3,22 +3,22 @@
         <img style="margin-top: 16px" *ngFor="let item of textRegions; index as i" nz-col nzSpan="24" nzMd="12" nzLg="8"
             nzXl="6" [src]="item.thumbnailUrl" (click)="showModal(i)" />
     </div>
-    <nz-modal *ngIf="selectedRegion" [(nzVisible)]="isVisible" nzTitle="Label image" [nzContent]="modalContent"
+    <nz-modal *ngIf="selectedRegion" [(nzVisible)]="isVisible" nzTitle="Verify label" [nzContent]="modalContent"
         [nzFooter]="modalFooter" (nzOnCancel)="hideModal()">
         <ng-template #modalContent>
             <img *ngIf="selectedRegion" style="width: 100%; height: auto;" [src]="selectedRegion.imageUrl" />
-            <input style="margin-top: 8px;" nz-input placeholder="Label" [(ngModel)]="selectedLabel" />
+            <p style="margin-top: 8px;">Is <b>{{ selectedRegion.label }}</b> the correct label for this example?</p>
         </ng-template>
         <ng-template #modalFooter>
             <button nz-button nzType="default" (click)="hideModal()">Cancel</button>
-            <button nz-button nzType="primary" nzDanger (click)="submit(false)">Cannot label</button>
-            <button nz-button nzType="primary" (click)="submit(true)">Submit label</button>
+            <button nz-button nzType="primary" nzDanger (click)="submit(false)">Incorrect label</button>
+            <button nz-button nzType="primary" (click)="submit(true)">Correct label</button>
         </ng-template>
     </nz-modal>
 </div>
 <nz-empty *ngIf="textRegions.length == 0" [nzNotFoundContent]="emptyContent">
     <ng-template #emptyContent>
-        <span>No image needs labeling</span>
+        <span>No image needs verifying</span>
     </ng-template>
 </nz-empty>
 <button style="margin-top: 16px; margin-left: auto; margin-right: auto; display: block;" nz-button>Refresh all</button>

@@ -13,7 +13,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -25,7 +25,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -37,7 +37,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -49,7 +49,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -61,7 +61,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -73,7 +73,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -85,7 +85,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -97,7 +97,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -109,7 +109,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -121,7 +121,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -133,7 +133,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -145,7 +145,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -157,7 +157,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -169,7 +169,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -181,7 +181,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -193,7 +193,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -205,7 +205,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -217,7 +217,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -229,7 +229,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -241,7 +241,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -253,7 +253,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -265,7 +265,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -277,7 +277,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -289,7 +289,7 @@ const REGIONS: TextRegion[] = [
     0,
     0,
     0,
-    "",
+    "This is an example label",
     LabelStatus.NotLabeled,
     null,
     null),
@@ -304,13 +304,25 @@ export class BackendService {
     private http: HttpClient
   ) { }
 
-  public loadRegionsForLabel(userId: string, itemCount: number): Promise<TextRegion[]> {
+  public loadRegionsForLabeling(userId: string, itemCount: number): Promise<TextRegion[]> {
     return new Promise<TextRegion[]>((resolve, reject) => {
       resolve(REGIONS.slice(0, itemCount));
     });
   }
 
   public labelRegion(region: TextRegion, canLabel: boolean, label: string): Promise<void> {
+    return new Promise<void>((resolve, rejects) => {
+      resolve();
+    });
+  }
+
+  public loadRegionsForVerifying(userId: string, itemCount: number): Promise<TextRegion[]> {
+    return new Promise<TextRegion[]>((resolve, reject) => {
+      resolve(REGIONS.slice(0, itemCount));
+    });
+  }
+
+  public verifyLabel(region: TextRegion, isCorrect: boolean): Promise<void> {
     return new Promise<void>((resolve, rejects) => {
       resolve();
     });
