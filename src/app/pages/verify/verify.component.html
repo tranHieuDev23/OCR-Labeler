@@ -2,28 +2,19 @@
     <h1 nz-typography>Verify results</h1>
     <p nz-typography>Tap on an image to start verifying it</p>
 </div>
-<div *ngIf="textRegions.length > 0">
-    <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
-        <img style="margin-top: 16px; object-fit: contain;" *ngFor="let item of textRegions; index as i" nz-col
-            nzSpan="24" nzMd="12" nzLg="8" nzXl="6" [src]="item.thumbnailUrl" (click)="showModal(i)" />
-    </div>
-    <nz-modal *ngIf="selectedRegion" [(nzVisible)]="isVisible" nzTitle="Verify label" [nzContent]="modalContent"
-        [nzFooter]="modalFooter" (nzOnCancel)="hideModal()">
-        <ng-template #modalContent>
-            <img *ngIf="selectedRegion" style="width: 100%; height: auto;" [src]="selectedRegion.imageUrl" />
-            <p nz-typography style="margin-top: 8px;">Is <b>{{ selectedRegion.label }}</b> the correct label for this
-                example?</p>
-        </ng-template>
-        <ng-template #modalFooter>
-            <button nz-button nzType="default" (click)="hideModal()">Cancel</button>
-            <button nz-button nzType="primary" nzDanger (click)="submit(false)">Incorrect</button>
-            <button nz-button nzType="primary" (click)="submit(true)">Correct</button>
-        </ng-template>
-    </nz-modal>
-</div>
-<nz-empty *ngIf="textRegions.length == 0" [nzNotFoundContent]="emptyContent">
-    <ng-template #emptyContent>
-        <p nz-typography>No image needs verifying</p>
-    </ng-template>
-</nz-empty>
+<app-image-grid [images]="images" emptyText="No image needs verifying" (imageClicked)="showModal($event)">
+</app-image-grid>
 <button style="margin-top: 16px; margin-left: auto; margin-right: auto; display: block;" nz-button>Refresh all</button>
+<nz-modal *ngIf="selectedRegion" [(nzVisible)]="isVisible" nzTitle="Verify label" [nzContent]="modalContent"
+    [nzFooter]="modalFooter" (nzOnCancel)="hideModal()">
+    <ng-template #modalContent>
+        <img *ngIf="selectedRegion" style="width: 100%; height: auto;" [src]="selectedRegion.imageUrl" />
+        <p nz-typography style="margin-top: 8px;">Is <b>{{ selectedRegion.label }}</b> the correct label for this
+            example?</p>
+    </ng-template>
+    <ng-template #modalFooter>
+        <button nz-button nzType="default" (click)="hideModal()">Cancel</button>
+        <button nz-button nzType="primary" nzDanger (click)="submit(false)">Incorrect</button>
+        <button nz-button nzType="primary" (click)="submit(true)">Correct</button>
+    </ng-template>
+</nz-modal>

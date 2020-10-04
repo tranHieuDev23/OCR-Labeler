@@ -1,0 +1,9 @@
+<div *ngIf="images.length > 0" nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
+    <img style="margin-top: 16px; object-fit: contain;" *ngFor="let item of images; index as i" nz-col nzSpan="24"
+        nzMd="12" nzLg="8" nzXl="6" [src]="item" (click)="onClick(i)" />
+</div>
+<nz-empty *ngIf="images.length == 0" [nzNotFoundContent]="emptyContent">
+    <ng-template #emptyContent>
+        <p nz-typography>{{ emptyText }}</p>
+    </ng-template>
+</nz-empty>

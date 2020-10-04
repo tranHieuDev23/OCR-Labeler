@@ -9,6 +9,7 @@ import { BackendService } from 'src/app/services/backend.service';
 })
 export class VerifyComponent implements OnInit {
   public textRegions: TextRegion[] = [];
+  public images: string[] = [];
   public selectedId: number = 0;
   public selectedRegion: TextRegion = null;
   public isVisible: boolean = false;
@@ -20,6 +21,7 @@ export class VerifyComponent implements OnInit {
   ngOnInit(): void {
     this.backend.loadRegionsForVerifying('123', 10).then((result) => {
       this.textRegions = result;
+      this.images = this.textRegions.map((value) => value.thumbnailUrl);
     }, (reason) => {
 
     });
@@ -41,6 +43,7 @@ export class VerifyComponent implements OnInit {
     this.backend.verifyLabel(this.selectedRegion, isCorrect).then((result) => {
       this.backend.loadRegionsForVerifying('123', 1).then((result) => {
         this.textRegions[this.selectedId] = result[0];
+        this.images[this.selectedId] = result[0].thumbnailUrl;
         this.hideModal();
       }, (reason) => {
 

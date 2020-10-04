@@ -10,6 +10,7 @@ import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzTypographyModule } from "ng-zorro-antd/typography";
 import { FormsModule } from '@angular/forms';
+import { ImageGridModule } from 'src/app/components/image-grid/image-grid.module';
 
 
 @NgModule({
@@ -24,7 +25,8 @@ import { FormsModule } from '@angular/forms';
     NzModalModule,
     NzEmptyModule,
     NzTypographyModule,
-    FormsModule
+    FormsModule,
+    ImageGridModule
   ],
   exports: [
     VerifyComponent

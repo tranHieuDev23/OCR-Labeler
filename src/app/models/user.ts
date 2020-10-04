@@ -1,14 +1,14 @@
 class User {
   constructor(
-    public readonly displayName: String,
-    public readonly username: String,
-    public readonly password: String
-  ) {}
+    public readonly displayName: string,
+    public readonly username: string,
+    public readonly password: string
+  ) { }
 
   static parseFromJson(obj: any): User {
-    const displayName: String = obj.displayName;
-    const username: String = obj.username;
-    const password: String = obj.password;
+    const displayName: string = obj.displayName;
+    const username: string = obj.username;
+    const password: string = obj.password;
     return new User(displayName, username, password);
   }
 }
