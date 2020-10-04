@@ -8,6 +8,11 @@ const routes: Routes = [
       import('./pages/welcome/welcome.module').then((m) => m.WelcomeModule),
   },
   {
+    path: 'upload',
+    loadChildren: () =>
+      import('./pages/upload/upload.module').then((m) => m.UploadModule),
+  },
+  {
     path: 'login',
     loadChildren: () =>
       import('./pages/login/login.module').then((m) => m.LoginModule),
