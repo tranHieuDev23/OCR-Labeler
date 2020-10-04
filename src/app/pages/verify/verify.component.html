@@ -4,8 +4,8 @@
 </div>
 <div *ngIf="textRegions.length > 0">
     <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
-        <img style="margin-top: 16px" *ngFor="let item of textRegions; index as i" nz-col nzSpan="24" nzMd="12" nzLg="8"
-            nzXl="6" [src]="item.thumbnailUrl" (click)="showModal(i)" />
+        <img style="margin-top: 16px; object-fit: contain;" *ngFor="let item of textRegions; index as i" nz-col
+            nzSpan="24" nzMd="12" nzLg="8" nzXl="6" [src]="item.thumbnailUrl" (click)="showModal(i)" />
     </div>
     <nz-modal *ngIf="selectedRegion" [(nzVisible)]="isVisible" nzTitle="Verify label" [nzContent]="modalContent"
         [nzFooter]="modalFooter" (nzOnCancel)="hideModal()">
