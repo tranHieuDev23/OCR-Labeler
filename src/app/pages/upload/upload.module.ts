@@ -4,7 +4,6 @@ import { UploadComponent } from './upload.component';
 import { UploadRoutingModule } from './upload-routing.module';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzGridModule } from 'ng-zorro-antd/grid';
-import { NzListModule } from 'ng-zorro-antd/list';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -20,7 +19,6 @@ import { FormsModule } from '@angular/forms';
     UploadRoutingModule,
     NzInputModule,
     NzGridModule,
-    NzListModule,
     NzAlertModule,
     NzButtonModule,
     NzIconModule,

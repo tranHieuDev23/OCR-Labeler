@@ -1,0 +1,27 @@
+<div *ngIf="textRegions.length > 0">
+    <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
+        <img style="margin-top: 16px" *ngFor="let item of textRegions; index as i" nz-col nzSpan="24" nzMd="12" nzLg="8"
+            nzXl="6" [src]="item.thumbnailUrl" (click)="showModal(i)" />
+    </div>
+    <nz-modal [(nzVisible)]="isVisible" nzTitle="Label image" [nzContent]="modalContent" [nzFooter]="modalFooter"
+        (nzOnCancel)="hideModal()">
+        <ng-template #modalContent>
+            <img *ngIf="selectedRegion" style="width: 100%; height: auto;" [src]="selectedRegion.imageUrl" />
+            <label style="margin-top: 4px;" nz-checkbox nzSize="large" [(ngModel)]="canLabelSelected">Can be
+                labeled?</label>
+            <br />
+            <input style="margin-top: 4px;" *ngIf="canLabelSelected" nz-input placeholder="Label"
+                [(ngModel)]="selectedLabel" />
+        </ng-template>
+        <ng-template #modalFooter>
+            <button nz-button nzType="default" (click)="hideModal()">Cancel</button>
+            <button nz-button nzType="primary" (click)="submit()">Submit</button>
+        </ng-template>
+    </nz-modal>
+</div>
+<nz-empty *ngIf="textRegions.length == 0" [nzNotFoundContent]="emptyContent">
+    <ng-template #emptyContent>
+        <span>No image needs labeling</span>
+    </ng-template>
+</nz-empty>
+<button style="margin-top: 16px; margin-left: auto; margin-right: auto; display: block;" nz-button>Refresh</button>

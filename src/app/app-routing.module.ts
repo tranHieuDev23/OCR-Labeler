@@ -13,6 +13,11 @@ const routes: Routes = [
       import('./pages/upload/upload.module').then((m) => m.UploadModule),
   },
   {
+    path: 'label',
+    loadChildren: () =>
+      import('./pages/label/label.module').then((m) => m.LabelModule),
+  },
+  {
     path: 'login',
     loadChildren: () =>
       import('./pages/login/login.module').then((m) => m.LoginModule),

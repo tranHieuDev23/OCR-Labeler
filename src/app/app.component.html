@@ -5,28 +5,28 @@
         <img src="assets/image/logo_hust.jpg" width="32" height="auto" alt="logo">
         <h1>OCR-Labeler</h1>
       </a>
-      <li nz-submenu nzTitle="Label" nzIcon="dashboard">
+      <li nz-submenu nzTitle="Label" nzIcon="edit">
         <ul>
-          <li nz-menu-item nzMatchRouter>
+          <li nz-menu-item>
             <a routerLink="/upload">Upload image</a>
           </li>
-          <li nz-menu-item nzMatchRouter>
-            <a routerLink="/upload">My images</a>
+          <li nz-menu-item>
+            <a routerLink="/my-image">My images</a>
           </li>
-          <li nz-menu-item nzMatchRouter>
-            <a>Label texts</a>
+          <li nz-menu-item="/label">
+            <a routerLink="/label">Label texts</a>
           </li>
-          <li nz-menu-item nzMatchRouter>
+          <li nz-menu-item="/verify">
             <a>Verify results</a>
           </li>
         </ul>
       </li>
       <li nz-submenu nzTitle="Account" nzIcon="user">
         <ul>
-          <li nz-menu-item nzMatchRouter>
-            <a>Manage account</a>
+          <li nz-menu-item>
+            <a routerLink="/account">Manage account</a>
           </li>
-          <li nz-menu-item nzMatchRouter>
+          <li nz-menu-item>
             <a>Log out</a>
           </li>
         </ul>
