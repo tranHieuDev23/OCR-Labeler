@@ -1,3 +1,7 @@
+<div>
+    <h1 nz-typography>Upload new image</h1>
+    <p nz-typography>Start by selecting an image in your device</p>
+</div>
 <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
     <div nz-col nzSpan="24" nzMd="12">
         <input nz-input type="file" accept="image/x-png,image/gif,image/jpeg" (change)="fileChangeEvent($event)" />

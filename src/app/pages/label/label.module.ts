@@ -8,6 +8,7 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { NzTypographyModule } from "ng-zorro-antd/typography";
 import { FormsModule } from '@angular/forms';
 
 
@@ -22,6 +23,7 @@ import { FormsModule } from '@angular/forms';
     NzGridModule,
     NzModalModule,
     NzEmptyModule,
+    NzTypographyModule,
     FormsModule
   ],
   exports: [

@@ -11,6 +11,7 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzPopoverModule } from 'ng-zorro-antd/popover';
 import { ImageCropperModule } from 'ngx-image-cropper';
 import { FormsModule } from '@angular/forms';
+import { NzTypographyModule } from 'ng-zorro-antd/typography';
 
 @NgModule({
   declarations: [UploadComponent],
@@ -24,6 +25,7 @@ import { FormsModule } from '@angular/forms';
     NzIconModule,
     NzCardModule,
     NzPopoverModule,
+    NzTypographyModule,
     ImageCropperModule,
     FormsModule
   ],
