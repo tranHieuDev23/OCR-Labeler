@@ -28,6 +28,11 @@ const routes: Routes = [
       import('./pages/my-images/my-images.module').then((m) => m.MyImagesModule),
   },
   {
+    path: 'manage-image',
+    loadChildren: () =>
+      import('./pages/manage-image/manage-image.module').then((m) => m.ManageImageModule),
+  },
+  {
     path: 'login',
     loadChildren: () =>
       import('./pages/login/login.module').then((m) => m.LoginModule),

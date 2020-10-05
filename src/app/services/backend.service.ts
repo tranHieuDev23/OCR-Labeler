@@ -447,4 +447,16 @@ export class BackendService {
       });
     });
   }
+
+  public loadImage(userId: string, imageId: string): Promise<UploadedImage> {
+    return new Promise<UploadedImage>((resolve, reject) => {
+      for (let i = 0; i < IMAGES.length; i++) {
+        if (IMAGES[i].imageId == imageId) {
+          resolve(IMAGES[i]);
+          return;
+        }
+      }
+      reject();
+    });
+  }
 }
