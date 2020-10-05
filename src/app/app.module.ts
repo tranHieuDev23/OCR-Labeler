@@ -14,6 +14,9 @@ import { NZ_I18N } from 'ng-zorro-antd/i18n';
 import { vi_VN } from 'ng-zorro-antd/i18n';
 import { registerLocaleData } from '@angular/common';
 import vi from '@angular/common/locales/vi';
+import { CookieService } from 'ngx-cookie-service';
+import UserLoggedInGuard from './services/logged-in-guard';
+import UserLoggedOutGuard from './services/logged-out-guard';
 
 registerLocaleData(vi);
 
@@ -32,7 +35,7 @@ registerLocaleData(vi);
     HttpClientModule,
     BrowserAnimationsModule,
   ],
-  providers: [{ provide: NZ_I18N, useValue: vi_VN }],
+  providers: [{ provide: NZ_I18N, useValue: vi_VN }, CookieService, UserLoggedInGuard, UserLoggedOutGuard],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

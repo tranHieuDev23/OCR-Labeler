@@ -7,9 +7,19 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
-  imports: [CommonModule, LoginRoutingModule, NzFormModule, NzInputModule, NzButtonModule, NzGridModule, NzTypographyModule],
+  imports: [
+    CommonModule,
+    LoginRoutingModule,
+    NzFormModule,
+    NzInputModule,
+    NzButtonModule,
+    NzGridModule,
+    NzTypographyModule,
+    FormsModule
+  ],
   declarations: [LoginComponent],
   exports: [LoginComponent],
 })
