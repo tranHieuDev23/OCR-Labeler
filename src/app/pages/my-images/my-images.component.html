@@ -4,6 +4,8 @@
 </div>
 <app-image-grid [images]="images" emptyText="No image need labeled" (imageClicked)="onImageClicked($event)">
 </app-image-grid>
-<div class="pagination">
-    <nz-pagination [nzPageIndex]="2" [nzTotal]="500" nzShowQuickJumper></nz-pagination>
+<div *ngIf="imagesCount" class="pagination">
+    <nz-pagination [nzPageIndex]="currentPage" [nzPageSize]="imagesPerPage" [nzTotal]="imagesCount" nzShowQuickJumper
+        (nzPageIndexChange)="changePage($event)">
+    </nz-pagination>
 </div>

@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import TextRegion from 'src/app/models/text-region';
+import { ActivatedRoute, Router } from '@angular/router';
+import UploadedImage from 'src/app/models/uploaded-image';
 import { BackendService } from 'src/app/services/backend.service';
 
-const IMAGE_PER_PAGE: number = 10;
+const IMAGES_PER_PAGE: number = 10;
 
 @Component({
   selector: 'app-my-images',
@@ -11,15 +11,19 @@ const IMAGE_PER_PAGE: number = 10;
   styleUrls: ['./my-images.component.scss']
 })
 export class MyImagesComponent implements OnInit {
-  public textRegions: TextRegion[] = [];
+  public currentPage: number = null;
+  public imagesPerPage: number = IMAGES_PER_PAGE;
+  public imagesCount: number = null;
+  public uploadedImages: UploadedImage[] = [];
   public images: string[] = [];
   public selectedId: number = 0;
-  public selectedRegion: TextRegion = null;
+  public selectedRegion: UploadedImage = null;
   public isVisible: boolean = false;
 
   constructor(
     private backend: BackendService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -30,10 +34,12 @@ export class MyImagesComponent implements OnInit {
   }
 
   loadPage(pageId: number): void {
+    this.currentPage = pageId;
     this.images = [];
-    this.backend.loadUserImages('123', IMAGE_PER_PAGE * (pageId - 1), IMAGE_PER_PAGE).then((result) => {
-      this.textRegions = result;
-      this.images = this.textRegions.map((value) => value.thumbnailUrl);
+    this.backend.loadUserImages('123', IMAGES_PER_PAGE * (pageId - 1), IMAGES_PER_PAGE).then((result) => {
+      this.imagesCount = result.imagesCount;
+      this.uploadedImages = result.images;
+      this.images = this.uploadedImages.map((value) => value.thumbnailUrl);
     }, (reason) => {
 
     });
@@ -41,5 +47,12 @@ export class MyImagesComponent implements OnInit {
 
   onImageClicked(id: number): void {
 
+  }
+
+  changePage(event: any): void {
+    if (event == this.currentPage) {
+      return;
+    }
+    this.router.navigateByUrl(`/my-images/${event}`);
   }
 }
