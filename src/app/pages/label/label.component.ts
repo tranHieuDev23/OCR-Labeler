@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import TextRegion from 'src/app/models/text-region';
+import { TextRegion } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
 
 @Component({

@@ -1,17 +1,7 @@
 import { Component } from '@angular/core';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
+import { Region } from 'src/app/models/text-region';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
-
-class Region {
-  constructor(
-    public x1: number,
-    public x2: number,
-    public y1: number,
-    public y2: number,
-    public fullImage: string,
-    public thumbnail: string
-  ) { }
-}
 
 @Component({
   selector: 'app-upload',
@@ -23,7 +13,10 @@ export class UploadComponent {
   public displayTools: boolean;
   public imageChangedEvent: any;
   public croppedRegions: Region[];
+  public croppedRegionImages: string[];
+  public croppedRegionThumbnails: string[];
   public currentRegion: Region;
+  public currentRegionImage: string;
 
   constructor(
     private thumbnail: ThumbnailService
@@ -36,7 +29,10 @@ export class UploadComponent {
     this.displayTools = false;
     this.imageChangedEvent = null;
     this.croppedRegions = [];
+    this.croppedRegionImages = [];
+    this.croppedRegionThumbnails = [];
     this.currentRegion = null;
+    this.currentRegionImage = null;
   }
 
   fileChangeEvent(event: any): void {
@@ -50,9 +46,8 @@ export class UploadComponent {
       event.cropperPosition.x2,
       event.cropperPosition.y1,
       event.cropperPosition.y2,
-      event.base64,
-      event.base64
     );
+    this.currentRegionImage = event.base64;
   }
 
   imageLoaded() {
@@ -68,16 +63,16 @@ export class UploadComponent {
   }
 
   addSelected() {
-    this.thumbnail.generateThumbnail(this.currentRegion.thumbnail, 160, 90).then((result) => {
+    this.thumbnail.generateThumbnail(this.currentRegionImage, 160, 90).then((thumbnail) => {
       const newRegion = new Region(
         this.currentRegion.x1,
         this.currentRegion.x2,
         this.currentRegion.y1,
         this.currentRegion.y2,
-        this.currentRegion.fullImage,
-        result
       );
       this.croppedRegions.push(newRegion);
+      this.croppedRegionImages.push(this.currentRegionImage);
+      this.croppedRegionThumbnails.push(thumbnail);
     });
   }
 
@@ -87,6 +82,8 @@ export class UploadComponent {
 
   deleteRegion(id: number) {
     this.croppedRegions.splice(id, 1);
+    this.croppedRegionImages.splice(id, 1);
+    this.croppedRegionThumbnails.splice(id, 1);
   }
 
   upload() {

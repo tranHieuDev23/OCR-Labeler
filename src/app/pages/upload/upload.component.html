@@ -10,7 +10,7 @@
         <image-cropper [imageChangedEvent]="imageChangedEvent" [maintainAspectRatio]="false" format="png"
             (imageCropped)="imageCropped($event)" (imageLoaded)="imageLoaded()" (cropperReady)="cropperReady()"
             (loadImageFailed)="loadImageFailed()"></image-cropper>
-        <img *ngIf="currentRegion" class="uploaded-image" [src]="currentRegion.fullImage" />
+        <img *ngIf="currentRegion" class="uploaded-image" [src]="currentRegionImage" />
     </div>
     <div *ngIf="displayTools" nz-col nzSpan="24" nzMd="12">
         <button class="button-tool" nz-button nzType="primary" (click)="addSelected()">
@@ -26,14 +26,14 @@
                     [nzActions]="[deleteSetting]">
                 </nz-card>
                 <ng-template #coverTemplate>
-                    <img class="item-thumbnail" [src]="item.thumbnail" nz-popover
+                    <img class="item-thumbnail" [src]="croppedRegionThumbnails[i]" nz-popover
                         [nzPopoverContent]="fullImageTemplate" />
                 </ng-template>
                 <ng-template #deleteSetting>
                     <i nz-icon nzType="delete" nzDanger (click)="deleteRegion(i)"></i>
                 </ng-template>
                 <ng-template #fullImageTemplate>
-                    <img class="item-full-image" [src]="item.fullImage" />
+                    <img class="item-full-image" [src]="croppedRegionImages[i]" />
                 </ng-template>
             </div>
         </div>

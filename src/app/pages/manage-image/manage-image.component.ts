@@ -1,19 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
+import LabelStatus from 'src/app/models/label-status';
+import { TextRegion, Region } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
-
-class Region {
-  constructor(
-    public x1: number,
-    public x2: number,
-    public y1: number,
-    public y2: number,
-    public fullImage: string,
-    public thumbnail: string
-  ) { }
-}
 
 @Component({
   selector: 'app-manage-image',
@@ -24,8 +15,9 @@ export class ManageImageComponent implements OnInit {
   public errorMessage: String;
   public displayTools: boolean;
   public imageUrl: string;
-  public croppedRegions: Region[];
+  public croppedRegions: TextRegion[];
   public currentRegion: Region;
+  public currentRegionImage: string;
 
   constructor(
     private thumbnail: ThumbnailService,
@@ -50,20 +42,14 @@ export class ManageImageComponent implements OnInit {
     this.imageUrl = null;
     this.croppedRegions = [];
     this.currentRegion = null;
+    this.currentRegionImage = null;
   }
 
   fileChangeEvent(imageId: string): void {
     this.initialize();
     this.backend.loadImage("123", imageId).then((result) => {
-      console.log(result);
       this.imageUrl = result.imageUrl;
-      this.croppedRegions = result.textRegions.map((item) => new Region(
-        item.left,
-        item.right,
-        item.top,
-        item.bottom,
-        item.imageUrl,
-        item.thumbnailUrl));
+      this.croppedRegions = result.textRegions;
     }, (reason) => {
       this.errorMessage = "Cannot load image!";
     });
@@ -75,9 +61,8 @@ export class ManageImageComponent implements OnInit {
       event.cropperPosition.x2,
       event.cropperPosition.y1,
       event.cropperPosition.y2,
-      event.base64,
-      event.base64
     );
+    this.currentRegionImage = event.base64;
   }
 
   imageLoaded() {
@@ -93,16 +78,24 @@ export class ManageImageComponent implements OnInit {
   }
 
   addSelected() {
-    this.thumbnail.generateThumbnail(this.currentRegion.thumbnail, 160, 90).then((result) => {
+    this.thumbnail.generateThumbnail(this.currentRegionImage, 160, 90).then((thumbnail) => {
       const newRegion = new Region(
         this.currentRegion.x1,
         this.currentRegion.x2,
         this.currentRegion.y1,
         this.currentRegion.y2,
-        this.currentRegion.fullImage,
-        result
       );
-      this.croppedRegions.push(newRegion);
+      const newTextRegion = new TextRegion(
+        null,
+        this.currentRegionImage,
+        thumbnail,
+        newRegion,
+        null,
+        LabelStatus.NotLabeled,
+        null,
+        null
+      );
+      this.croppedRegions.push(newTextRegion);
     });
   }
 

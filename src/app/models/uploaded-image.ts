@@ -1,4 +1,4 @@
-import TextRegion from './text-region';
+import { TextRegion } from './text-region';
 import User from './user';
 
 class UploadedImage {
