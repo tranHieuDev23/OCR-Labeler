@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
-import LabelStatus from 'src/app/models/label-status';
 import { TextRegion, Region } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
@@ -80,33 +79,28 @@ export class ManageImageComponent implements OnInit {
   }
 
   addSelected() {
-    this.thumbnail.generateThumbnail(this.currentRegionImage, 160, 90).then((thumbnail) => {
-      const newRegion = new Region(
-        this.currentRegion.x1,
-        this.currentRegion.x2,
-        this.currentRegion.y1,
-        this.currentRegion.y2,
-      );
-      const newTextRegion = new TextRegion(
-        null,
-        this.currentRegionImage,
-        thumbnail,
-        newRegion,
-        null,
-        LabelStatus.NotLabeled,
-        null,
-        null
-      );
-      this.croppedRegions.push(newTextRegion);
-      this.backend.addTextRegion("123", this.imageId, newRegion);
+    const newRegion = new Region(
+      this.currentRegion.x1,
+      this.currentRegion.x2,
+      this.currentRegion.y1,
+      this.currentRegion.y2,
+    );
+    this.backend.addTextRegion("123", this.imageId, newRegion).then((newTextRegion) => {
+      this.thumbnail.generateThumbnail(this.currentRegionImage, 160, 90).then((thumbnail) => {
+        this.croppedRegions.push(newTextRegion);
+      });
     });
   }
 
   deleteRegion(id: number) {
-    this.croppedRegions.splice(id, 1);
+    this.backend.deleteTextRegion("123", this.croppedRegions[id].id).then(() => {
+      this.croppedRegions.splice(id, 1);
+    });
   }
 
   deleteImage() {
-
+    this.backend.deleteImage("123", this.imageId).then(() => {
+      this.router.navigateByUrl("/");
+    });
   }
 }

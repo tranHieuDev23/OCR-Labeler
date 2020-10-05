@@ -43,7 +43,7 @@ export class LabelComponent implements OnInit {
   }
 
   submit(canLabel: boolean): void {
-    this.backend.labelRegion(this.selectedRegion, canLabel, this.selectedLabel).then(() => {
+    this.backend.labelRegion(this.selectedRegion.id, canLabel, this.selectedLabel).then(() => {
       this.backend.loadRegionsForLabeling("123", 1).then((result) => {
         this.textRegions[this.selectedId] = result[0];
         this.images[this.selectedId] = result[0].thumbnailUrl;

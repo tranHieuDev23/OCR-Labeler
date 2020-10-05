@@ -40,7 +40,7 @@ export class VerifyComponent implements OnInit {
   }
 
   submit(isCorrect: boolean): void {
-    this.backend.verifyLabel(this.selectedRegion, isCorrect).then((result) => {
+    this.backend.verifyLabel(this.selectedRegion.id, isCorrect).then((result) => {
       this.backend.loadRegionsForVerifying('123', 1).then((result) => {
         this.textRegions[this.selectedId] = result[0];
         this.images[this.selectedId] = result[0].thumbnailUrl;

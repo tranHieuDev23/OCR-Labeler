@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
 import { Region } from 'src/app/models/text-region';
+import { BackendService } from 'src/app/services/backend.service';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
 
 @Component({
@@ -19,7 +21,9 @@ export class UploadComponent {
   public currentRegionImage: string;
 
   constructor(
-    private thumbnail: ThumbnailService
+    private thumbnail: ThumbnailService,
+    private backend: BackendService,
+    private router: Router
   ) {
     this.initialize();
   }
@@ -87,6 +91,9 @@ export class UploadComponent {
   }
 
   upload() {
-
+    this.backend.uploadImage("123", this.imageChangedEvent.srcElement.files[0], this.croppedRegions)
+      .then(() => {
+        this.router.navigateByUrl('/');
+      });
   }
 }

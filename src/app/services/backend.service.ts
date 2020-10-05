@@ -342,31 +342,37 @@ export class BackendService {
     private http: HttpClient
   ) { }
 
-  public loadRegionsForLabeling(userId: string, itemCount: number): Promise<TextRegion[]> {
+  public uploadImage(username: string, imageFile: File, regions: Region[]): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      resolve();
+    });
+  }
+
+  public loadRegionsForLabeling(username: string, itemCount: number): Promise<TextRegion[]> {
     return new Promise<TextRegion[]>((resolve, reject) => {
       resolve(REGIONS.slice(0, itemCount));
     });
   }
 
-  public labelRegion(region: TextRegion, canLabel: boolean, label: string): Promise<void> {
+  public labelRegion(regionId: string, canLabel: boolean, label: string): Promise<void> {
     return new Promise<void>((resolve, rejects) => {
       resolve();
     });
   }
 
-  public loadRegionsForVerifying(userId: string, itemCount: number): Promise<TextRegion[]> {
+  public loadRegionsForVerifying(username: string, itemCount: number): Promise<TextRegion[]> {
     return new Promise<TextRegion[]>((resolve, reject) => {
       resolve(REGIONS.slice(0, itemCount));
     });
   }
 
-  public verifyLabel(region: TextRegion, isCorrect: boolean): Promise<void> {
+  public verifyLabel(regionId: string, isCorrect: boolean): Promise<void> {
     return new Promise<void>((resolve, rejects) => {
       resolve();
     });
   }
 
-  public loadUserImages(userId: string, startFrom: number, itemCount: number): Promise<{ imagesCount: number, images: UploadedImage[] }> {
+  public loadUserImages(username: string, startFrom: number, itemCount: number): Promise<{ imagesCount: number, images: UploadedImage[] }> {
     return new Promise<{ imagesCount: number, images: UploadedImage[] }>((resolve, reject) => {
       resolve({
         imagesCount: IMAGES.length,
@@ -375,7 +381,7 @@ export class BackendService {
     });
   }
 
-  public loadImage(userId: string, imageId: string): Promise<UploadedImage> {
+  public loadImage(username: string, imageId: string): Promise<UploadedImage> {
     return new Promise<UploadedImage>((resolve, reject) => {
       for (let i = 0; i < IMAGES.length; i++) {
         if (IMAGES[i].imageId == imageId) {
@@ -387,7 +393,19 @@ export class BackendService {
     });
   }
 
-  public addTextRegion(userId: string, imageId: string, region: Region): Promise<void> {
+  public addTextRegion(username: string, imageId: string, region: Region): Promise<TextRegion> {
+    return new Promise<TextRegion>((resolve, reject) => {
+      resolve();
+    });
+  }
+
+  public deleteTextRegion(username: string, regionId: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      resolve();
+    });
+  }
+
+  public deleteImage(username: string, imageId: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       resolve();
     });
