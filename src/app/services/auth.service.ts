@@ -43,7 +43,7 @@ export class AuthService {
           return;
         }
         this.cookie.set(AUTH_COOKIE_NAME, '123');
-        this.currentUser = new User("Tran Minh Hieu", username, null);
+        this.currentUser = new User("Tran Minh Hieu", username);
         this.loggedIn.emit(true);
         resolve(this.currentUser);
       }, reject);
@@ -75,7 +75,7 @@ export class AuthService {
         resolve(null);
         return;
       }
-      this.currentUser = new User("Tran Minh Hieu", 'admin', null);
+      this.currentUser = new User("Tran Minh Hieu", 'admin');
       resolve(this.currentUser);
     });
   }
