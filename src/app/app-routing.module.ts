@@ -23,6 +23,11 @@ const routes: Routes = [
       import('./pages/verify/verify.module').then((m) => m.VerifyModule),
   },
   {
+    path: 'my-images',
+    loadChildren: () =>
+      import('./pages/my-images/my-images.module').then((m) => m.MyImagesModule),
+  },
+  {
     path: 'login',
     loadChildren: () =>
       import('./pages/login/login.module').then((m) => m.LoginModule),

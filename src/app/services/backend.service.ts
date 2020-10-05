@@ -327,4 +327,10 @@ export class BackendService {
       resolve();
     });
   }
+
+  public loadUserImages(userId: string, startFrom: number, itemCount: number): Promise<TextRegion[]> {
+    return new Promise<TextRegion[]>((resolve, reject) => {
+      resolve(REGIONS.slice(startFrom, startFrom + itemCount));
+    });
+  }
 }

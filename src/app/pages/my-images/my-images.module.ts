@@ -1,29 +1,28 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { VerifyComponent } from './verify.component';
-import { VerifyRoutingModule } from './verify-routing.module';
+import { MyImagesComponent } from './my-images.component';
+import { MyImagesRoutingModule } from './my-images-routing.module';
+import { ImageGridModule } from 'src/app/components/image-grid/image-grid.module';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzModalModule } from 'ng-zorro-antd/modal';
-import { NzTypographyModule } from "ng-zorro-antd/typography";
+import { NzTypographyModule } from 'ng-zorro-antd/typography';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { FormsModule } from '@angular/forms';
-import { ImageGridModule } from 'src/app/components/image-grid/image-grid.module';
 
 
 @NgModule({
-  declarations: [VerifyComponent],
+  declarations: [MyImagesComponent],
   imports: [
     CommonModule,
-    VerifyRoutingModule,
+    MyImagesRoutingModule,
     NzButtonModule,
     NzInputModule,
     NzModalModule,
     NzTypographyModule,
+    NzPaginationModule,
     FormsModule,
     ImageGridModule
-  ],
-  exports: [
-    VerifyComponent
   ]
 })
-export class VerifyModule { }
+export class MyImagesModule { }
