@@ -5,7 +5,7 @@ import { LabelRoutingModule } from './label-routing.module';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzModalModule } from 'ng-zorro-antd/modal';
-import { NzTypographyModule } from "ng-zorro-antd/typography";
+import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { FormsModule } from '@angular/forms';
 import { ImageGridModule } from 'src/app/components/image-grid/image-grid.module';
 

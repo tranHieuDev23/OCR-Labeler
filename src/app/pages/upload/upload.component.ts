@@ -91,7 +91,7 @@ export class UploadComponent {
   }
 
   upload() {
-    this.backend.uploadImage("123", this.imageChangedEvent.srcElement.files[0], this.croppedRegions)
+    this.backend.uploadImage('123', this.imageChangedEvent.srcElement.files[0], this.croppedRegions)
       .then(() => {
         this.router.navigateByUrl('/');
       });

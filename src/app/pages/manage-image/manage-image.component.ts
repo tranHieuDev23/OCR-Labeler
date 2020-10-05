@@ -32,7 +32,7 @@ export class ManageImageComponent implements OnInit {
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
       this.initialize();
-      this.imageId = params["id"];
+      this.imageId = params['id'];
       this.fileChangeEvent(this.imageId);
     });
   }
@@ -48,7 +48,7 @@ export class ManageImageComponent implements OnInit {
 
   fileChangeEvent(imageId: string): void {
     this.initialize();
-    this.backend.loadImage("123", imageId).then((result) => {
+    this.backend.loadImage('123', imageId).then((result) => {
       this.imageUrl = result.imageUrl;
       this.croppedRegions = result.textRegions;
     }, (reason) => {
@@ -85,7 +85,7 @@ export class ManageImageComponent implements OnInit {
       this.currentRegion.y1,
       this.currentRegion.y2,
     );
-    this.backend.addTextRegion("123", this.imageId, newRegion).then((newTextRegion) => {
+    this.backend.addTextRegion('123', this.imageId, newRegion).then((newTextRegion) => {
       this.thumbnail.generateThumbnail(this.currentRegionImage, 160, 90).then((thumbnail) => {
         this.croppedRegions.push(newTextRegion);
       });
@@ -93,14 +93,14 @@ export class ManageImageComponent implements OnInit {
   }
 
   deleteRegion(id: number) {
-    this.backend.deleteTextRegion("123", this.croppedRegions[id].id).then(() => {
+    this.backend.deleteTextRegion('123', this.croppedRegions[id].id).then(() => {
       this.croppedRegions.splice(id, 1);
     });
   }
 
   deleteImage() {
-    this.backend.deleteImage("123", this.imageId).then(() => {
-      this.router.navigateByUrl("/");
+    this.backend.deleteImage('123', this.imageId).then(() => {
+      this.router.navigateByUrl('/');
     });
   }
 }
