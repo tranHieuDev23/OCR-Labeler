@@ -387,7 +387,7 @@ export class BackendService {
     });
   }
 
-  public addTextRegion(userId: string, imageId: string, textRegion: TextRegion): Promise<void> {
+  public addTextRegion(userId: string, imageId: string, region: Region): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       resolve();
     });

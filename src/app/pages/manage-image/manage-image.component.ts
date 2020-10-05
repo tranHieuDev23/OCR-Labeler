@@ -19,6 +19,8 @@ export class ManageImageComponent implements OnInit {
   public currentRegion: Region;
   public currentRegionImage: string;
 
+  private imageId: string;
+
   constructor(
     private thumbnail: ThumbnailService,
     private backend: BackendService,
@@ -31,8 +33,8 @@ export class ManageImageComponent implements OnInit {
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
       this.initialize();
-      const id: string = params["id"];
-      this.fileChangeEvent(id);
+      this.imageId = params["id"];
+      this.fileChangeEvent(this.imageId);
     });
   }
 
@@ -96,18 +98,15 @@ export class ManageImageComponent implements OnInit {
         null
       );
       this.croppedRegions.push(newTextRegion);
+      this.backend.addTextRegion("123", this.imageId, newRegion);
     });
-  }
-
-  resetRegions() {
-    this.croppedRegions = [];
   }
 
   deleteRegion(id: number) {
     this.croppedRegions.splice(id, 1);
   }
 
-  upload() {
+  deleteImage() {
 
   }
 }

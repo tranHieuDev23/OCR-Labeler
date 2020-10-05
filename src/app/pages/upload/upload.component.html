@@ -30,7 +30,9 @@
                         [nzPopoverContent]="fullImageTemplate" />
                 </ng-template>
                 <ng-template #deleteSetting>
-                    <i nz-icon nzType="delete" nzDanger (click)="deleteRegion(i)"></i>
+                    <button nz-button nzDanger>
+                        <i nz-icon nzType="delete" nzDanger (click)="deleteRegion(i)"></i>
+                    </button>
                 </ng-template>
                 <ng-template #fullImageTemplate>
                     <img class="item-full-image" [src]="croppedRegionImages[i]" />

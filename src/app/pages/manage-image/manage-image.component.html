@@ -23,7 +23,10 @@
                         [nzPopoverContent]="fullImageTemplate" />
                 </ng-template>
                 <ng-template #deleteSetting>
-                    <i nz-icon nzType="delete" nzDanger (click)="deleteRegion(i)"></i>
+                    <button nz-button nzDanger nz-popconfirm nzPopconfirmTitle="Are you sure?" nzOkText="OK"
+                        nzCancelText="Cancel" (nzOnConfirm)="deleteRegion(i)">
+                        <i nz-icon nzType="delete"></i>
+                    </button>
                 </ng-template>
                 <ng-template #fullImageTemplate>
                     <img class="item-full-image" [src]="item.imageUrl" />
@@ -31,7 +34,9 @@
             </div>
         </div>
         <button *ngIf="croppedRegions.length > 0" class="button-tool" nz-button nzType="primary"
-            style="margin-top: 8px;" (click)="upload()">
+            style="margin-top: 8px;" nz-popconfirm
+            nzPopconfirmTitle="Are you sure? Deleting this image will also delete all region extracted from it."
+            nzOkText="OK" nzCancelText="Cancel" (nzOnConfirm)="deleteImage()">
             <i nz-icon nzType="upload"></i>Delete this image
         </button>
     </div>

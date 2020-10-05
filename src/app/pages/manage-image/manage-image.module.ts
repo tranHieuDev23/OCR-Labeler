@@ -11,6 +11,7 @@ import { NzPopoverModule } from 'ng-zorro-antd/popover';
 import { ImageCropperModule } from 'ngx-image-cropper';
 import { FormsModule } from '@angular/forms';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
+import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 
 @NgModule({
   declarations: [ManageImageComponent],
@@ -24,6 +25,7 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography';
     NzCardModule,
     NzPopoverModule,
     NzTypographyModule,
+    NzPopconfirmModule,
     ImageCropperModule,
     FormsModule
   ],
