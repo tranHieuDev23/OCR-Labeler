@@ -43,3 +43,15 @@
         </button>
     </div>
 </div>
+<ng-template #imageNotification let-data="data">
+    <i nz-icon nzType="check-circle" nzTheme="outline" class="image-notification-icon"></i>
+    <div nz-typography class="image-notification-title">
+        {{ data.title }}
+    </div>
+    <div nz-typography class="image-notification-description">
+        {{ data.description }}
+    </div>
+    <div class="image-notification-image">
+        <img [src]="data.imgSrc" />
+    </div>
+</ng-template>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
@@ -12,6 +12,8 @@ import { ThumbnailService } from 'src/app/services/thumbnail.service';
   styleUrls: ['./upload.component.scss']
 })
 export class UploadComponent {
+  @ViewChild('imageNotification', { static: false }) imageNotificationTemplate: TemplateRef<{}>;
+
   public displayTools: boolean;
   public imageChangedEvent: any;
   public croppedRegions: Region[];
@@ -90,10 +92,22 @@ export class UploadComponent {
   }
 
   upload() {
-    this.backend.uploadImage('123', this.imageChangedEvent.srcElement.files[0], this.croppedRegions)
+    const imageFile: File = this.imageChangedEvent.srcElement.files[0];
+    this.backend.uploadImage('123', imageFile, this.croppedRegions)
       .then(() => {
-        this.notification.success('File uploaded successfully', '');
-        this.router.navigateByUrl('/');
+        const reader: FileReader = new FileReader();
+        reader.onloadend = () => {
+          this.notification.template(this.imageNotificationTemplate, {
+            nzDuration: 6000,
+            nzData: {
+              title: 'File uploaded sucessfully',
+              description: 'Text regions will be automatically detected. You can edit them via My Images page.',
+              imgSrc: reader.result
+            }
+          });
+          this.router.navigateByUrl('/');
+        };
+        reader.readAsDataURL(imageFile);
       }, (reason) => {
         this.notification.error('Failed to upload file', `Reason: ${reason}`);
       });
