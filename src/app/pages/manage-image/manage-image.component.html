@@ -1,7 +1,6 @@
 <div>
     <h1 nz-typography>Manage your image</h1>
 </div>
-<nz-alert *ngIf="errorMessage" nzType="error" nzMessage="Error" [nzDescription]="errorMessage" nzShowIcon></nz-alert>
 <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
     <div nz-col nzSpan="24" nzMd="12">
         <image-cropper [imageURL]="imageUrl" [maintainAspectRatio]="false" format="png"

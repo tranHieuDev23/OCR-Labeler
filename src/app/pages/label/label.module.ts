@@ -8,6 +8,7 @@ import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { FormsModule } from '@angular/forms';
 import { ImageGridModule } from 'src/app/components/image-grid/image-grid.module';
+import { NzNotificationModule } from 'ng-zorro-antd/notification';
 
 
 @NgModule({
@@ -19,6 +20,7 @@ import { ImageGridModule } from 'src/app/components/image-grid/image-grid.module
     NzInputModule,
     NzModalModule,
     NzTypographyModule,
+    NzNotificationModule,
     FormsModule,
     ImageGridModule
   ],

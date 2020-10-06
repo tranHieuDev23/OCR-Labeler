@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
 import { TextRegion, Region } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
-import { ThumbnailService } from 'src/app/services/thumbnail.service';
 
 @Component({
   selector: 'app-manage-image',
@@ -11,7 +11,6 @@ import { ThumbnailService } from 'src/app/services/thumbnail.service';
   styleUrls: ['./manage-image.component.scss']
 })
 export class ManageImageComponent implements OnInit {
-  public errorMessage: String;
   public displayTools: boolean;
   public imageUrl: string;
   public croppedRegions: TextRegion[];
@@ -21,10 +20,10 @@ export class ManageImageComponent implements OnInit {
   private imageId: string;
 
   constructor(
-    private thumbnail: ThumbnailService,
     private backend: BackendService,
     private route: ActivatedRoute,
     private router: Router,
+    private notification: NzNotificationService
   ) {
     this.initialize();
   }
@@ -38,7 +37,6 @@ export class ManageImageComponent implements OnInit {
   }
 
   initialize() {
-    this.errorMessage = null;
     this.displayTools = false;
     this.imageUrl = null;
     this.croppedRegions = [];
@@ -52,7 +50,8 @@ export class ManageImageComponent implements OnInit {
       this.imageUrl = result.imageUrl;
       this.croppedRegions = result.textRegions;
     }, (reason) => {
-      this.errorMessage = "Cannot load image!";
+      this.notification.error('Failed to load file', `Reason: ${reason}`);
+      this.router.navigateByUrl('/');
     });
   }
 
@@ -67,7 +66,6 @@ export class ManageImageComponent implements OnInit {
   }
 
   imageLoaded() {
-    this.errorMessage = null;
   }
 
   cropperReady() {
@@ -75,7 +73,8 @@ export class ManageImageComponent implements OnInit {
   }
 
   loadImageFailed() {
-    this.errorMessage = "File cannot be loaded into image cropper!";
+    this.notification.error('Failed to load file', `The file may be of incorrect format or corrupted`);
+    this.router.navigateByUrl('/');
   }
 
   addSelected() {
@@ -86,21 +85,26 @@ export class ManageImageComponent implements OnInit {
       this.currentRegion.y2,
     );
     this.backend.addTextRegion('123', this.imageId, newRegion).then((newTextRegion) => {
-      this.thumbnail.generateThumbnail(this.currentRegionImage, 160, 90).then((thumbnail) => {
-        this.croppedRegions.push(newTextRegion);
-      });
+      this.notification.success('Text region added sucessfully', '');
+      this.croppedRegions.push(newTextRegion);
     });
   }
 
   deleteRegion(id: number) {
     this.backend.deleteTextRegion('123', this.croppedRegions[id].id).then(() => {
+      this.notification.success('Text region deleted sucessfully', '');
       this.croppedRegions.splice(id, 1);
+    }, (reason) => {
+      this.notification.error('Failed to delete text region', `Reason: ${reason}`);
     });
   }
 
   deleteImage() {
     this.backend.deleteImage('123', this.imageId).then(() => {
+      this.notification.success('Image deleted sucessfully', '');
       this.router.navigateByUrl('/');
+    }, (reason) => {
+      this.notification.error('Failed to delete image', `Reason: ${reason}`);
     });
   }
 }

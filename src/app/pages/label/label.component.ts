@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { TextRegion } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
 
@@ -16,7 +17,8 @@ export class LabelComponent implements OnInit {
   public isVisible: boolean = false;
 
   constructor(
-    private backend: BackendService
+    private backend: BackendService,
+    private notification: NzNotificationService
   ) { }
 
   ngOnInit(): void {
@@ -44,15 +46,19 @@ export class LabelComponent implements OnInit {
 
   submit(canLabel: boolean): void {
     this.backend.labelRegion(this.selectedRegion.id, canLabel, this.selectedLabel).then(() => {
+      this.notification.success('Label text region sucessfully', '');
       this.backend.loadRegionsForLabeling('123', 1).then((result) => {
         this.textRegions[this.selectedId] = result[0];
         this.images[this.selectedId] = result[0].thumbnailUrl;
         this.hideModal();
       }, (reason) => {
-
+        this.textRegions.splice(this.selectedId, 1);
+        this.images.splice(this.selectedId, 1);
+        this.hideModal();
+        this.notification.error('Failed to load new text region', `Reason: ${reason}`);
       });
     }, (reason) => {
-
+      this.notification.error('Failed to label text region', `Reason: ${reason}`);
     });
   }
 }

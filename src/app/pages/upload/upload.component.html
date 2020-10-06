@@ -5,8 +5,6 @@
 <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
     <div nz-col nzSpan="24" nzMd="12">
         <input nz-input type="file" accept="image/x-png,image/gif,image/jpeg" (change)="fileChangeEvent($event)" />
-        <nz-alert *ngIf="errorMessage" nzType="error" nzMessage="Error" [nzDescription]="errorMessage" nzShowIcon>
-        </nz-alert>
         <image-cropper [imageChangedEvent]="imageChangedEvent" [maintainAspectRatio]="false" format="png"
             (imageCropped)="imageCropped($event)" (imageLoaded)="imageLoaded()" (cropperReady)="cropperReady()"
             (loadImageFailed)="loadImageFailed()"></image-cropper>

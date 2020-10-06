@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
 import { Region } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
@@ -11,7 +12,6 @@ import { ThumbnailService } from 'src/app/services/thumbnail.service';
   styleUrls: ['./upload.component.scss']
 })
 export class UploadComponent {
-  public errorMessage: String;
   public displayTools: boolean;
   public imageChangedEvent: any;
   public croppedRegions: Region[];
@@ -23,13 +23,13 @@ export class UploadComponent {
   constructor(
     private thumbnail: ThumbnailService,
     private backend: BackendService,
-    private router: Router
+    private router: Router,
+    private notification: NzNotificationService
   ) {
     this.initialize();
   }
 
   initialize() {
-    this.errorMessage = null;
     this.displayTools = false;
     this.imageChangedEvent = null;
     this.croppedRegions = [];
@@ -55,7 +55,6 @@ export class UploadComponent {
   }
 
   imageLoaded() {
-    this.errorMessage = null;
   }
 
   cropperReady() {
@@ -63,7 +62,7 @@ export class UploadComponent {
   }
 
   loadImageFailed() {
-    this.errorMessage = "File cannot be loaded into image cropper!";
+    this.notification.error('Failed to load file', 'The selected file may be of incorrect format or corrupted');
   }
 
   addSelected() {
@@ -93,7 +92,10 @@ export class UploadComponent {
   upload() {
     this.backend.uploadImage('123', this.imageChangedEvent.srcElement.files[0], this.croppedRegions)
       .then(() => {
+        this.notification.success('File uploaded successfully', '');
         this.router.navigateByUrl('/');
+      }, (reason) => {
+        this.notification.error('Failed to upload file', `Reason: ${reason}`);
       });
   }
 }

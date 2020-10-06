@@ -2,7 +2,7 @@
     <h1 nz-typography>Your uploaded images</h1>
     <p nz-typography>Select an image to manage its text regions, or delete it</p>
 </div>
-<app-image-grid [images]="images" emptyText="No image need labeled" (imageClicked)="onImageClicked($event)">
+<app-image-grid [images]="images" emptyText="You haven't uploaded any image" (imageClicked)="onImageClicked($event)">
 </app-image-grid>
 <div *ngIf="imagesCount" class="pagination">
     <nz-pagination [nzPageIndex]="currentPage" [nzPageSize]="imagesPerPage" [nzTotal]="imagesCount" nzShowQuickJumper

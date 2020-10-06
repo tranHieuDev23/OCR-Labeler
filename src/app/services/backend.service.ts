@@ -353,7 +353,7 @@ export class BackendService {
           return;
         }
       }
-      reject();
+      reject("Cannot find image with the requested ID");
     });
   }
 

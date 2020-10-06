@@ -16,7 +16,7 @@ export class AuthService {
   ) {
     this.isUserLoggedIn().then((isLoggedIn) => {
       this.loggedIn.emit(isLoggedIn);
-    }, (reason) => {
+    }, () => {
       this.logOut().then(() => {
         this.loggedIn.emit(false);
       });
@@ -35,11 +35,11 @@ export class AuthService {
     return new Promise<User>((resolve, reject) => {
       this.isUserLoggedIn().then((isLoggedIn) => {
         if (isLoggedIn) {
-          reject();
+          reject("User already logged in");
           return;
         }
         if (username != 'admin' || password != 'admin') {
-          reject();
+          reject("Incorrect username or password");
           return;
         }
         this.cookie.set(AUTH_COOKIE_NAME, '123');
@@ -54,7 +54,7 @@ export class AuthService {
     return new Promise<void>((resolve, reject) => {
       this.isUserLoggedIn().then((isLoggedIn) => {
         if (!isLoggedIn) {
-          reject();
+          reject("User already logged out");
           return;
         }
         this.cookie.delete(AUTH_COOKIE_NAME);

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
@@ -13,7 +14,8 @@ export class LoginComponent {
 
   constructor(
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private notification: NzNotificationService
   ) { }
 
   login(): void {
@@ -23,8 +25,8 @@ export class LoginComponent {
     console.log(this.username, this.password);
     this.auth.login(this.username, this.password).then((user) => {
       this.router.navigateByUrl('/welcome');
-    }, (reject) => {
-
+    }, (reason) => {
+      this.notification.error('Login failed', `Reason: ${reason}`);
     });
   }
 }

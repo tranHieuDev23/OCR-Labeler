@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { TextRegion } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
 
@@ -15,7 +17,9 @@ export class VerifyComponent implements OnInit {
   public isVisible: boolean = false;
 
   constructor(
-    private backend: BackendService
+    private backend: BackendService,
+    private router: Router,
+    private notification: NzNotificationService
   ) { }
 
   ngOnInit(): void {
@@ -23,7 +27,8 @@ export class VerifyComponent implements OnInit {
       this.textRegions = result;
       this.images = this.textRegions.map((value) => value.thumbnailUrl);
     }, (reason) => {
-
+      this.notification.error('Failed to load text regions', `Reason: ${reason}`);
+      this.router.navigateByUrl('/');
     });
   }
 
@@ -40,16 +45,20 @@ export class VerifyComponent implements OnInit {
   }
 
   submit(isCorrect: boolean): void {
-    this.backend.verifyLabel(this.selectedRegion.id, isCorrect).then((result) => {
+    this.backend.verifyLabel(this.selectedRegion.id, isCorrect).then(() => {
+      this.notification.success('Verify text region sucessfully', '');
       this.backend.loadRegionsForVerifying('123', 1).then((result) => {
         this.textRegions[this.selectedId] = result[0];
         this.images[this.selectedId] = result[0].thumbnailUrl;
         this.hideModal();
       }, (reason) => {
-
+        this.textRegions.splice(this.selectedId, 1);
+        this.images.splice(this.selectedId, 1);
+        this.hideModal();
+        this.notification.error('Failed to load new text region', `Reason: ${reason}`);
       });
     }, (reason) => {
-
+      this.notification.error('Failed to verify text region', `Reason: ${reason}`);
     });
   }
 }

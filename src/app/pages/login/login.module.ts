@@ -6,7 +6,7 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzGridModule } from 'ng-zorro-antd/grid';
-import { NzTypographyModule } from 'ng-zorro-antd/typography';
+import { NzNotificationModule } from 'ng-zorro-antd/notification';
 import { FormsModule } from '@angular/forms';
 
 @NgModule({
@@ -17,7 +17,7 @@ import { FormsModule } from '@angular/forms';
     NzInputModule,
     NzButtonModule,
     NzGridModule,
-    NzTypographyModule,
+    NzNotificationModule,
     FormsModule
   ],
   declarations: [LoginComponent],
