@@ -1,8 +1,7 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
+import { AUTH_COOKIE_NAME } from 'src/environments/constants';
 import User from '../models/user';
-
-const AUTH_COOKIE_NAME = 'ocr-auth';
 
 @Injectable({
   providedIn: 'root'
@@ -43,7 +42,7 @@ export class AuthService {
           return;
         }
         this.cookie.set(AUTH_COOKIE_NAME, '123');
-        this.currentUser = new User("Tran Minh Hieu", username);
+        this.currentUser = new User("Tran Minh Hieu", username, null);
         this.loggedIn.emit(true);
         resolve(this.currentUser);
       }, reject);
@@ -75,7 +74,7 @@ export class AuthService {
         resolve(null);
         return;
       }
-      this.currentUser = new User("Tran Minh Hieu", 'admin');
+      this.currentUser = new User("Tran Minh Hieu", 'admin', null);
       resolve(this.currentUser);
     });
   }

@@ -14,8 +14,11 @@ export class AppComponent {
     private auth: AuthService,
     private router: Router
   ) {
-    this.auth.loggedIn.subscribe((isLoggedIn: boolean) => {
-      this.isLoggedIn = isLoggedIn;
+    this.auth.isUserLoggedIn().then((result) => {
+      this.isLoggedIn = result;
+      this.auth.loggedIn.subscribe((isLoggedIn: boolean) => {
+        this.isLoggedIn = isLoggedIn;
+      });
     });
   }
 

@@ -7,12 +7,16 @@ import { join } from 'path';
 import { AppServerModule } from './src/main.server';
 import { APP_BASE_HREF } from '@angular/common';
 import { existsSync } from 'fs';
+import authRouter from 'src/api/routes/auth';
+import * as bodyParser from 'body-parser';
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
   const server = express();
   const distFolder = join(process.cwd(), 'dist/ocr-labeler/browser');
   const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
+
+  server.use(bodyParser.json());
 
   // Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
   server.engine('html', ngExpressEngine({
@@ -22,8 +26,8 @@ export function app(): express.Express {
   server.set('view engine', 'html');
   server.set('views', distFolder);
 
-  // Example Express Rest API endpoints
-  // server.get('/api/**', (req, res) => { });
+  server.use('/api', authRouter);
+
   // Serve static files from /browser
   server.get('*.*', express.static(distFolder, {
     maxAge: '1y'
