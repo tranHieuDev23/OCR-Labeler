@@ -27,11 +27,11 @@ authRouter.post('/register', (request, response) => {
             response.cookie(AUTH_COOKIE_NAME, jwt, getCookieOption()).sendStatus(StatusCodes.OK);
         }, (reason) => {
             console.log(`[/register] Register failed: ${reason}`);
-            response.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+            response.sendStatus(StatusCodes.BAD_REQUEST);
         });
     }, (reason) => {
         console.log(`[/register] Register failed: ${reason}`);
-        response.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        response.sendStatus(StatusCodes.BAD_REQUEST);
     });
 });
 
@@ -46,7 +46,7 @@ authRouter.post('/login', (request, response) => {
             });
         }, (reason) => {
             console.log(`[/login] Authentication failed: ${reason}`);
-            response.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+            response.sendStatus(StatusCodes.BAD_REQUEST);
         });
     }, (reason) => {
         console.log(`[/login] Authentication failed: ${reason}`);

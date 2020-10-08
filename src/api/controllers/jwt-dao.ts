@@ -4,11 +4,11 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 import * as jwt from 'jsonwebtoken';
+import uid from 'uid';
 import databaseConnection from "./database";
 
 class BlacklistedJwtDao {
     private readonly secretKey: string = process.env.JWT_SECRET;
-    private readonly idPattern: string = 'xxxx-xxxx-xxxx-xxxx';
     private constructor() { }
 
     public static getInstance(): BlacklistedJwtDao {
@@ -20,7 +20,7 @@ class BlacklistedJwtDao {
             jwt.sign({}, this.secretKey, {
                 subject: username,
                 expiresIn: '30d',
-                jwtid: this.createFromPattern(this.idPattern)
+                jwtid: uid(32)
             }, (err, token) => {
                 if (err) {
                     reject(`[generateJwt] Error happened while generating JWT: ${err}`);
@@ -93,15 +93,6 @@ class BlacklistedJwtDao {
         });
 
     }
-
-    private randomAlphaNumeric(): string {
-        return Math.random().toString(36).charAt(2);
-    };
-
-    private createFromPattern(pattern: string): string {
-        const chars: string[] = pattern.split('');
-        return chars.map(x => x.replace('x', this.randomAlphaNumeric())).join('');
-    };
 
     private unblacklistSession(jwtid: string): Promise<void> {
         return new Promise<void>((resolve, reject) => {

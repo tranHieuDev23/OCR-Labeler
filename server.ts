@@ -12,12 +12,14 @@ import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import uploadRouter from 'src/api/routes/upload';
 import * as mkdirp from 'mkdirp';
-import { UPLOADED_IMAGE_DIRECTORY } from 'src/environments/constants';
+import { THUMBNAIL_DIRECTORY, UPLOADED_IMAGE_DIRECTORY } from 'src/environments/constants';
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
   const server = express();
   const distFolder = join(process.cwd(), 'dist/ocr-labeler/browser');
+  const uploadedFolder = join(process.cwd(), UPLOADED_IMAGE_DIRECTORY);
+  const thumbnailFolder = join(process.cwd(), THUMBNAIL_DIRECTORY);
   const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
 
   server.use(bodyParser.json());
@@ -38,6 +40,17 @@ export function app(): express.Express {
   server.use('/api', authRouter);
   server.use('/api', uploadRouter);
 
+  // Server uploaded images from /uploaded
+  server.get(`*.*`, express.static(uploadedFolder, {
+    maxAge: '1y'
+  }));
+
+
+  // Server uploaded images from /uploaded
+  server.get(`*.*`, express.static(thumbnailFolder, {
+    maxAge: '1y'
+  }));
+
   // Serve static files from /browser
   server.get('*.*', express.static(distFolder, {
     maxAge: '1y'
@@ -54,6 +67,7 @@ export function app(): express.Express {
 function run(): void {
   const port = process.env.PORT || 4000;
   mkdirp.sync(UPLOADED_IMAGE_DIRECTORY);
+  mkdirp.sync(THUMBNAIL_DIRECTORY);
   // Start up the Node server
   const server = app();
   server.listen(port, () => {
