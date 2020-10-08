@@ -13,8 +13,8 @@ class UserDao {
         return new Promise((resolve, reject) => {
             databaseConnection.oneOrNone(
                 `
-                    SELECT (username, displayName, password) FROM Users
-                    WHERE username == $1;
+                    SELECT username, "displayName", password FROM public."Users"
+                    WHERE username = $1;
                 `,
                 [username]
             ).then((user) => {
@@ -33,8 +33,8 @@ class UserDao {
         return new Promise((resolve, reject) => {
             databaseConnection.oneOrNone(
                 `
-                    SELECT (username, displayName, password) FROM Users
-                    WHERE username == $1;
+                    SELECT username, password, "displayName" FROM public."Users"
+                    WHERE username = $1;
                 `,
                 [username]
             ).then((user) => {
@@ -66,7 +66,7 @@ class UserDao {
                             username, password, "displayName")
                             VALUES ($1, $2, $3);
                     `,
-                    [user.username, user.displayName, hash]
+                    [user.username, hash, user.displayName]
                 ).then(() => {
                     resolve();
                 }, (reason) => {

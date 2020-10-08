@@ -34,11 +34,16 @@ class BlacklistedJwtDao {
     public blacklistJwt(token: string): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             jwt.verify(token, this.secretKey, (err, decoded) => {
+                if (err) {
+                    reject(`[blacklistSession()] Error happened while blacklisting JWT: ${err}`);
+                    return;
+                }
                 const jwtid: string = decoded['jti'];
                 const exp: number = decoded['exp'];
                 databaseConnection.none(
                     `
-                        INSERT INTO BlacklistedSessions VALUES($1, $2);
+                        INSERT INTO public."BlacklistedJwts"(jwtid, exp)
+                        VALUES($1, $2);
                     `,
                     [jwtid, exp]
                 ).then(resolve, (reason) => {
@@ -56,20 +61,23 @@ class BlacklistedJwtDao {
                     return;
                 }
                 const jwtid: string = decoded['jti'];
-                databaseConnection.one(
+                databaseConnection.oneOrNone(
                     `
-                        SELECT * FROM BlacklistedSessions
-                        WHERE jwt == $1
+                        SELECT * FROM public."BlacklistedJwts"
+                        WHERE jwtid = $1;
                     `,
                     [jwtid]
                 ).then((session) => {
-                    if (!session) {
-                        reject(`[isSessionBlacklisted()] Error happened while validating JWT: No username found`)
-                        return;
+                    if (session) {
+                        const sessionExp: number = session.exp;
+                        if (sessionExp < Date.now()) {
+                            reject(`[isSessionBlacklisted()] Error happened while validating JWT: JWT is blacklisted`);
+                            return;
+                        }
+                        this.unblacklistSession(jwtid);
                     }
-                    const exp: number = session.exp;
-                    const username: number = session.sub;
-                    resolve(session.sub);
+                    const username: string = decoded['sub'];
+                    resolve(username);
                 }, (reason) => {
                     reject(`[isSessionBlacklisted()] Error happened while validating JWT: ${reason}`)
                 });
@@ -79,8 +87,8 @@ class BlacklistedJwtDao {
 
     public isValidJwt(token: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
-            this.getUsernameFrowJwt(token).then((username) => {
-                resolve(!username);
+            this.getUsernameFrowJwt(token).then(() => {
+                resolve(true);
             }, reject);
         });
 
@@ -99,8 +107,8 @@ class BlacklistedJwtDao {
         return new Promise<void>((resolve, reject) => {
             databaseConnection.none(
                 `
-                    DELETE FROM BlacklistedSessions
-                    WHERE jwtid == $1;
+                    DELETE FROM public."BlacklistedJwts"
+                    WHERE jwtid = $1;
                 `,
                 [jwtid]
             ).then(resolve, (reason) => {

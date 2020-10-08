@@ -9,17 +9,22 @@ const authRouter: Router = Router();
 const userDao: UserDao = UserDao.getInstance();
 const jwtDao: BlacklistedJwtDao = BlacklistedJwtDao.getInstance();
 
-const cookieOptions: CookieOptions = {
-    httpOnly: true,
-    secure: true,
-    sameSite: "strict"
-};
+const THIRTY_DAYS: number = 30 * 24 * 60 * 60 * 1000;
+
+function getCookieOption(): CookieOptions {
+    return {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        expires: new Date(Date.now() + THIRTY_DAYS)
+    };
+}
 
 authRouter.post('/register', (request, response) => {
     const newUser = User.parseFromJson(request.body);
     userDao.addUser(newUser).then(() => {
         jwtDao.generateJwt(newUser.username).then((jwt) => {
-            response.cookie(AUTH_COOKIE_NAME, jwt, cookieOptions).sendStatus(StatusCodes.OK);
+            response.cookie(AUTH_COOKIE_NAME, jwt, getCookieOption()).sendStatus(StatusCodes.OK);
         }, (reason) => {
             console.log(`[/register] Register failed: ${reason}`);
             response.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
@@ -35,7 +40,7 @@ authRouter.post('/login', (request, response) => {
     const password: string = request.body.password;
     userDao.validateUser(username, password).then((user: User) => {
         jwtDao.generateJwt(username).then((jwt) => {
-            response.cookie(AUTH_COOKIE_NAME, jwt, cookieOptions).json({
+            response.cookie(AUTH_COOKIE_NAME, jwt, getCookieOption()).json({
                 username: user.username,
                 displayName: user.displayName
             });
@@ -76,9 +81,10 @@ authRouter.post('/validate', (request, response) => {
         return;
     }
     jwtDao.getUsernameFrowJwt(jwt).then((username) => {
-        jwtDao.generateJwt(username).then((token) => {
-            userDao.findUser(username).then((user) => {
-                response.cookie(AUTH_COOKIE_NAME, token).json({
+        userDao.findUser(username).then((user) => {
+            jwtDao.generateJwt(username).then((token) => {
+                console.log(user);
+                response.cookie(AUTH_COOKIE_NAME, token, getCookieOption()).json({
                     username: user.username,
                     displayName: user.displayName
                 });
