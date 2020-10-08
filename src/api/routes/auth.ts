@@ -1,4 +1,4 @@
-import { CookieOptions, response, Router } from 'express';
+import { CookieOptions, Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import User from 'src/app/models/user';
 import { AUTH_COOKIE_NAME } from 'src/environments/constants';
@@ -83,7 +83,6 @@ authRouter.post('/validate', (request, response) => {
     jwtDao.getUsernameFrowJwt(jwt).then((username) => {
         userDao.findUser(username).then((user) => {
             jwtDao.generateJwt(username).then((token) => {
-                console.log(user);
                 response.cookie(AUTH_COOKIE_NAME, token, getCookieOption()).json({
                     username: user.username,
                     displayName: user.displayName

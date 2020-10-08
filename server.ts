@@ -10,6 +10,9 @@ import { existsSync } from 'fs';
 import authRouter from 'src/api/routes/auth';
 import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
+import uploadRouter from 'src/api/routes/upload';
+import * as mkdirp from 'mkdirp';
+import { UPLOADED_IMAGE_DIRECTORY } from 'src/environments/constants';
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
@@ -18,6 +21,10 @@ export function app(): express.Express {
   const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
 
   server.use(bodyParser.json());
+  server.use(bodyParser.raw({
+    type: 'image/*',
+    limit: '5mb'
+  }));
   server.use(cookieParser());
 
   // Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
@@ -29,6 +36,7 @@ export function app(): express.Express {
   server.set('views', distFolder);
 
   server.use('/api', authRouter);
+  server.use('/api', uploadRouter);
 
   // Serve static files from /browser
   server.get('*.*', express.static(distFolder, {
@@ -45,7 +53,7 @@ export function app(): express.Express {
 
 function run(): void {
   const port = process.env.PORT || 4000;
-
+  mkdirp.sync(UPLOADED_IMAGE_DIRECTORY);
   // Start up the Node server
   const server = app();
   server.listen(port, () => {

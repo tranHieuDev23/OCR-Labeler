@@ -1,3 +1,4 @@
+import ImageStatus from './image-status';
 import { TextRegion } from './text-region';
 
 class UploadedImage {
@@ -5,7 +6,8 @@ class UploadedImage {
     public readonly imageId: string,
     public readonly imageUrl: string,
     public readonly thumbnailUrl: string,
-    public readonly textRegions: TextRegion[]
+    public readonly textRegions: TextRegion[],
+    public readonly status: ImageStatus
   ) { }
 
   static parseFromJson(obj: any): UploadedImage {
@@ -16,11 +18,13 @@ class UploadedImage {
     for (let item of obj.textRegions) {
       textRegions.push(TextRegion.parseFromJson(item));
     }
+    const status: ImageStatus = obj.status as ImageStatus;
     return new UploadedImage(
       imageId,
       imageUrl,
       thumbnailUrl,
-      textRegions
+      textRegions,
+      status
     );
   }
 }

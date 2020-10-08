@@ -22,7 +22,6 @@ export class LoginComponent {
     if (this.username.length == 0 || this.password.length == 0) {
       return;
     }
-    console.log(this.username, this.password);
     this.auth.login(this.username, this.password).then((user) => {
       this.router.navigateByUrl('/welcome');
     }, (reason) => {
