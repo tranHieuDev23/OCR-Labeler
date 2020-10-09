@@ -10,6 +10,8 @@ import UploadedImage from 'src/app/models/uploaded-image';
 import User from 'src/app/models/user';
 import ImageStatus from 'src/app/models/image-status';
 import ImageDao from '../controllers/image-dao';
+import { processImageWithCraft } from '../controllers/craft';
+import TextRegionDao from '../controllers/region-dao';
 
 const uploadRouter: Router = Router();
 const FULL_HD_WIDTH = 1920;
@@ -19,6 +21,7 @@ const THUMBNAIL_HEIGHT = 90;
 
 const jwtDao: BlacklistedJwtDao = BlacklistedJwtDao.getInstance();
 const imageDao: ImageDao = ImageDao.getInstance();
+const regionDao: TextRegionDao = TextRegionDao.getInstance();
 
 function generateImageAndThumbnail(image: any): Promise<{ fullImage: Buffer, thumbnail: Buffer }> {
     return new Promise<{ fullImage: Buffer, thumbnail: Buffer }>((resolve, reject) => {
@@ -51,6 +54,16 @@ function saveImageAndThumbnail(
     });
 }
 
+function processPostUpload(imageId: string, username: string, image: any): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        processImageWithCraft(imageId, username, image).then((regions) => {
+            regionDao.addTextRegions(regions).then(() => {
+                resolve();
+            }, reject);
+        }, reject);
+    });
+}
+
 uploadRouter.post('/upload', async (request, response) => {
     const jwt = request.cookies[AUTH_COOKIE_NAME];
     jwtDao.getUsernameFrowJwt(jwt).then((username) => {
@@ -69,7 +82,12 @@ uploadRouter.post('/upload', async (request, response) => {
                     ImageStatus.Uploaded
                 );
                 imageDao.addImage(newImage).then(() => {
-                    response.sendStatus(StatusCodes.OK);
+                    processPostUpload(imageId, username, fullImage).then(() => {
+                        console.log(`[/upload] Processed ${imageId} with CRAFT`);
+                    }, (reason) => {
+                        console.log(`[/upload] Problem processing ${imageId} with CRAFT: ${reason}`);
+                    });
+                    return response.json(newImage);
                 }, (reason) => {
                     console.log(`[/upload] Problem adding image to database: ${reason}`);
                     return response.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);

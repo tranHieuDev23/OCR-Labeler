@@ -20,3 +20,5 @@ const connectionInfo = {
 const databaseConnection = pgp(connectionInfo);
 
 export default databaseConnection;
+
+export { pgp };

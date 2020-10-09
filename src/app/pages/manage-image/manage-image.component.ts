@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
-import { TextRegion, Region } from 'src/app/models/text-region';
+import { TextRegion, Region, Coordinate } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
 
 @Component({
@@ -56,12 +56,16 @@ export class ManageImageComponent implements OnInit {
   }
 
   imageCropped(event: ImageCroppedEvent) {
-    this.currentRegion = new Region(
-      event.cropperPosition.x1,
-      event.cropperPosition.x2,
-      event.cropperPosition.y1,
-      event.cropperPosition.y2,
-    );
+    const x1: number = event.cropperPosition.x1;
+    const x2: number = event.cropperPosition.x2;
+    const y1: number = event.cropperPosition.y1;
+    const y2: number = event.cropperPosition.y2;
+    this.currentRegion = new Region([
+      new Coordinate(x1, y1),
+      new Coordinate(x1, y2),
+      new Coordinate(x2, y2),
+      new Coordinate(x2, y1)
+    ]);
     this.currentRegionImage = event.base64;
   }
 
@@ -78,20 +82,14 @@ export class ManageImageComponent implements OnInit {
   }
 
   addSelected() {
-    const newRegion = new Region(
-      this.currentRegion.x1,
-      this.currentRegion.x2,
-      this.currentRegion.y1,
-      this.currentRegion.y2,
-    );
-    this.backend.addTextRegion('123', this.imageId, newRegion).then((newTextRegion) => {
+    this.backend.addTextRegion('123', this.imageId, this.currentRegion).then((newTextRegion) => {
       this.notification.success('Text region added sucessfully', '');
       this.croppedRegions.push(newTextRegion);
     });
   }
 
   deleteRegion(id: number) {
-    this.backend.deleteTextRegion('123', this.croppedRegions[id].id).then(() => {
+    this.backend.deleteTextRegion('123', this.croppedRegions[id].regionId).then(() => {
       this.notification.success('Text region deleted sucessfully', '');
       this.croppedRegions.splice(id, 1);
     }, (reason) => {

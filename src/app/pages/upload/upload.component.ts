@@ -2,7 +2,7 @@ import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { ImageCroppedEvent } from 'ngx-image-cropper';
-import { Region } from 'src/app/models/text-region';
+import { Coordinate, Region } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
 
@@ -47,12 +47,16 @@ export class UploadComponent {
   }
 
   imageCropped(event: ImageCroppedEvent) {
-    this.currentRegion = new Region(
-      event.cropperPosition.x1,
-      event.cropperPosition.x2,
-      event.cropperPosition.y1,
-      event.cropperPosition.y2,
-    );
+    const x1: number = event.cropperPosition.x1;
+    const x2: number = event.cropperPosition.x2;
+    const y1: number = event.cropperPosition.y1;
+    const y2: number = event.cropperPosition.y2;
+    this.currentRegion = new Region([
+      new Coordinate(x1, y1),
+      new Coordinate(x1, y2),
+      new Coordinate(x2, y2),
+      new Coordinate(x2, y1)
+    ]);
     this.currentRegionImage = event.base64;
   }
 
@@ -69,13 +73,7 @@ export class UploadComponent {
 
   addSelected() {
     this.thumbnail.generateThumbnail(this.currentRegionImage, 160, 90).then((thumbnail) => {
-      const newRegion = new Region(
-        this.currentRegion.x1,
-        this.currentRegion.x2,
-        this.currentRegion.y1,
-        this.currentRegion.y2,
-      );
-      this.croppedRegions.push(newRegion);
+      this.croppedRegions.push(this.currentRegion);
       this.croppedRegionImages.push(this.currentRegionImage);
       this.croppedRegionThumbnails.push(thumbnail);
     });
