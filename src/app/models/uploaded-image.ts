@@ -1,5 +1,6 @@
 import ImageStatus from './image-status';
 import { TextRegion } from './text-region';
+import User from './user';
 
 class UploadedImage {
   constructor(
@@ -7,6 +8,8 @@ class UploadedImage {
     public readonly imageUrl: string,
     public readonly thumbnailUrl: string,
     public readonly textRegions: TextRegion[],
+    public readonly uploadedBy: User,
+    public readonly uploadedDate: Date,
     public readonly status: ImageStatus
   ) { }
 
@@ -15,15 +18,21 @@ class UploadedImage {
     const imageUrl: string = obj.imageUrl;
     const thumbnailUrl: string = obj.thumbnailUrl;
     const textRegions: TextRegion[] = [];
-    for (let item of obj.textRegions) {
-      textRegions.push(TextRegion.parseFromJson(item));
+    if (obj.textRegions) {
+      for (let item of obj.textRegions) {
+        textRegions.push(TextRegion.parseFromJson(item));
+      }
     }
+    const uploadedBy: User = User.parseFromJson(obj.uploadedBy);
+    const uploadedDate: Date = new Date(obj.uploadedDate);
     const status: ImageStatus = obj.status as ImageStatus;
     return new UploadedImage(
       imageId,
       imageUrl,
       thumbnailUrl,
       textRegions,
+      uploadedBy,
+      uploadedDate,
       status
     );
   }
