@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
-import { ImageCroppedEvent } from 'ngx-image-cropper';
 import { TextRegion, Region, Coordinate } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
 
@@ -11,12 +10,10 @@ import { BackendService } from 'src/app/services/backend.service';
   styleUrls: ['./manage-image.component.scss']
 })
 export class ManageImageComponent implements OnInit {
-  public displayTools: boolean;
   public imageUrl: string;
   public croppedRegions: TextRegion[];
   public currentRegion: Region;
   public currentRegionImage: string;
-
   private imageId: string;
 
   constructor(
@@ -37,7 +34,6 @@ export class ManageImageComponent implements OnInit {
   }
 
   initialize() {
-    this.displayTools = false;
     this.imageUrl = null;
     this.croppedRegions = [];
     this.currentRegion = null;
@@ -55,30 +51,8 @@ export class ManageImageComponent implements OnInit {
     });
   }
 
-  imageCropped(event: ImageCroppedEvent) {
-    const x1: number = event.cropperPosition.x1;
-    const x2: number = event.cropperPosition.x2;
-    const y1: number = event.cropperPosition.y1;
-    const y2: number = event.cropperPosition.y2;
-    this.currentRegion = new Region([
-      new Coordinate(x1, y1),
-      new Coordinate(x1, y2),
-      new Coordinate(x2, y2),
-      new Coordinate(x2, y1)
-    ]);
-    this.currentRegionImage = event.base64;
-  }
-
-  imageLoaded() {
-  }
-
-  cropperReady() {
-    this.displayTools = true;
-  }
-
-  loadImageFailed() {
-    this.notification.error('Failed to load file', `The file may be of incorrect format or corrupted`);
-    this.router.navigateByUrl('/');
+  cropped(event: string) {
+    this.currentRegionImage = event;
   }
 
   addSelected() {

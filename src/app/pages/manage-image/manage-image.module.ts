@@ -7,13 +7,13 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule, NZ_ICONS } from 'ng-zorro-antd/icon';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzPopoverModule } from 'ng-zorro-antd/popover';
-import { ImageCropperModule } from 'ngx-image-cropper';
 import { FormsModule } from '@angular/forms';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzNotificationModule } from 'ng-zorro-antd/notification';
 import { IconDefinition } from '@ant-design/icons-angular';
 import { PlusOutline, DeleteOutline, UploadOutline } from '@ant-design/icons-angular/icons';
+import { RegionSelectorModule } from 'src/app/components/region-selector/region-selector.module';
 
 const icons: IconDefinition[] = [PlusOutline, DeleteOutline, UploadOutline];
 
@@ -30,8 +30,8 @@ const icons: IconDefinition[] = [PlusOutline, DeleteOutline, UploadOutline];
     NzTypographyModule,
     NzPopconfirmModule,
     NzNotificationModule,
-    ImageCropperModule,
-    FormsModule
+    FormsModule,
+    RegionSelectorModule
   ],
   exports: [
     ManageImageComponent

@@ -3,12 +3,11 @@
 </div>
 <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
     <div nz-col nzSpan="24" nzMd="12">
-        <image-cropper [imageURL]="imageUrl" [maintainAspectRatio]="false" format="png"
-            (imageCropped)="imageCropped($event)" (imageLoaded)="imageLoaded()" (cropperReady)="cropperReady()"
-            (loadImageFailed)="loadImageFailed()"></image-cropper>
-        <img *ngIf="currentRegion" class="uploaded-image" [src]="currentRegionImage" />
+        <app-region-selector *ngIf="imageUrl" [imageSrc]="imageUrl" (imageCropped)="cropped($event)">
+        </app-region-selector>
+        <img *ngIf="currentRegionImage" class="uploaded-image" [src]="currentRegionImage" />
     </div>
-    <div *ngIf="displayTools" nz-col nzSpan="24" nzMd="12">
+    <div nz-col nzSpan="24" nzMd="12">
         <button class="button-tool" nz-button nzType="primary" (click)="addSelected()">
             <i nz-icon nzType="plus"></i>Add selected
         </button>

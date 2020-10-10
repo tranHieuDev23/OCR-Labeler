@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Coordinate } from '../models/text-region';
 
 @Injectable({
   providedIn: 'root'
@@ -29,5 +30,47 @@ export class ThumbnailService {
       };
       img.src = imageSrc;
     });
+  }
+
+  public generatePolygonImage(imageSrc: string, vertices: Coordinate[]): Promise<string> {
+    return new Promise<string>((resolve) => {
+      const xs: number[] = vertices.map(item => item.x);
+      const ys: number[] = vertices.map(item => item.y);
+      const left: number = Math.min(...xs);
+      const right: number = Math.max(...xs);
+      const top: number = Math.min(...ys);
+      const bottom: number = Math.max(...ys);
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width * (right - left);
+        canvas.height = img.height * (bottom - top);
+        const ctx = canvas.getContext('2d');
+        this.clipPolygon(img.width, img.height, ctx, vertices, left, top);
+        ctx.drawImage(img, - left * img.width, - top * img.height);
+        resolve(canvas.toDataURL());
+      };
+
+      img.src = imageSrc;
+    });
+  }
+
+  private clipPolygon(width: number, height: number, ctx: CanvasRenderingContext2D, vertices: Coordinate[], left: number, top: number): void {
+    ctx.beginPath();
+    const verticesCount = vertices.length;
+    ctx.moveTo(
+      (vertices[verticesCount - 1].x - left) * width,
+      (vertices[verticesCount - 1].y - top) * height
+    );
+    for (let item of vertices) {
+      ctx.lineTo(
+        (item.x - left) * width,
+        (item.y - top) * height
+      );
+    }
+    ctx.closePath();
+    ctx.clip();
   }
 }
