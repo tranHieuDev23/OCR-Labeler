@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
-import { TextRegion, Region, Coordinate } from 'src/app/models/text-region';
+import { RegionSelectedEvent } from 'src/app/components/region-selector/region-selector.component';
+import { TextRegion, Region } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
 
 @Component({
@@ -51,8 +52,9 @@ export class ManageImageComponent implements OnInit {
     });
   }
 
-  cropped(event: string) {
-    this.currentRegionImage = event;
+  cropped(event: RegionSelectedEvent) {
+    this.currentRegion = event.region;
+    this.currentRegionImage = event.imageBase64;
   }
 
   addSelected() {

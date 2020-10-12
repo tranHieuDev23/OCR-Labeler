@@ -1,6 +1,13 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { Coordinate } from 'src/app/models/text-region';
+import { Coordinate, Region } from 'src/app/models/text-region';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
+
+export class RegionSelectedEvent {
+  constructor(
+    public readonly region: Region,
+    public readonly imageBase64: string
+  ) { }
+}
 
 @Component({
   selector: 'app-region-selector',
@@ -10,7 +17,7 @@ import { ThumbnailService } from 'src/app/services/thumbnail.service';
 export class RegionSelectorComponent implements OnInit {
   @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
   @Input('imageSrc') imageSrc: string;
-  @Output('imageCropped') public imageCropped: EventEmitter<string> = new EventEmitter<string>();
+  @Output('imageCropped') public imageCropped: EventEmitter<RegionSelectedEvent> = new EventEmitter<RegionSelectedEvent>();
   private imageElement = new Image();
   private isImageLoaded: boolean = false;
 
@@ -55,7 +62,10 @@ export class RegionSelectorComponent implements OnInit {
     if (this.selectedCoordinates.length == 4) {
       this.thumbnail.generatePolygonImage(this.imageSrc, this.selectedCoordinates)
         .then((result) => {
-          this.imageCropped.emit(result);
+          this.imageCropped.emit(new RegionSelectedEvent(
+            new Region(this.selectedCoordinates),
+            result
+          ));
         });
     }
     this.drawCanvas();

@@ -1,5 +1,7 @@
 <div>
     <h1 nz-typography>Manage your image</h1>
+    <p nz-typography>Click on 4 points on the image to select a text region, and click <b>Add selected</b> to add that
+        region</p>
 </div>
 <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
     <div nz-col nzSpan="24" nzMd="12">
@@ -8,7 +10,7 @@
         <img *ngIf="currentRegionImage" class="uploaded-image" [src]="currentRegionImage" />
     </div>
     <div nz-col nzSpan="24" nzMd="12">
-        <button class="button-tool" nz-button nzType="primary" (click)="addSelected()">
+        <button class="button-tool" nz-button nzType="primary" [disabled]="!currentRegion" (click)="addSelected()">
             <i nz-icon nzType="plus"></i>Add selected
         </button>
         <div nz-row nzGutter="8">
