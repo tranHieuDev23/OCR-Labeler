@@ -41,8 +41,6 @@ class TextRegion {
   constructor(
     public readonly regionId: string,
     public readonly imageId: string,
-    public readonly imageUrl: string,
-    public readonly thumbnailUrl: string,
     public readonly region: Region,
     public readonly label: string,
     public readonly status: LabelStatus,
@@ -53,8 +51,6 @@ class TextRegion {
 
   static parseFromJson(obj: any): TextRegion {
     const regionId: string = obj.regionId;
-    const imageId: string = obj.imageId;
-    const imageUrl: string = obj.imageUrl;
     const thumbnailUrl: string = obj.thumbnailUrl;
     const region: Region = Region.parseFromJson(obj.region);
     const label: string = obj.label;
@@ -64,8 +60,6 @@ class TextRegion {
     const verifiedBy: User = User.parseFromJson(obj.verifiedBy);
     return new TextRegion(
       regionId,
-      imageId,
-      imageUrl,
       thumbnailUrl,
       region,
       label,

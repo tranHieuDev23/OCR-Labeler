@@ -25,7 +25,7 @@ export class VerifyComponent implements OnInit {
   ngOnInit(): void {
     this.backend.loadRegionsForVerifying('123', 10).then((result) => {
       this.textRegions = result;
-      this.images = this.textRegions.map((value) => value.thumbnailUrl);
+      // this.images = this.textRegions.map((value) => value.thumbnailUrl);
     }, (reason) => {
       this.notification.error('Failed to load text regions', `Reason: ${reason}`);
       this.router.navigateByUrl('/');
@@ -49,7 +49,7 @@ export class VerifyComponent implements OnInit {
       this.notification.success('Verify text region sucessfully', '');
       this.backend.loadRegionsForVerifying('123', 1).then((result) => {
         this.textRegions[this.selectedId] = result[0];
-        this.images[this.selectedId] = result[0].thumbnailUrl;
+        // this.images[this.selectedId] = result[0].thumbnailUrl;
         this.hideModal();
       }, (reason) => {
         this.textRegions.splice(this.selectedId, 1);

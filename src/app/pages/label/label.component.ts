@@ -24,7 +24,7 @@ export class LabelComponent implements OnInit {
   ngOnInit(): void {
     this.backend.loadRegionsForLabeling('123', 10).then((result) => {
       this.textRegions = result;
-      this.images = this.textRegions.map((value) => value.thumbnailUrl);
+      // this.images = this.textRegions.map((value) => value.thumbnailUrl);
     }, (reason) => {
 
     });
@@ -49,7 +49,7 @@ export class LabelComponent implements OnInit {
       this.notification.success('Label text region sucessfully', '');
       this.backend.loadRegionsForLabeling('123', 1).then((result) => {
         this.textRegions[this.selectedId] = result[0];
-        this.images[this.selectedId] = result[0].thumbnailUrl;
+        // this.images[this.selectedId] = result[0].thumbnailUrl;
         this.hideModal();
       }, (reason) => {
         this.textRegions.splice(this.selectedId, 1);

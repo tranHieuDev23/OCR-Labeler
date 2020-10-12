@@ -9,6 +9,16 @@ class UserDao {
         return new UserDao();
     }
 
+    public getUserCount(): Promise<number> {
+        return new Promise((resolve, reject) => {
+            databaseConnection.one('SELECT COUNT(*) FROM public."Users";').then((result) => {
+                resolve(result.count);
+            }, (reason) => {
+                reject(`[getUserCount()] Error happened while getting user count: ${reason}`);
+            });
+        });
+    }
+
     public findUser(username: string): Promise<User> {
         return new Promise((resolve, reject) => {
             databaseConnection.oneOrNone(
@@ -63,10 +73,10 @@ class UserDao {
                 databaseConnection.none(
                     `
                         INSERT INTO public."Users"(
-                            username, password, "displayName")
-                            VALUES ($1, $2, $3);
+                            username, password, "displayName", "canUpload", "canLabel", "canVerify", "canManageUsers")
+                            VALUES ($1, $2, $3, $4, $5, $6, $7);
                     `,
-                    [user.username, hash, user.displayName]
+                    [user.username, hash, user.displayName, user.canUpload, user.canLabel, user.canVerify, user.canManageUsers]
                 ).then(() => {
                     resolve();
                 }, (reason) => {

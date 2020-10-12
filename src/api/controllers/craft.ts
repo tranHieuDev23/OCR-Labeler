@@ -5,7 +5,7 @@ import LabelStatus from 'src/app/models/label-status';
 import User from 'src/app/models/user';
 import uid from 'uid';
 
-function processImageWithCraft(imageId: string, username: string, image: Buffer): Promise<TextRegion[]> {
+function processImageWithCraft(imageId: string, user: User, image: Buffer): Promise<TextRegion[]> {
     return new Promise<TextRegion[]>((resolve, reject) => {
         Axios.post(environment.craftServer, image, {
             headers: {
@@ -21,12 +21,10 @@ function processImageWithCraft(imageId: string, username: string, image: Buffer)
                 results.push(new TextRegion(
                     uid(35),
                     imageId,
-                    '',
-                    '',
                     item,
                     null,
                     LabelStatus.NotLabeled,
-                    new User(null, username, null),
+                    user,
                     null,
                     null
                 ));

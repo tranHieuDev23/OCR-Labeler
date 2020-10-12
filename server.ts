@@ -1,3 +1,8 @@
+import * as dotenv from 'dotenv';
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
+
 import 'zone.js/dist/zone-node';
 
 import { ngExpressEngine } from '@nguniversal/express-engine';
@@ -13,6 +18,8 @@ import * as cookieParser from 'cookie-parser';
 import uploadRouter from 'src/api/routes/upload';
 import * as mkdirp from 'mkdirp';
 import { THUMBNAIL_DIRECTORY, UPLOADED_IMAGE_DIRECTORY } from 'src/environments/constants';
+import UserDao from 'src/api/controllers/user-dao';
+import User from 'src/app/models/user';
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
@@ -60,14 +67,34 @@ export function app(): express.Express {
   return server;
 }
 
+function createFirstAdminUser(): Promise<void> {
+  const userDao: UserDao = UserDao.getInstance();
+  return new Promise<void>((resolve, reject) => {
+    userDao.getUserCount().then((userCount) => {
+      if (userCount > 0) {
+        return resolve();
+      }
+      console.log('No user was created, request for creation of the first admin user before launching the server');
+      const displayName = process.env.DEFAULT_ADMIN_DISPLAYNAME;
+      const username = process.env.DEFAULT_ADMIN_USERNAME;
+      const password = process.env.DEFAULT_ADMIN_PASSWORD;
+      userDao.addUser(User.newAdminUser(displayName, username, password)).then(resolve, reject);
+    }, reject);
+  });
+}
+
 function run(): void {
   const port = process.env.PORT || 4000;
   mkdirp.sync(UPLOADED_IMAGE_DIRECTORY);
   mkdirp.sync(THUMBNAIL_DIRECTORY);
-  // Start up the Node server
-  const server = app();
-  server.listen(port, () => {
-    console.log(`Node Express server listening on http://localhost:${port}`);
+  // In case no user was created, request for creation of the first admin user before launching the server
+  createFirstAdminUser().then(() => {
+    const server = app();
+    server.listen(port, () => {
+      console.log(`Node Express server listening on http://localhost:${port}`);
+    });
+  }, (reason) => {
+    console.log(`Problem when initialize server: ${reason}`);
   });
 }
 

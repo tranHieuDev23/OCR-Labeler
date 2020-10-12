@@ -13,8 +13,6 @@ class TextRegionDao {
             const cs = new pgp.helpers.ColumnSet([
                 'regionId',
                 'imageId',
-                'imageUrl',
-                'thumbnailUrl',
                 'region',
                 'label',
                 'status',
@@ -26,8 +24,6 @@ class TextRegionDao {
                 return {
                     regionId: item.regionId,
                     imageId: item.imageId,
-                    imageUrl: item.imageUrl,
-                    thumbnailUrl: item.thumbnailUrl,
                     region: item.region.getPostgresPolygonString(),
                     label: item.label,
                     status: item.status,

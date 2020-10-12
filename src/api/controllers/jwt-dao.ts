@@ -4,8 +4,12 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 import * as jwt from 'jsonwebtoken';
+import User from 'src/app/models/user';
 import uid from 'uid';
 import databaseConnection from "./database";
+import UserDao from './user-dao';
+
+const userDao: UserDao = UserDao.getInstance();
 
 class BlacklistedJwtDao {
     private readonly secretKey: string = process.env.JWT_SECRET;
@@ -91,7 +95,14 @@ class BlacklistedJwtDao {
                 resolve(true);
             }, reject);
         });
+    }
 
+    public getUserFromJwt(token: string): Promise<User> {
+        return new Promise((resolve, reject) => {
+            this.getUsernameFrowJwt(token).then((username) => {
+                userDao.findUser(username).then(resolve, reject);
+            }, reject);
+        });
     }
 
     private unblacklistSession(jwtid: string): Promise<void> {

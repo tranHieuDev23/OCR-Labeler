@@ -55,9 +55,9 @@ function saveImageAndThumbnail(
     });
 }
 
-function processPostUpload(imageId: string, username: string, image: any): Promise<void> {
+function processPostUpload(imageId: string, user: User, image: any): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        processImageWithCraft(imageId, username, image).then((regions) => {
+        processImageWithCraft(imageId, user, image).then((regions) => {
             regionDao.addTextRegions(regions).then(() => {
                 resolve();
             }, reject);
@@ -79,7 +79,11 @@ const multerMiddleware = multer({
 
 uploadRouter.post('/upload', multerMiddleware, async (request, response) => {
     const jwt = request.cookies[AUTH_COOKIE_NAME];
-    jwtDao.getUsernameFrowJwt(jwt).then((username) => {
+    jwtDao.getUserFromJwt(jwt).then((user) => {
+        if (!user.canUpload) {
+            console.log(`[/upload] User ${user.username} is not authorized to upload images!`);
+            return response.sendStatus(StatusCodes.UNAUTHORIZED);
+        }
         generateImageAndThumbnail(request.files[0].buffer).then(({ fullImage, thumbnail }) => {
             const imageFileName: string = uid(33) + '.jpeg';
             const thumbnailName: string = uid(34) + '.jpeg';
@@ -90,12 +94,12 @@ uploadRouter.post('/upload', multerMiddleware, async (request, response) => {
                     `/${imageFileName}`,
                     `/${thumbnailName}`,
                     [],
-                    new User(null, username, null),
+                    user,
                     new Date(),
                     ImageStatus.Uploaded
                 );
                 imageDao.addImage(newImage).then(() => {
-                    processPostUpload(imageId, username, fullImage).then(() => {
+                    processPostUpload(imageId, user, fullImage).then(() => {
                         console.log(`[/upload] Processed ${imageId} with CRAFT`);
                     }, (reason) => {
                         console.log(`[/upload] Problem processing ${imageId} with CRAFT: ${reason}`);
