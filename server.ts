@@ -23,10 +23,6 @@ export function app(): express.Express {
   const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
 
   server.use(bodyParser.json());
-  server.use(bodyParser.raw({
-    type: 'image/*',
-    limit: '5mb'
-  }));
   server.use(cookieParser());
 
   // Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)

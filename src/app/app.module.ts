@@ -11,7 +11,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { en_US, NZ_I18N } from 'ng-zorro-antd/i18n';
 import { registerLocaleData } from '@angular/common';
 import vi from '@angular/common/locales/vi';
-import { CookieService } from 'ngx-cookie-service';
 import UserLoggedInGuard from './services/logged-in-guard';
 import UserLoggedOutGuard from './services/logged-out-guard';
 import { NzIconModule, NZ_ICONS } from 'ng-zorro-antd/icon';
@@ -39,7 +38,6 @@ registerLocaleData(vi);
   ],
   providers: [
     { provide: NZ_I18N, useValue: en_US },
-    CookieService,
     UserLoggedInGuard,
     UserLoggedOutGuard,
     { provide: NZ_ICONS, useValue: icons }

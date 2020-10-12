@@ -1,6 +1,5 @@
+import { HttpClient } from '@angular/common/http';
 import { EventEmitter, Injectable } from '@angular/core';
-import { CookieService } from 'ngx-cookie-service';
-import { AUTH_COOKIE_NAME } from 'src/environments/constants';
 import User from '../models/user';
 
 @Injectable({
@@ -11,14 +10,13 @@ export class AuthService {
   public readonly loggedIn: EventEmitter<boolean> = new EventEmitter<boolean>()
 
   constructor(
-    private cookie: CookieService
+    private http: HttpClient
   ) {
-    this.isUserLoggedIn().then((isLoggedIn) => {
-      this.loggedIn.emit(isLoggedIn);
+    this.getCurrentUser().then((user) => {
+      this.currentUser = user;
+      this.loggedIn.emit(user != null);
     }, () => {
-      this.logOut().then(() => {
-        this.loggedIn.emit(false);
-      });
+      this.loggedIn.emit(false);
     });
   }
 
@@ -37,14 +35,13 @@ export class AuthService {
           reject("User already logged in");
           return;
         }
-        if (username != 'admin' || password != 'admin') {
-          reject("Incorrect username or password");
-          return;
-        }
-        this.cookie.set(AUTH_COOKIE_NAME, '123');
-        this.currentUser = new User("Tran Minh Hieu", username, null);
-        this.loggedIn.emit(true);
-        resolve(this.currentUser);
+        this.http.post('/api/login', {
+          username, password
+        }).toPromise().then((response) => {
+          this.currentUser = User.parseFromJson(response);
+          this.loggedIn.emit(true);
+          resolve(this.currentUser);
+        }, reject);
       }, reject);
     });
   }
@@ -56,10 +53,11 @@ export class AuthService {
           reject("User already logged out");
           return;
         }
-        this.cookie.delete(AUTH_COOKIE_NAME);
-        this.currentUser = null;
-        this.loggedIn.emit(false);
-        resolve();
+        this.http.post('/api/logout', {}).toPromise().then(() => {
+          this.currentUser = null;
+          this.loggedIn.emit(false);
+          resolve();
+        }, reject);
       }, reject);
     });
   }
@@ -70,12 +68,13 @@ export class AuthService {
         resolve(this.currentUser);
         return;
       }
-      if (!this.cookie.check(AUTH_COOKIE_NAME)) {
+      this.http.post('/api/validate', {}).toPromise().then((response) => {
+        this.currentUser = User.parseFromJson(response);
+        this.loggedIn.emit(true);
+        resolve(this.currentUser);
+      }, () => {
         resolve(null);
-        return;
-      }
-      this.currentUser = new User("Tran Minh Hieu", 'admin', null);
-      resolve(this.currentUser);
+      });
     });
   }
 }

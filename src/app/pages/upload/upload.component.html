@@ -1,7 +1,7 @@
 <h1 nz-typography>Upload new image</h1>
 <p nz-typography>Upload file(s)</p>
 <nz-upload nzType="drag" [nzMultiple]="true" nzAction="/api/upload" (nzChange)="handleChange($event)" [nzSize]="5120"
-    nzAccept="image/*">
+    nzAccept="image/*" [nzShowUploadList]="{ showPreviewIcon: true, showRemoveIcon: true, showDownloadIcon: false }">
     <p class="ant-upload-drag-icon">
         <i nz-icon nzType="inbox"></i>
     </p>
@@ -12,7 +12,7 @@
 </nz-upload>
 <p nz-typography style="margin-top: 8px;">Upload folder</p>
 <nz-upload nzType="drag" [nzDirectory]="true" nzAction="/api/upload" (nzChange)="handleChange($event)" [nzSize]="5120"
-    nzAccept="image/*">
+    nzAccept="image/*" [nzShowUploadList]="{ showPreviewIcon: true, showRemoveIcon: true, showDownloadIcon: false }">
     <p class="ant-upload-drag-icon">
         <i nz-icon nzType="inbox"></i>
     </p>

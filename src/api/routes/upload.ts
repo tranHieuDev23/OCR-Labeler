@@ -12,6 +12,7 @@ import ImageStatus from 'src/app/models/image-status';
 import ImageDao from '../controllers/image-dao';
 import { processImageWithCraft } from '../controllers/craft';
 import TextRegionDao from '../controllers/region-dao';
+import * as multer from 'multer';
 
 const uploadRouter: Router = Router();
 const FULL_HD_WIDTH = 1920;
@@ -64,10 +65,22 @@ function processPostUpload(imageId: string, username: string, image: any): Promi
     });
 }
 
-uploadRouter.post('/upload', async (request, response) => {
+const FIVE_MEGABYTE = 5 << 20;
+
+const multerMiddleware = multer({
+    limits: {
+        files: 1,
+        fileSize: FIVE_MEGABYTE
+    },
+    fileFilter: (request, file, callback) => {
+        callback(null, file.mimetype.startsWith('image/'));
+    }
+}).any();
+
+uploadRouter.post('/upload', multerMiddleware, async (request, response) => {
     const jwt = request.cookies[AUTH_COOKIE_NAME];
     jwtDao.getUsernameFrowJwt(jwt).then((username) => {
-        generateImageAndThumbnail(request.body).then(({ fullImage, thumbnail }) => {
+        generateImageAndThumbnail(request.files[0].buffer).then(({ fullImage, thumbnail }) => {
             const imageFileName: string = uid(33) + '.jpeg';
             const thumbnailName: string = uid(34) + '.jpeg';
             saveImageAndThumbnail(imageFileName, fullImage, thumbnailName, thumbnail).then(() => {

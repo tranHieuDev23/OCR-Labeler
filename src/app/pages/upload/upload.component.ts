@@ -24,10 +24,11 @@ export class UploadComponent {
           nzData: {
             title: 'File uploaded sucessfully',
             description: 'Text regions will be automatically detected. You can edit them via My Images page.',
-            imgSrc: file.thumbUrl
+            imgSrc: reader.result
           }
         });
       };
+      reader.readAsDataURL(file.originFileObj);
     } else if (status === 'error') {
       this.notification.error('Failed to upload file', '');
     }
