@@ -1,48 +1,26 @@
-<div>
-    <h1 nz-typography>Upload new image</h1>
-    <p nz-typography>Start by selecting an image in your device</p>
-</div>
-<div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
-    <div nz-col nzSpan="24" nzMd="12">
-        <input nz-input type="file" accept="image/x-png,image/gif,image/jpeg" (change)="fileChangeEvent($event)" />
-        <image-cropper [imageChangedEvent]="imageChangedEvent" [maintainAspectRatio]="false" format="png"
-            (imageCropped)="imageCropped($event)" (imageLoaded)="imageLoaded()" (cropperReady)="cropperReady()"
-            (loadImageFailed)="loadImageFailed()"></image-cropper>
-        <img *ngIf="currentRegion" class="uploaded-image" [src]="currentRegionImage" />
-    </div>
-    <div *ngIf="displayTools" nz-col nzSpan="24" nzMd="12">
-        <button class="button-tool" nz-button nzType="primary" (click)="addSelected()">
-            <i nz-icon nzType="plus"></i>Add selected
-        </button>
-        <button class="button-tool" nz-button nzType="primary" nzDanger (click)="resetRegions()">
-            <i nz-icon nzType="rollback"></i>Reset
-        </button>
-        <div nz-row nzGutter="8">
-            <div *ngFor="let item of croppedRegions; index as i " nz-col nzSpan="12" nzMd="8" nzLg="6"
-                style="margin-top: 8px;">
-                <nz-card style="width:100%;" [nzBodyStyle]="{'padding': '0'}" [nzCover]="coverTemplate"
-                    [nzActions]="[deleteSetting]">
-                </nz-card>
-                <ng-template #coverTemplate>
-                    <img class="item-thumbnail" [src]="croppedRegionThumbnails[i]" nz-popover
-                        [nzPopoverContent]="fullImageTemplate" />
-                </ng-template>
-                <ng-template #deleteSetting>
-                    <button nz-button nzDanger>
-                        <i nz-icon nzType="delete" nzDanger (click)="deleteRegion(i)"></i>
-                    </button>
-                </ng-template>
-                <ng-template #fullImageTemplate>
-                    <img class="item-full-image" [src]="croppedRegionImages[i]" />
-                </ng-template>
-            </div>
-        </div>
-        <button *ngIf="croppedRegions.length > 0" class="button-tool" nz-button nzType="primary"
-            style="margin-top: 8px;" (click)="upload()">
-            <i nz-icon nzType="upload"></i>Upload
-        </button>
-    </div>
-</div>
+<h1 nz-typography>Upload new image</h1>
+<p nz-typography>Upload file(s)</p>
+<nz-upload nzType="drag" [nzMultiple]="true" nzAction="/api/upload" (nzChange)="handleChange($event)" [nzSize]="5120"
+    nzAccept="image/*">
+    <p class="ant-upload-drag-icon">
+        <i nz-icon nzType="inbox"></i>
+    </p>
+    <p class="ant-upload-text">Click or drag file(s) to this area to upload</p>
+    <p class="ant-upload-hint">
+        Only image files are accepted.
+    </p>
+</nz-upload>
+<p nz-typography style="margin-top: 8px;">Upload folder</p>
+<nz-upload nzType="drag" [nzDirectory]="true" nzAction="/api/upload" (nzChange)="handleChange($event)" [nzSize]="5120"
+    nzAccept="image/*">
+    <p class="ant-upload-drag-icon">
+        <i nz-icon nzType="inbox"></i>
+    </p>
+    <p class="ant-upload-text">Click or drag a folder to this area to upload</p>
+    <p class="ant-upload-hint">
+        Every files in the folder will be uploaded, only image files are accepted.
+    </p>
+</nz-upload>
 <ng-template #imageNotification let-data="data">
     <i nz-icon nzType="check-circle" nzTheme="outline" class="image-notification-icon"></i>
     <div nz-typography class="image-notification-title">
