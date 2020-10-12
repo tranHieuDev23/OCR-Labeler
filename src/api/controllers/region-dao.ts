@@ -1,4 +1,6 @@
-import { TextRegion } from 'src/app/models/text-region';
+import LabelStatus from 'src/app/models/label-status';
+import { Region, TextRegion } from 'src/app/models/text-region';
+import User from 'src/app/models/user';
 import databaseConnection, { pgp } from './database';
 
 class TextRegionDao {
@@ -36,6 +38,48 @@ class TextRegionDao {
                 resolve();
             }, (reason) => {
                 reject(`[addTextRegions()] Error happened while adding TextRegion: ${reason}`);
+            });
+        });
+    }
+
+    public getTextRegions(imageId: string): Promise<TextRegion[]> {
+        return new Promise<TextRegion[]>((resolve, reject) => {
+            databaseConnection.any(
+                `
+                    SELECT
+                        "TextRegions"."regionId", "TextRegions"."region", "TextRegions"."label", "TextRegions"."status",
+                        "Uploader".username as "uploaderUsername", "Uploader"."displayName" as "uploaderDisplayName",
+                        "Labeler".username as "labelerUsername", "Labeler"."displayName" as "labelerDisplayName",
+                        "Verifier".username as "verifierUsername", "Verifier"."displayName" as "verifierDisplayName"
+                        FROM public."TextRegions" 
+                        INNER JOIN public."Users" AS "Uploader"
+                            ON "TextRegions"."uploadedBy" = "Uploader".username
+                        LEFT JOIN public."Users" as "Labeler"
+                            ON "TextRegions"."labeledBy" = "Labeler".username
+                        LEFT JOIN public."Users" as "Verifier"
+                            ON "TextRegions"."verifiedBy" = "Verifier".username
+                        WHERE "TextRegions"."imageId" = $1;
+                `,
+                [imageId]
+            ).then((regions) => {
+                const results: TextRegion[] = [];
+                for (let item of regions) {
+                    results.push(
+                        new TextRegion(
+                            item.regionId,
+                            imageId,
+                            Region.parseFromPostgresPolygonString(item.region),
+                            item.label,
+                            item.status as LabelStatus,
+                            User.newBaseUser(item.uploaderDisplayName, item.uploaderUsername),
+                            item.labelerDisplayName ? User.newBaseUser(item.labelerDisplayName, item.labelerUsername) : null,
+                            item.verifierDisplayName ? User.newBaseUser(item.verifierDisplayName, item.verifierUsername) : null
+                        )
+                    );
+                }
+                resolve(results);
+            }, (reason) => {
+                reject(`[getTextRegions()] Error happened while reading regions from database: ${reason}`);
             });
         });
     }

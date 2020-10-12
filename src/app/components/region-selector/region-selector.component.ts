@@ -37,7 +37,6 @@ export class RegionSelectorComponent implements OnInit {
         this.drawCanvas();
       };
     }
-    console.log(this.imageSrc);
     this.imageElement.src = this.imageSrc;
     this.canvas.nativeElement.addEventListener('mousedown', (event) => {
       this.handleMouseOnCanvas(this.getCanvasPosition(event.clientX, event.clientY));

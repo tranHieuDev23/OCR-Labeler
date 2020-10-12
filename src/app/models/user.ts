@@ -20,6 +20,18 @@ class User {
     return new User(displayName, username, password, canUpload, canLabel, canVerify, canManageUsers);
   }
 
+  static newBaseUser(displayname: string, username: string): User {
+    return new User(
+      displayname,
+      username,
+      null,
+      null,
+      null,
+      null,
+      null
+    );
+  }
+
   static newAdminUser(displayName: string, username: string, password: string): User {
     return new User(
       displayName,

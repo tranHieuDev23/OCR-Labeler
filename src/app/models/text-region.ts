@@ -30,10 +30,19 @@ class Region {
   }
 
   public getPostgresPolygonString(): string {
-    return '(' + this.vertices
-      .map(item => '(' + item.x + ',' + item.y + ')')
-      .join(',')
-      + ')';
+    return this.vertices
+      .map(item => item.x + ',' + item.y)
+      .join(';');
+  }
+
+  static parseFromPostgresPolygonString(str: string): Region {
+    const parts: string[] = str.substr(2, str.length - 4).split(';');
+    const vertices: Coordinate[] = [];
+    for (let item of parts) {
+      const values: string[] = item.split(',');
+      vertices.push(new Coordinate(+values[0], +values[1]));
+    }
+    return new Region(vertices);
   }
 };
 
@@ -67,6 +76,27 @@ class TextRegion {
       uploadedBy,
       labelBy,
       verifiedBy
+    );
+  }
+
+  static parseFromPostgresResult(obj: any): TextRegion {
+    const regionId: string = obj.regionId;
+    const thumbnailUrl: string = obj.thumbnailUrl;
+    const region: Region = Region.parseFromPostgresPolygonString(obj.region);
+    const label: string = obj.label;
+    const status: LabelStatus = obj.status as LabelStatus;
+    const uploadedBy: string = obj.uploadedBy;
+    const labelBy: User = obj.labeledBy;
+    const verifiedBy: User = obj.verifiedBy;
+    return new TextRegion(
+      regionId,
+      thumbnailUrl,
+      region,
+      label,
+      status,
+      null,
+      null,
+      null,
     );
   }
 }

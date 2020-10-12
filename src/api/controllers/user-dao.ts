@@ -22,16 +22,14 @@ class UserDao {
     public findUser(username: string): Promise<User> {
         return new Promise((resolve, reject) => {
             databaseConnection.oneOrNone(
-                `
-                    SELECT username, "displayName", password FROM public."Users"
-                    WHERE username = $1;
-                `,
+                `SELECT * FROM public."Users" WHERE username = $1;`,
                 [username]
             ).then((user) => {
                 if (!user) {
                     reject('No user with the provided username was found');
                     return;
                 }
+                delete user.password;
                 resolve(User.parseFromJson(user));
             }, (reason) => {
                 reject(`[findUser()] Error happened while reading database: ${reason}`);
@@ -42,10 +40,7 @@ class UserDao {
     public validateUser(username: string, password: string): Promise<User> {
         return new Promise((resolve, reject) => {
             databaseConnection.oneOrNone(
-                `
-                    SELECT username, password, "displayName" FROM public."Users"
-                    WHERE username = $1;
-                `,
+                `SELECT * FROM public."Users" WHERE username = $1;`,
                 [username]
             ).then((user) => {
                 if (!user) {
@@ -54,6 +49,7 @@ class UserDao {
                 }
                 validate(password, user.password).then((same) => {
                     if (same) {
+                        delete user.password;
                         resolve(User.parseFromJson(user));
                     } else {
                         reject('Invalid password');

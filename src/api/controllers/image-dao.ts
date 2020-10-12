@@ -1,5 +1,11 @@
+import ImageStatus from 'src/app/models/image-status';
 import UploadedImage from "src/app/models/uploaded-image";
 import databaseConnection from './database';
+import TextRegionDao from './region-dao';
+import UserDao from './user-dao';
+
+const userDao: UserDao = UserDao.getInstance();
+const regionDao: TextRegionDao = TextRegionDao.getInstance();
 
 class ImageDao {
     private constructor() { }
@@ -27,6 +33,38 @@ class ImageDao {
                 resolve();
             }, (reason) => {
                 reject(`[addImage()] Error happened while writing into database: ${reason}`);
+            });
+        });
+    }
+
+    public getImage(imageId: string): Promise<UploadedImage> {
+        return new Promise<UploadedImage>((resolve, reject) => {
+            databaseConnection.one(
+                `
+                    SELECT * FROM public."Images"
+                        WHERE "Images"."imageId" = $1;
+                `,
+                [imageId]
+            ).then((image) => {
+                userDao.findUser(image.uploadedBy).then((user) => {
+                    regionDao.getTextRegions(imageId).then((regions) => {
+                        resolve(new UploadedImage(
+                            imageId,
+                            image.imageUrl,
+                            image.thumbnailUrl,
+                            regions,
+                            user,
+                            new Date(+image.uploadedDate),
+                            image.status as ImageStatus
+                        ));
+                    }, (reason) => {
+                        reject(`[getImage()] Error happened while reading regions from database: ${reason}`);
+                    });
+                }, (reason) => {
+                    reject(`[getImage()] Error happened while finding user from database: ${reason}`);
+                });
+            }, (reason) => {
+                reject(`[getImage()] Error happened while reading image from database: ${reason}`);
             });
         });
     }
