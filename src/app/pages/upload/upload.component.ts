@@ -22,7 +22,7 @@ export class UploadComponent {
         this.notification.template(this.imageNotificationTemplate, {
           nzDuration: 6000,
           nzData: {
-            title: 'File uploaded sucessfully',
+            title: 'File uploaded successfully',
             description: 'Text regions will be automatically detected. You can edit them via My Images page.',
             imgSrc: reader.result
           }

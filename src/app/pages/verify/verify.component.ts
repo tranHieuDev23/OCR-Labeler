@@ -46,7 +46,7 @@ export class VerifyComponent implements OnInit {
 
   submit(isCorrect: boolean): void {
     this.backend.verifyLabel(this.selectedRegion.regionId, isCorrect).then(() => {
-      this.notification.success('Verify text region sucessfully', '');
+      this.notification.success('Verify text region successfully', '');
       this.backend.loadRegionsForVerifying('123', 1).then((result) => {
         this.textRegions[this.selectedId] = result[0];
         // this.images[this.selectedId] = result[0].thumbnailUrl;

@@ -11,9 +11,11 @@ import { FormsModule } from '@angular/forms';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzNotificationModule } from 'ng-zorro-antd/notification';
+import { NzTagModule } from 'ng-zorro-antd/tag';
 import { IconDefinition } from '@ant-design/icons-angular';
 import { PlusOutline, DeleteOutline, UploadOutline } from '@ant-design/icons-angular/icons';
 import { RegionSelectorModule } from 'src/app/components/region-selector/region-selector.module';
+import { NzEmptyModule } from 'ng-zorro-antd/empty';
 
 const icons: IconDefinition[] = [PlusOutline, DeleteOutline, UploadOutline];
 
@@ -30,6 +32,8 @@ const icons: IconDefinition[] = [PlusOutline, DeleteOutline, UploadOutline];
     NzTypographyModule,
     NzPopconfirmModule,
     NzNotificationModule,
+    NzEmptyModule,
+    NzTagModule,
     FormsModule,
     RegionSelectorModule
   ],

@@ -41,9 +41,6 @@ export class RegionSelectorComponent implements OnInit {
     this.canvas.nativeElement.addEventListener('mousedown', (event) => {
       this.handleMouseOnCanvas(this.getCanvasPosition(event.clientX, event.clientY));
     });
-    this.canvas.nativeElement.addEventListener('touchstart', (event) => {
-      this.handleMouseOnCanvas(this.getCanvasPosition(event.touches[0].clientX, event.touches[0].clientY));
-    });
   }
 
   private getCanvasPosition(clientX: number, clientY: number): Coordinate {

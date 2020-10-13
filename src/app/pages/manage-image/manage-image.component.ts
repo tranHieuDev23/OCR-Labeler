@@ -71,7 +71,7 @@ export class ManageImageComponent implements OnInit {
 
   addSelected() {
     this.backend.addTextRegion(this.imageId, this.currentRegion).then((newTextRegion) => {
-      this.notification.success('Text region added sucessfully', '');
+      this.notification.success('Text region added successfully', '');
       this.thumbnail.generatePolygonImage(this.imageUrl, newTextRegion.region.vertices).then((regionImage) => {
         this.croppedRegions.push(newTextRegion);
         this.croppedRegionImages.push(regionImage);
@@ -81,7 +81,7 @@ export class ManageImageComponent implements OnInit {
 
   deleteRegion(id: number) {
     this.backend.deleteTextRegion(this.croppedRegions[id].regionId).then(() => {
-      this.notification.success('Text region deleted sucessfully', '');
+      this.notification.success('Text region deleted successfully', '');
       this.croppedRegions.splice(id, 1);
       this.croppedRegionImages.splice(id, 1);
     }, (reason) => {
@@ -91,7 +91,7 @@ export class ManageImageComponent implements OnInit {
 
   deleteImage() {
     this.backend.deleteImage(this.imageId).then(() => {
-      this.notification.success('Image deleted sucessfully', '');
+      this.notification.success('Image deleted successfully', '');
       this.router.navigateByUrl('/');
     }, (reason) => {
       this.notification.error('Failed to delete image', `Reason: ${reason}`);

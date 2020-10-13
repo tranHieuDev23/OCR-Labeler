@@ -3,21 +3,42 @@
     <p nz-typography>Click on 4 points on the image to select a text region, and click <b>Add selected</b> to add that
         region</p>
 </div>
+
+<app-region-selector *ngIf="imageUrl" [imageSrc]="imageUrl" (imageCropped)="cropped($event)">
+</app-region-selector>
+
 <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
-    <div nz-col nzSpan="24" nzLg="18">
-        <app-region-selector *ngIf="imageUrl" [imageSrc]="imageUrl" (imageCropped)="cropped($event)">
-        </app-region-selector>
+    <div nz-col nzSpan="24" nzMd="8">
         <img *ngIf="currentRegionImage" class="uploaded-image" [src]="currentRegionImage" />
+        <nz-empty *ngIf="!currentRegionImage" [nzNotFoundContent]="contentTpl"></nz-empty>
+        <ng-template #contentTpl>
+            <span>Nothing was selected</span>
+        </ng-template>
     </div>
-    <div nz-col nzSpan="24" nzLg="6">
+    <div nz-col nzSpan="24" nzMd="16">
         <button class="button-tool" nz-button nzType="primary" [disabled]="!currentRegion" (click)="addSelected()">
             <i nz-icon nzType="plus"></i>Add selected
         </button>
-        <div nz-row nzGutter="8">
-            <div *ngFor="let item of croppedRegions; index as i " nz-col nzSpan="24" nzMd="12" nzLg="24"
-                style="margin-top: 8px;">
+
+        <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
+            <div *ngFor="let item of croppedRegions; index as i " nz-col nzSpan="24" nzMd="12" nzLg="8"
+                style="margin-top: 8px; margin-bottom: 8px;">
                 <nz-card style="width:100%;" [nzCover]="coverTemplate" [nzActions]="[deleteSetting]">
-                    Anything would be fine
+                    <span *ngIf="item.status == 'NotLabeled'">
+                        <nz-tag nzColor="blue">Not labeled</nz-tag>
+                    </span>
+                    <span *ngIf="item.status == 'CantLabel'">
+                        <nz-tag nzColor="red">Can't be labeled</nz-tag>
+                    </span>
+                    <span *ngIf="item.status == 'NotVerified'">
+                        <nz-tag nzColor="yellow">Labeled</nz-tag>
+                    </span>
+                    <span *ngIf="item.status == 'Verified'">
+                        <nz-tag nzColor="green">Verified</nz-tag>
+                    </span>
+                    <br />
+                    Labeled by Trần Minh Hiếu <br />
+                    Verified by Trần Minh Hiếu
                 </nz-card>
                 <ng-template #coverTemplate>
                     <img class="item-thumbnail" [src]="croppedRegionImages[i]" nz-popover
@@ -34,11 +55,15 @@
                 </ng-template>
             </div>
         </div>
-        <button *ngIf="croppedRegions.length > 0" class="button-tool" nz-button nzType="primary"
-            style="margin-top: 8px;" nz-popconfirm
+
+        <button class="button-tool" nz-button nzType="primary" style="margin-top: 8px;"
+            [disabled]="croppedRegions.length == 0">
+            <i nz-icon nzType="upload"></i>Publish this image
+        </button>
+        <button class="button-tool" nz-button nzType="primary" nzDanger style="margin-top: 8px;" nz-popconfirm
             nzPopconfirmTitle="Are you sure? Deleting this image will also delete all region extracted from it."
             nzOkText="OK" nzCancelText="Cancel" (nzOnConfirm)="deleteImage()">
-            <i nz-icon nzType="upload"></i>Delete this image
+            <i nz-icon nzType="delete"></i>Delete this image
         </button>
     </div>
 </div>
