@@ -4,17 +4,18 @@
         region</p>
 </div>
 <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
-    <div nz-col nzSpan="24" nzMd="12">
+    <div nz-col nzSpan="24" nzLg="18">
         <app-region-selector *ngIf="imageUrl" [imageSrc]="imageUrl" (imageCropped)="cropped($event)">
         </app-region-selector>
         <img *ngIf="currentRegionImage" class="uploaded-image" [src]="currentRegionImage" />
     </div>
-    <div nz-col nzSpan="24" nzMd="12">
+    <div nz-col nzSpan="24" nzLg="6">
         <button class="button-tool" nz-button nzType="primary" [disabled]="!currentRegion" (click)="addSelected()">
             <i nz-icon nzType="plus"></i>Add selected
         </button>
         <div nz-row nzGutter="8">
-            <div *ngFor="let item of croppedRegions; index as i " nz-col nzSpan="24" nzLg="12" style="margin-top: 8px;">
+            <div *ngFor="let item of croppedRegions; index as i " nz-col nzSpan="24" nzMd="12" nzLg="24"
+                style="margin-top: 8px;">
                 <nz-card style="width:100%;" [nzCover]="coverTemplate" [nzActions]="[deleteSetting]">
                     Anything would be fine
                 </nz-card>
