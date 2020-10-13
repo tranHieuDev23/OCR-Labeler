@@ -74,6 +74,14 @@ export class BackendService {
     });
   }
 
+  public publishImage(imageId: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.http.post('/api/publish-image', { imageId }).toPromise().then(() => {
+        resolve();
+      }, reject);
+    });
+  }
+
   public deleteImage(imageId: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.http.post('/api/delete-image', { imageId }).toPromise().then(() => {

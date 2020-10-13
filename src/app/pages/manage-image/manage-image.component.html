@@ -7,23 +7,24 @@
 <app-region-selector *ngIf="imageUrl" [imageSrc]="imageUrl" (imageCropped)="cropped($event)">
 </app-region-selector>
 
-<div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
+<div *ngIf="imageUrl" nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
     <div nz-col nzSpan="24" nzMd="8">
-        <img *ngIf="currentRegionImage" class="uploaded-image" [src]="currentRegionImage" />
-        <nz-empty *ngIf="!currentRegionImage" [nzNotFoundContent]="contentTpl"></nz-empty>
+        <img *ngIf="selectedRegionImage" class="uploaded-image" [src]="selectedRegionImage" />
+        <nz-empty *ngIf="!selectedRegionImage" [nzNotFoundContent]="contentTpl"></nz-empty>
         <ng-template #contentTpl>
             <span>Nothing was selected</span>
         </ng-template>
     </div>
     <div nz-col nzSpan="24" nzMd="16">
-        <button class="button-tool" nz-button nzType="primary" [disabled]="!currentRegion" (click)="addSelected()">
+        <button class="button-tool" nz-button nzType="primary" [disabled]="!selectedRegion" (click)="addSelected()">
             <i nz-icon nzType="plus"></i>Add selected
         </button>
 
         <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
             <div *ngFor="let item of croppedRegions; index as i " nz-col nzSpan="24" nzMd="12" nzLg="8"
                 style="margin-top: 8px; margin-bottom: 8px;">
-                <nz-card style="width:100%;" [nzCover]="coverTemplate" [nzActions]="[deleteSetting]">
+                <nz-card style="width:100%;" [nzHoverable]="true" [nzCover]="coverTemplate"
+                    [nzActions]="[deleteSetting]" (click)="regionClicked(i)">
                     <span *ngIf="item.status == 'NotLabeled'">
                         <nz-tag nzColor="blue">Not labeled</nz-tag>
                     </span>
@@ -37,12 +38,15 @@
                         <nz-tag nzColor="green">Verified</nz-tag>
                     </span>
                     <br />
-                    Labeled by Trần Minh Hiếu <br />
-                    Verified by Trần Minh Hiếu
+                    <span *ngIf="item.labeledBy">
+                        Labeled by {{ item.labeledBy.displayName }}<br />
+                    </span>
+                    <span *ngIf="item.verifiedBy">
+                        Verified by {{ item.verifiedBy.displayName }}<br />
+                    </span>
                 </nz-card>
                 <ng-template #coverTemplate>
-                    <img class="item-thumbnail" [src]="croppedRegionImages[i]" nz-popover
-                        [nzPopoverContent]="fullImageTemplate" />
+                    <img class="item-thumbnail" [src]="croppedRegionImages[i]" />
                 </ng-template>
                 <ng-template #deleteSetting>
                     <button nz-button nzDanger nz-popconfirm nzPopconfirmTitle="Are you sure?" nzOkText="OK"
@@ -50,15 +54,20 @@
                         <i nz-icon nzType="delete"></i>
                     </button>
                 </ng-template>
-                <ng-template #fullImageTemplate>
-                    <img class="item-full-image" [src]="croppedRegionImages[i]" />
-                </ng-template>
             </div>
         </div>
 
         <button class="button-tool" nz-button nzType="primary" style="margin-top: 8px;"
-            [disabled]="croppedRegions.length == 0">
-            <i nz-icon nzType="upload"></i>Publish this image
+            [disabled]="croppedRegions.length == 0" nz-popconfirm
+            nzPopconfirmTitle="Publishing this image will allow other people to label and verify its text regions."
+            nzOkText="OK" nzCancelText="Cancel" (nzOnConfirm)="publishImage()" [nzLoading]="isPublishing">
+            <span *ngIf="status != 'Published'">
+                <i nz-icon nzType="check-circle"></i> Publish this image
+            </span>
+            <span *ngIf="status == 'Published'">
+                <i nz-icon nzType="close-circle"></i>
+                Unpublish this image
+            </span>
         </button>
         <button class="button-tool" nz-button nzType="primary" nzDanger style="margin-top: 8px;" nz-popconfirm
             nzPopconfirmTitle="Are you sure? Deleting this image will also delete all region extracted from it."

@@ -131,6 +131,26 @@ class ImageDao {
             });
         });
     }
+
+    public updateImageStatus(imageId: string, user: User, status: ImageStatus): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            databaseConnection.one(
+                `
+                    WITH Updated AS (
+                        UPDATE public."Images"
+                            SET status=$1
+                            WHERE "Images"."imageId" = $2
+                            AND "Images"."uploadedBy" = $3
+                        RETURNING *
+                    ) SELECT COUNT(*) FROM Updated
+                `, [status, imageId, user.username]
+            ).then((result) => {
+                resolve(+result.count > 0);
+            }, (reason) => {
+                reject(`[updateImageStatus()] Error happened while updating image status: ${reason}`);
+            })
+        });
+    }
 };
 
 export default ImageDao;

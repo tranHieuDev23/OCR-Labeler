@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import ImageStatus from 'src/app/models/image-status';
 import LabelStatus from 'src/app/models/label-status';
 import { Region, TextRegion } from 'src/app/models/text-region';
 import { AUTH_COOKIE_NAME } from 'src/environments/constants';
@@ -97,6 +98,23 @@ imageRouter.post('/add-region', (request, response) => {
     }, (reason) => {
         console.log(`[/add-region] Problem when authorizing user to retrieve image: ${reason}`);
         return response.status(StatusCodes.UNAUTHORIZED).json({});
+    });
+});
+
+imageRouter.post('/publish-image', (request, response) => {
+    const token: string = request.cookies[AUTH_COOKIE_NAME];
+    jwtDao.getUserFromJwt(token).then((user) => {
+        if (!user.canUpload) {
+            console.log(`[/publish-image] User ${user.username} is not authorized to upload image!`);
+            return response.status(StatusCodes.UNAUTHORIZED).json({});
+        }
+        const imageId: string = request.body.imageId;
+        imageDao.updateImageStatus(imageId, user, ImageStatus.Published).then((success) => {
+            return response.status(success ? StatusCodes.OK : StatusCodes.UNAUTHORIZED).json({});
+        }, (reason) => {
+            console.log(`[/add-region] Problem when updating image's status: ${reason}`);
+            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+        })
     });
 });
 

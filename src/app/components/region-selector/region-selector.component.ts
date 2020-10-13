@@ -18,10 +18,11 @@ export class RegionSelectorComponent implements OnInit {
   @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
   @Input('imageSrc') imageSrc: string;
   @Output('imageCropped') public imageCropped: EventEmitter<RegionSelectedEvent> = new EventEmitter<RegionSelectedEvent>();
+
   private imageElement = new Image();
   private isImageLoaded: boolean = false;
-
   private selectedCoordinates: Coordinate[] = [];
+  private highlightedCoordinates: Coordinate[] = [];
 
   constructor(
     private thumbnail: ThumbnailService
@@ -48,6 +49,16 @@ export class RegionSelectorComponent implements OnInit {
     const x = (clientX - rect.left) / this.canvas.nativeElement.offsetWidth;
     const y = (clientY - rect.top) / this.canvas.nativeElement.offsetHeight;
     return new Coordinate(x, y);
+  }
+
+  public clearSelected(): void {
+    this.selectedCoordinates = [];
+    this.drawCanvas();
+  }
+
+  public highlight(coordinates: Coordinate[]): void {
+    this.highlightedCoordinates = coordinates;
+    this.drawCanvas();
   }
 
   private handleMouseOnCanvas(coordinate: Coordinate) {
@@ -83,33 +94,49 @@ export class RegionSelectorComponent implements OnInit {
     this.canvas.nativeElement.height = newCanvasHeight;
 
     ctx.drawImage(this.imageElement, 0, 0, newCanvasWidth, newCanvasHeight);
+    this.drawHighlight(newCanvasWidth, newCanvasHeight, ctx);
+    this.drawSelected(newCanvasWidth, newCanvasHeight, ctx);
+  }
+
+  private drawSelected(width: number, height: number, ctx: CanvasRenderingContext2D): void {
     if (this.selectedCoordinates.length == 0) {
       return;
     }
     let lastItem: Coordinate = this.selectedCoordinates[this.selectedCoordinates.length - 1];
     for (let item of this.selectedCoordinates) {
-      this.drawCircle(newCanvasWidth, newCanvasHeight, ctx, item, 3);
-      this.drawLine(newCanvasWidth, newCanvasHeight, ctx, lastItem, item);
+      this.drawCircle(width, height, ctx, item, 1, 'red');
+      this.drawLine(width, height, ctx, lastItem, item, 'red');
       lastItem = item;
     }
   }
 
-  private drawCircle(width: number, height: number, ctx: CanvasRenderingContext2D, center: Coordinate, radius: number): void {
+  private drawHighlight(width: number, height: number, ctx: CanvasRenderingContext2D): void {
+    if (!this.highlightedCoordinates || this.highlightedCoordinates.length == 0) {
+      return;
+    }
+    let lastItem: Coordinate = this.highlightedCoordinates[this.highlightedCoordinates.length - 1];
+    for (let item of this.highlightedCoordinates) {
+      this.drawLine(width, height, ctx, lastItem, item, 'green');
+      lastItem = item;
+    }
+  }
+
+  private drawCircle(width: number, height: number, ctx: CanvasRenderingContext2D, center: Coordinate, radius: number, color: string): void {
     ctx.beginPath();
     ctx.arc(center.x * width, center.y * height, radius, 0, 2 * Math.PI, false);
-    ctx.fillStyle = 'red';
+    ctx.fillStyle = color;
     ctx.fill();
     ctx.lineWidth = 1;
-    ctx.strokeStyle = 'red';
+    ctx.strokeStyle = color;
     ctx.stroke();
   }
 
-  private drawLine(width: number, height: number, ctx: CanvasRenderingContext2D, start: Coordinate, end: Coordinate): void {
+  private drawLine(width: number, height: number, ctx: CanvasRenderingContext2D, start: Coordinate, end: Coordinate, color: string): void {
     ctx.beginPath();
     ctx.moveTo(start.x * width, start.y * height);
     ctx.lineTo(end.x * width, end.y * height);
     ctx.lineWidth = 1;
-    ctx.strokeStyle = 'red';
+    ctx.strokeStyle = color;
     ctx.stroke();
   }
 }

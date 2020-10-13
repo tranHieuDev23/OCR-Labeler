@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
-import { RegionSelectedEvent } from 'src/app/components/region-selector/region-selector.component';
-import { TextRegion, Region } from 'src/app/models/text-region';
+import { RegionSelectedEvent, RegionSelectorComponent } from 'src/app/components/region-selector/region-selector.component';
+import ImageStatus from 'src/app/models/image-status';
+import { TextRegion, Region, Coordinate } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
 
@@ -12,11 +13,15 @@ import { ThumbnailService } from 'src/app/services/thumbnail.service';
   styleUrls: ['./manage-image.component.scss']
 })
 export class ManageImageComponent implements OnInit {
+  @ViewChild(RegionSelectorComponent, { static: false }) regionSelector: RegionSelectorComponent;
+
   public imageUrl: string;
   public croppedRegions: TextRegion[];
   public croppedRegionImages: string[];
-  public currentRegion: Region;
-  public currentRegionImage: string;
+  public status: ImageStatus;
+  public isPublishing: boolean;
+  public selectedRegion: Region;
+  public selectedRegionImage: string;
   private imageId: string;
 
   constructor(
@@ -37,18 +42,21 @@ export class ManageImageComponent implements OnInit {
     });
   }
 
-  initialize() {
+  initialize(): void {
     this.imageUrl = null;
     this.croppedRegions = [];
     this.croppedRegionImages = [];
-    this.currentRegion = null;
-    this.currentRegionImage = null;
+    this.status = null;
+    this.isPublishing = false;
+    this.selectedRegion = null;
+    this.selectedRegionImage = null;
   }
 
   fileChangeEvent(imageId: string): void {
     this.initialize();
     this.backend.loadImage(imageId).then((result) => {
       this.imageUrl = result.imageUrl;
+      this.status = result.status;
       Promise.all(result.textRegions.map(item => {
         return this.thumbnail.generatePolygonImage(this.imageUrl, item.region.vertices);
       })).then((regionImages) => {
@@ -64,19 +72,26 @@ export class ManageImageComponent implements OnInit {
     });
   }
 
-  cropped(event: RegionSelectedEvent) {
-    this.currentRegion = event.region;
-    this.currentRegionImage = event.imageBase64;
+  cropped(event: RegionSelectedEvent): void {
+    this.selectedRegion = event.region;
+    this.selectedRegionImage = event.imageBase64;
   }
 
-  addSelected() {
-    this.backend.addTextRegion(this.imageId, this.currentRegion).then((newTextRegion) => {
+  addSelected(): void {
+    this.backend.addTextRegion(this.imageId, this.selectedRegion).then((newTextRegion) => {
       this.notification.success('Text region added successfully', '');
       this.thumbnail.generatePolygonImage(this.imageUrl, newTextRegion.region.vertices).then((regionImage) => {
         this.croppedRegions.push(newTextRegion);
         this.croppedRegionImages.push(regionImage);
+        this.regionSelector.clearSelected();
+        this.selectedRegion = null;
+        this.selectedRegionImage = null;
       });
     });
+  }
+
+  regionClicked(id: number): void {
+    this.regionSelector.highlight(this.croppedRegions[id].region.vertices);
   }
 
   deleteRegion(id: number) {
@@ -86,6 +101,18 @@ export class ManageImageComponent implements OnInit {
       this.croppedRegionImages.splice(id, 1);
     }, (reason) => {
       this.notification.error('Failed to delete text region', `Reason: ${reason}`);
+    });
+  }
+
+  publishImage() {
+    this.isPublishing = true;
+    this.backend.publishImage(this.imageId).then(() => {
+      this.notification.success('Image published successfully', '');
+      this.status = ImageStatus.Published;
+      this.isPublishing = false;
+    }, (reason) => {
+      this.notification.error('Failed to publish image', `Reason: ${reason}`);
+      this.isPublishing = false;
     });
   }
 
