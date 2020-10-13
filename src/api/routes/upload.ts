@@ -84,6 +84,10 @@ uploadRouter.post('/upload', multerMiddleware, async (request, response) => {
             console.log(`[/upload] User ${user.username} is not authorized to upload images!`);
             return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
+        if (request.files.length === 0 || !request.files[0].buffer) {
+            console.log(`[/upload] User ${user.username} is trying to upload unsupported file!`);
+            return response.status(StatusCodes.BAD_REQUEST).json({});
+        }
         generateImageAndThumbnail(request.files[0].buffer).then(({ fullImage, thumbnail }) => {
             const imageFileName: string = uid(33) + '.jpeg';
             const thumbnailName: string = uid(34) + '.jpeg';
