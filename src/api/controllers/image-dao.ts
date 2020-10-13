@@ -1,5 +1,6 @@
 import ImageStatus from 'src/app/models/image-status';
 import UploadedImage from "src/app/models/uploaded-image";
+import User from 'src/app/models/user';
 import databaseConnection from './database';
 import TextRegionDao from './region-dao';
 import UserDao from './user-dao';
@@ -12,6 +13,49 @@ class ImageDao {
 
     public static getInstance(): ImageDao {
         return new ImageDao();
+    }
+
+    public getUserImagesCount(user: User): Promise<number> {
+        return new Promise<number>((resolve, reject) => {
+            databaseConnection.one(
+                `SELECT COUNT(*) FROM public."Images" WHERE "Images"."uploadedBy" = $1;`,
+                [user.username]
+            ).then((result) => {
+                resolve(+result.count);
+            }, (reason) => {
+                reject(`[addImage()] Error happened while writing into database: ${reason}`);
+            });
+        });
+    }
+
+    public getUserImages(user: User, startFrom: number, itemCount: number): Promise<UploadedImage[]> {
+        return new Promise<UploadedImage[]>((resolve, reject) => {
+            databaseConnection.any(
+                `
+                    SELECT * FROM public."Images"
+                        WHERE "Images"."uploadedBy" = $1
+                        ORDER BY "Images"."uploadedDate" DESC
+                        OFFSET $2 LIMIT $3;
+                `,
+                [user.username, startFrom, itemCount]
+            ).then((results) => {
+                const images: UploadedImage[] = [];
+                for (let item of results) {
+                    images.push(new UploadedImage(
+                        item.imageId,
+                        item.imageUrl,
+                        item.thumbnailUrl,
+                        [],
+                        user,
+                        new Date(item.uploadedDate),
+                        item.status as ImageStatus
+                    ));
+                }
+                resolve(images);
+            }, (reason) => {
+                reject(`[addImage()] Error happened while writing into database: ${reason}`);
+            });
+        });
     }
 
     public addImage(image: UploadedImage): Promise<void> {

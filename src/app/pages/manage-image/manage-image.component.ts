@@ -43,7 +43,7 @@ export class ManageImageComponent implements OnInit {
 
   fileChangeEvent(imageId: string): void {
     this.initialize();
-    this.backend.loadImage('123', imageId).then((result) => {
+    this.backend.loadImage(imageId).then((result) => {
       this.imageUrl = result.imageUrl;
       this.croppedRegions = result.textRegions;
     }, (reason) => {
@@ -58,14 +58,14 @@ export class ManageImageComponent implements OnInit {
   }
 
   addSelected() {
-    this.backend.addTextRegion('123', this.imageId, this.currentRegion).then((newTextRegion) => {
+    this.backend.addTextRegion(this.imageId, this.currentRegion).then((newTextRegion) => {
       this.notification.success('Text region added sucessfully', '');
       this.croppedRegions.push(newTextRegion);
     });
   }
 
   deleteRegion(id: number) {
-    this.backend.deleteTextRegion('123', this.croppedRegions[id].regionId).then(() => {
+    this.backend.deleteTextRegion(this.croppedRegions[id].regionId).then(() => {
       this.notification.success('Text region deleted sucessfully', '');
       this.croppedRegions.splice(id, 1);
     }, (reason) => {
@@ -74,7 +74,7 @@ export class ManageImageComponent implements OnInit {
   }
 
   deleteImage() {
-    this.backend.deleteImage('123', this.imageId).then(() => {
+    this.backend.deleteImage(this.imageId).then(() => {
       this.notification.success('Image deleted sucessfully', '');
       this.router.navigateByUrl('/');
     }, (reason) => {

@@ -64,9 +64,9 @@ class TextRegion {
     const region: Region = Region.parseFromJson(obj.region);
     const label: string = obj.label;
     const status: LabelStatus = obj.status as LabelStatus;
-    const uploadedBy: User = User.parseFromJson(obj.uploadedBy);
-    const labelBy: User = User.parseFromJson(obj.labeledBy);
-    const verifiedBy: User = User.parseFromJson(obj.verifiedBy);
+    const uploadedBy: User = obj.uploadedBy ? User.parseFromJson(obj.uploadedBy) : null;
+    const labelBy: User = obj.labeledBy ? User.parseFromJson(obj.labeledBy) : null;
+    const verifiedBy: User = obj.verifiedBy ? User.parseFromJson(obj.verifiedBy) : null;
     return new TextRegion(
       regionId,
       thumbnailUrl,
@@ -85,9 +85,6 @@ class TextRegion {
     const region: Region = Region.parseFromPostgresPolygonString(obj.region);
     const label: string = obj.label;
     const status: LabelStatus = obj.status as LabelStatus;
-    const uploadedBy: string = obj.uploadedBy;
-    const labelBy: User = obj.labeledBy;
-    const verifiedBy: User = obj.verifiedBy;
     return new TextRegion(
       regionId,
       thumbnailUrl,

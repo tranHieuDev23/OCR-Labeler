@@ -23,7 +23,7 @@ class UploadedImage {
         textRegions.push(TextRegion.parseFromJson(item));
       }
     }
-    const uploadedBy: User = User.parseFromJson(obj.uploadedBy);
+    const uploadedBy: User = obj.uploadedBy ? User.parseFromJson(obj.uploadedBy) : null;
     const uploadedDate: Date = new Date(obj.uploadedDate);
     const status: ImageStatus = obj.status as ImageStatus;
     return new UploadedImage(

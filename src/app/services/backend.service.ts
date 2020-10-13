@@ -35,33 +35,48 @@ export class BackendService {
     });
   }
 
-  public loadUserImages(username: string, startFrom: number, itemCount: number): Promise<{ imagesCount: number, images: UploadedImage[] }> {
+  public loadUserImages(startFrom: number, itemCount: number): Promise<{ imagesCount: number, images: UploadedImage[] }> {
     return new Promise<{ imagesCount: number, images: UploadedImage[] }>((resolve, reject) => {
-
+      this.http.post<any>('/api/get-user-images', { startFrom, itemCount }).toPromise().then((response) => {
+        const imagesCount: number = +response.imagesCount;
+        const images: UploadedImage[] = [];
+        for (let item of response.images) {
+          images.push(UploadedImage.parseFromJson(item));
+        }
+        resolve({ imagesCount, images });
+      }, reject);
     });
   }
 
-  public loadImage(username: string, imageId: string): Promise<UploadedImage> {
+  public loadImage(imageId: string): Promise<UploadedImage> {
     return new Promise<UploadedImage>((resolve, reject) => {
-      reject("Cannot find image with the requested ID");
+      this.http.post('/api/get-image', { imageId }).toPromise().then((response) => {
+        resolve(UploadedImage.parseFromJson(response));
+      }, reject);
     });
   }
 
-  public addTextRegion(username: string, imageId: string, region: Region): Promise<TextRegion> {
+  public addTextRegion(imageId: string, region: Region): Promise<TextRegion> {
     return new Promise<TextRegion>((resolve, reject) => {
-      resolve();
+      this.http.post('/api/add-region', { imageId, region }).toPromise().then((response) => {
+        resolve(TextRegion.parseFromJson(response));
+      }, reject);
     });
   }
 
-  public deleteTextRegion(username: string, regionId: string): Promise<void> {
+  public deleteTextRegion(regionId: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      resolve();
+      this.http.post('/api/delete-region', { regionId }).toPromise().then(() => {
+        resolve();
+      }, reject);
     });
   }
 
-  public deleteImage(username: string, imageId: string): Promise<void> {
+  public deleteImage(imageId: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      resolve();
+      this.http.post('/api/delete-image', { imageId }).toPromise().then(() => {
+        resolve();
+      }, reject);
     });
   }
 }

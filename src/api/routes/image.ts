@@ -14,6 +14,36 @@ const jwtDao: BlacklistedJwtDao = BlacklistedJwtDao.getInstance();
 const imageDao: ImageDao = ImageDao.getInstance();
 const regionDao: TextRegionDao = TextRegionDao.getInstance();
 
+imageRouter.post('/get-user-images', (request, response) => {
+    const token: string = request.cookies[AUTH_COOKIE_NAME];
+    jwtDao.getUserFromJwt(token).then((user) => {
+        if (!user.canUpload) {
+            console.log(`[/get-user-images] User ${user.username} is not authorized to upload image!`);
+            return response.sendStatus(StatusCodes.UNAUTHORIZED);
+        }
+        const startFrom: number = request.body.startFrom;
+        const itemCount: number = request.body.itemCount;
+        imageDao.getUserImagesCount(user).then((imagesCount) => {
+            if (imagesCount <= startFrom) {
+                console.log(
+                    `[/get-user-images] User ${user.username} is trying to access more image than allowed: startFrom=${startFrom}, imagesCount=${imagesCount}`
+                );
+                return response.sendStatus(StatusCodes.BAD_REQUEST);
+            }
+            imageDao.getUserImages(user, startFrom, itemCount).then((images) => {
+                return response.json({
+                    imagesCount, images
+                });
+            }, (reason) => {
+                console.log(`[/get-user-images] Problem when retrieving image: ${reason}`);
+                return response.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+            });
+        })
+    }, (reason) => {
+        console.log(`[/get-user-images] Problem when authorizing user to retrieve image: ${reason}`);
+        return response.sendStatus(StatusCodes.UNAUTHORIZED);
+    });
+});
 
 imageRouter.post('/get-image', (request, response) => {
     const token: string = request.cookies[AUTH_COOKIE_NAME];
