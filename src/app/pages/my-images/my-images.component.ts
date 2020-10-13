@@ -49,8 +49,8 @@ export class MyImagesComponent implements OnInit {
     this.router.navigateByUrl(`/manage-image/${this.uploadedImages[id].imageId}`);
   }
 
-  changePage(event: any): void {
-    if (event == this.currentPage) {
+  changePage(event: number): void {
+    if (event === this.currentPage) {
       return;
     }
     this.router.navigateByUrl(`/my-images/${event}`);

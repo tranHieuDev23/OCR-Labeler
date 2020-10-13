@@ -68,6 +68,25 @@ class ImageDao {
             });
         });
     }
+
+    public deleteImage(imageId: string, username: string): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            databaseConnection.one(
+                `
+                    WITH Deleted AS (
+                        DELETE FROM public."Images"
+                            WHERE "Images"."imageId" = $1
+                            AND "Images"."uploadedBy" = $2
+                        RETURNING *
+                    ) SELECT COUNT(*) FROM Deleted;
+                `, [imageId, username]
+            ).then((result) => {
+                resolve(+result.count > 0);
+            }, (reason) => {
+                reject(`[deleteImage()] Error happened while deleting image: ${reason}`);
+            });
+        });
+    }
 };
 
 export default ImageDao;

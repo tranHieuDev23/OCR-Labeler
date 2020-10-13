@@ -83,6 +83,23 @@ class TextRegionDao {
             });
         });
     }
+
+    public deleteTextRegion(regionId: string, uploadedBy: string): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            databaseConnection.one(
+                `
+                    WITH Deleted AS (
+                        DELETE FROM public."TextRegions" WHERE "regionId" = $1 AND "uploadedBy" = $2 RETURNING *
+                    ) SELECT COUNT(*) FROM Deleted;
+                `,
+                [regionId, uploadedBy]
+            ).then((result) => {
+                resolve(+result.count === 1);
+            }, (reason) => {
+                reject(`[deleteTextRegion()] Error happened while deleting region: ${reason}`);
+            })
+        });
+    }
 };
 
 export default TextRegionDao;
