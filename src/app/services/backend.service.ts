@@ -66,9 +66,11 @@ export class BackendService {
 
   public deleteTextRegion(regionId: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      this.http.post('/api/delete-region', { regionId }).toPromise().then(() => {
+      this.http.post('/api/delete-region', { regionId }).toPromise().then((response) => {
         resolve();
-      }, reject);
+      }, (reason) => {
+        reject(reason);
+      });
     });
   }
 

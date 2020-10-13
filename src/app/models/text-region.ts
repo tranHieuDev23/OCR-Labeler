@@ -36,7 +36,7 @@ class Region {
   }
 
   static parseFromPostgresPolygonString(str: string): Region {
-    const parts: string[] = str.substr(2, str.length - 4).split(';');
+    const parts: string[] = str.split(';');
     const vertices: Coordinate[] = [];
     for (let item of parts) {
       const values: string[] = item.split(',');

@@ -82,7 +82,7 @@ uploadRouter.post('/upload', multerMiddleware, async (request, response) => {
     jwtDao.getUserFromJwt(jwt).then((user) => {
         if (!user.canUpload) {
             console.log(`[/upload] User ${user.username} is not authorized to upload images!`);
-            return response.sendStatus(StatusCodes.UNAUTHORIZED);
+            return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
         generateImageAndThumbnail(request.files[0].buffer).then(({ fullImage, thumbnail }) => {
             const imageFileName: string = uid(33) + '.jpeg';
@@ -107,19 +107,19 @@ uploadRouter.post('/upload', multerMiddleware, async (request, response) => {
                     return response.json(newImage);
                 }, (reason) => {
                     console.log(`[/upload] Problem adding image to database: ${reason}`);
-                    return response.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+                    return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
                 });
             }, (reason) => {
                 console.log(`[/upload] Problem saving image: ${reason}`);
-                return response.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+                return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
             });
         }, (reason) => {
             console.log(`[/upload] Problem resizing image: ${reason}`);
-            return response.sendStatus(StatusCodes.BAD_REQUEST);
+            return response.status(StatusCodes.BAD_REQUEST).json({});
         });
     }, (reason) => {
         console.log(`[/upload] Problem validating JWT: ${reason}`);
-        return response.sendStatus(StatusCodes.UNAUTHORIZED);
+        return response.status(StatusCodes.UNAUTHORIZED).json({});
     });
 });
 

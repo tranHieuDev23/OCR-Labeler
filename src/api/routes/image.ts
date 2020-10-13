@@ -19,7 +19,7 @@ imageRouter.post('/get-user-images', (request, response) => {
     jwtDao.getUserFromJwt(token).then((user) => {
         if (!user.canUpload) {
             console.log(`[/get-user-images] User ${user.username} is not authorized to upload image!`);
-            return response.sendStatus(StatusCodes.UNAUTHORIZED);
+            return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
         const startFrom: number = request.body.startFrom;
         const itemCount: number = request.body.itemCount;
@@ -28,7 +28,7 @@ imageRouter.post('/get-user-images', (request, response) => {
                 console.log(
                     `[/get-user-images] User ${user.username} is trying to access more image than allowed: startFrom=${startFrom}, imagesCount=${imagesCount}`
                 );
-                return response.sendStatus(StatusCodes.BAD_REQUEST);
+                return response.status(StatusCodes.BAD_REQUEST).json({});
             }
             imageDao.getUserImages(user, startFrom, itemCount).then((images) => {
                 return response.json({
@@ -36,12 +36,12 @@ imageRouter.post('/get-user-images', (request, response) => {
                 });
             }, (reason) => {
                 console.log(`[/get-user-images] Problem when retrieving image: ${reason}`);
-                return response.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+                return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
             });
         })
     }, (reason) => {
         console.log(`[/get-user-images] Problem when authorizing user to retrieve image: ${reason}`);
-        return response.sendStatus(StatusCodes.UNAUTHORIZED);
+        return response.status(StatusCodes.UNAUTHORIZED).json({});
     });
 });
 
@@ -50,22 +50,22 @@ imageRouter.post('/get-image', (request, response) => {
     jwtDao.getUserFromJwt(token).then((user) => {
         if (!user.canUpload) {
             console.log(`[/get-image] User ${user.username} is not authorized to upload image!`);
-            return response.sendStatus(StatusCodes.UNAUTHORIZED);
+            return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
         const imageId: string = request.body.imageId;
         imageDao.getImage(imageId).then((image) => {
             if (image.uploadedBy.username != user.username) {
                 console.log(`[/get-image] User ${user.username} is trying to access other's images!`);
-                return response.sendStatus(StatusCodes.UNAUTHORIZED);
+                return response.status(StatusCodes.UNAUTHORIZED).json({});
             }
             return response.json(image);
         }, (reason) => {
             console.log(`[/get-image] Problem when retrieving image: ${reason}`);
-            return response.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
         })
     }, (reason) => {
         console.log(`[/get-image] Problem when authorizing user to retrieve image: ${reason}`);
-        return response.sendStatus(StatusCodes.UNAUTHORIZED);
+        return response.status(StatusCodes.UNAUTHORIZED).json({});
     });
 });
 
@@ -74,7 +74,7 @@ imageRouter.post('/add-region', (request, response) => {
     jwtDao.getUserFromJwt(token).then((user) => {
         if (!user.canUpload) {
             console.log(`[/add-region] User ${user.username} is not authorized to upload image!`);
-            return response.sendStatus(StatusCodes.UNAUTHORIZED);
+            return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
         const imageId: string = request.body.imageId;
         const region: Region = Region.parseFromJson(request.body.region);
@@ -92,11 +92,11 @@ imageRouter.post('/add-region', (request, response) => {
             response.json(textRegion);
         }, (reason) => {
             console.log(`[/add-region] Problem when storing new image region: ${reason}`);
-            return response.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
         });
     }, (reason) => {
         console.log(`[/add-region] Problem when authorizing user to retrieve image: ${reason}`);
-        return response.sendStatus(StatusCodes.UNAUTHORIZED);
+        return response.status(StatusCodes.UNAUTHORIZED).json({});
     });
 });
 
@@ -105,18 +105,18 @@ imageRouter.post('/delete-region', (request, response) => {
     jwtDao.getUserFromJwt(token).then((user) => {
         if (!user.canUpload) {
             console.log(`[/delete-region] User ${user.username} is not authorized to upload image!`);
-            return response.sendStatus(StatusCodes.UNAUTHORIZED);
+            return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
         const regionId: string = request.body.regionId;
         regionDao.deleteTextRegion(regionId, user.username).then((success) => {
-            response.sendStatus(success ? StatusCodes.OK : StatusCodes.UNAUTHORIZED);
+            return response.status(success ? StatusCodes.OK : StatusCodes.UNAUTHORIZED).json({});
         }, (reason) => {
             console.log(`[/delete-region] Problem when storing new image region: ${reason}`);
-            return response.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
         });
     }, (reason) => {
         console.log(`[/delete-region] Problem when authorizing user to retrieve image: ${reason}`);
-        return response.sendStatus(StatusCodes.UNAUTHORIZED);
+        return response.status(StatusCodes.UNAUTHORIZED).json({});
     });
 });
 
@@ -125,18 +125,18 @@ imageRouter.post('/delete-image', (request, response) => {
     jwtDao.getUserFromJwt(token).then((user) => {
         if (!user.canUpload) {
             console.log(`[/delete-image] User ${user.username} is not authorized to upload image!`);
-            return response.sendStatus(StatusCodes.UNAUTHORIZED);
+            return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
         const imageId: string = request.body.imageId;
         imageDao.deleteImage(imageId, user.username).then((success) => {
-            response.sendStatus(success ? StatusCodes.OK : StatusCodes.UNAUTHORIZED);
+            return response.status(success ? StatusCodes.OK : StatusCodes.UNAUTHORIZED).json({});
         }, (reason) => {
             console.log(`[/delete-image] Problem when delete image region: ${reason}`);
-            return response.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
         });
     }, (reason) => {
         console.log(`[/delete-image] Problem when authorizing user to retrieve image: ${reason}`);
-        return response.sendStatus(StatusCodes.UNAUTHORIZED);
+        return response.status(StatusCodes.UNAUTHORIZED).json({});
     });
 });
 

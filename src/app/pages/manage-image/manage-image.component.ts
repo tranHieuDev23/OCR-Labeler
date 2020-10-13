@@ -4,6 +4,7 @@ import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { RegionSelectedEvent } from 'src/app/components/region-selector/region-selector.component';
 import { TextRegion, Region } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
+import { ThumbnailService } from 'src/app/services/thumbnail.service';
 
 @Component({
   selector: 'app-manage-image',
@@ -13,6 +14,7 @@ import { BackendService } from 'src/app/services/backend.service';
 export class ManageImageComponent implements OnInit {
   public imageUrl: string;
   public croppedRegions: TextRegion[];
+  public croppedRegionImages: string[];
   public currentRegion: Region;
   public currentRegionImage: string;
   private imageId: string;
@@ -21,7 +23,8 @@ export class ManageImageComponent implements OnInit {
     private backend: BackendService,
     private route: ActivatedRoute,
     private router: Router,
-    private notification: NzNotificationService
+    private notification: NzNotificationService,
+    private thumbnail: ThumbnailService,
   ) {
     this.initialize();
   }
@@ -37,6 +40,7 @@ export class ManageImageComponent implements OnInit {
   initialize() {
     this.imageUrl = null;
     this.croppedRegions = [];
+    this.croppedRegionImages = [];
     this.currentRegion = null;
     this.currentRegionImage = null;
   }
@@ -45,7 +49,15 @@ export class ManageImageComponent implements OnInit {
     this.initialize();
     this.backend.loadImage(imageId).then((result) => {
       this.imageUrl = result.imageUrl;
-      this.croppedRegions = result.textRegions;
+      Promise.all(result.textRegions.map(item => {
+        return this.thumbnail.generatePolygonImage(this.imageUrl, item.region.vertices);
+      })).then((regionImages) => {
+        this.croppedRegions = result.textRegions;
+        this.croppedRegionImages = regionImages;
+      }, (reason) => {
+        this.notification.error('Failed to load file', `Reason: ${reason}`);
+        this.router.navigateByUrl('/');
+      });
     }, (reason) => {
       this.notification.error('Failed to load file', `Reason: ${reason}`);
       this.router.navigateByUrl('/');
@@ -60,7 +72,10 @@ export class ManageImageComponent implements OnInit {
   addSelected() {
     this.backend.addTextRegion(this.imageId, this.currentRegion).then((newTextRegion) => {
       this.notification.success('Text region added sucessfully', '');
-      this.croppedRegions.push(newTextRegion);
+      this.thumbnail.generatePolygonImage(this.imageUrl, newTextRegion.region.vertices).then((regionImage) => {
+        this.croppedRegions.push(newTextRegion);
+        this.croppedRegionImages.push(regionImage);
+      });
     });
   }
 
@@ -68,6 +83,7 @@ export class ManageImageComponent implements OnInit {
     this.backend.deleteTextRegion(this.croppedRegions[id].regionId).then(() => {
       this.notification.success('Text region deleted sucessfully', '');
       this.croppedRegions.splice(id, 1);
+      this.croppedRegionImages.splice(id, 1);
     }, (reason) => {
       this.notification.error('Failed to delete text region', `Reason: ${reason}`);
     });

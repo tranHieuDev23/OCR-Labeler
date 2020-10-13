@@ -27,11 +27,11 @@ authRouter.post('/register', (request, response) => {
             response.cookie(AUTH_COOKIE_NAME, jwt, getCookieOption()).sendStatus(StatusCodes.OK);
         }, (reason) => {
             console.log(`[/register] Register failed: ${reason}`);
-            response.sendStatus(StatusCodes.BAD_REQUEST);
+            return response.status(StatusCodes.BAD_REQUEST).json({});
         });
     }, (reason) => {
         console.log(`[/register] Register failed: ${reason}`);
-        response.sendStatus(StatusCodes.BAD_REQUEST);
+        return response.status(StatusCodes.BAD_REQUEST).json({});
     });
 });
 
@@ -46,38 +46,38 @@ authRouter.post('/login', (request, response) => {
             });
         }, (reason) => {
             console.log(`[/login] Authentication failed: ${reason}`);
-            response.sendStatus(StatusCodes.BAD_REQUEST);
+            return response.status(StatusCodes.BAD_REQUEST).json({});
         });
     }, (reason) => {
         console.log(`[/login] Authentication failed: ${reason}`);
-        response.sendStatus(StatusCodes.FORBIDDEN);
+        return response.status(StatusCodes.FORBIDDEN).json({});
     });
 });
 
 authRouter.post('/logout', (request, response) => {
     const jwt = request.cookies[AUTH_COOKIE_NAME];
     if (!jwt) {
-        response.sendStatus(StatusCodes.FORBIDDEN);
+        return response.status(StatusCodes.FORBIDDEN).json({});
         return;
     }
     jwtDao.isValidJwt(jwt).then((isValid) => {
         if (!isValid) {
             console.log(`[/logout] Authentication failed: invalid JWT`);
-            response.sendStatus(StatusCodes.FORBIDDEN);
+            return response.status(StatusCodes.FORBIDDEN).json({});
             return;
         }
         jwtDao.blacklistJwt(jwt);
         response.clearCookie(AUTH_COOKIE_NAME).send();
     }, (reason) => {
         console.log(`[/logout] Authentication failed: ${reason}`);
-        response.sendStatus(StatusCodes.FORBIDDEN);
+        return response.status(StatusCodes.FORBIDDEN).json({});
     });
 });
 
 authRouter.post('/validate', (request, response) => {
     const jwt = request.cookies[AUTH_COOKIE_NAME];
     if (!jwt) {
-        response.sendStatus(StatusCodes.FORBIDDEN);
+        return response.status(StatusCodes.FORBIDDEN).json({});
         return;
     }
     jwtDao.getUsernameFrowJwt(jwt).then((username) => {
@@ -89,15 +89,15 @@ authRouter.post('/validate', (request, response) => {
                 });
             }, (reason) => {
                 console.log(`[/validate] Authentication failed: ${reason}`);
-                response.sendStatus(StatusCodes.FORBIDDEN);
+                return response.status(StatusCodes.FORBIDDEN).json({});
             });
         }, (reason) => {
             console.log(`[/validate] Authentication failed: ${reason}`);
-            response.sendStatus(StatusCodes.FORBIDDEN);
+            return response.status(StatusCodes.FORBIDDEN).json({});
         });
     }, (reason) => {
         console.log(`[/validate] Authentication failed: ${reason}`);
-        response.sendStatus(StatusCodes.FORBIDDEN);
+        return response.status(StatusCodes.FORBIDDEN).json({});
     });
 });
 

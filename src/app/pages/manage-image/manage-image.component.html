@@ -19,7 +19,7 @@
                     Anything would be fine
                 </nz-card>
                 <ng-template #coverTemplate>
-                    <img class="item-thumbnail" [src]="item.thumbnailUrl" nz-popover
+                    <img class="item-thumbnail" [src]="croppedRegionImages[i]" nz-popover
                         [nzPopoverContent]="fullImageTemplate" />
                 </ng-template>
                 <ng-template #deleteSetting>
@@ -29,7 +29,7 @@
                     </button>
                 </ng-template>
                 <ng-template #fullImageTemplate>
-                    <img class="item-full-image" [src]="item.imageUrl" />
+                    <img class="item-full-image" [src]="croppedRegionImages[i]" />
                 </ng-template>
             </div>
         </div>
