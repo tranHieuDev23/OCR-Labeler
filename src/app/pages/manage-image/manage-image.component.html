@@ -38,11 +38,14 @@
                         <nz-tag nzColor="green">Verified</nz-tag>
                     </span>
                     <br />
-                    <span *ngIf="item.labeledBy">
-                        Labeled by {{ item.labeledBy.displayName }}<br />
+                    <span *ngIf="item.status == 'NotVerified' || item.status == 'Verified'" nz-typography>
+                        Labeled by <b>{{ item.labeledBy.displayName }}</b> as <b>{{ item.label }}</b><br />
                     </span>
-                    <span *ngIf="item.verifiedBy">
-                        Verified by {{ item.verifiedBy.displayName }}<br />
+                    <span *ngIf="item.status == 'CantLabel'" nz-typography>
+                        Reported by <b>{{ item.labeledBy.displayName }}</b><br />
+                    </span>
+                    <span *ngIf="item.status == 'Verified'" nz-typography>
+                        Verified by <b>{{ item.verifiedBy.displayName }}</b><br />
                     </span>
                 </nz-card>
                 <ng-template #coverTemplate>

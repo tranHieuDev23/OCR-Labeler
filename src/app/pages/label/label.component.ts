@@ -1,5 +1,4 @@
 import { Component, HostListener, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { TextRegion } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
@@ -18,8 +17,7 @@ export class LabelComponent implements OnInit {
   constructor(
     private backend: BackendService,
     private thumbnail: ThumbnailService,
-    private notification: NzNotificationService,
-    private router: Router
+    private notification: NzNotificationService
   ) { }
 
   ngOnInit(): void {
@@ -28,26 +26,27 @@ export class LabelComponent implements OnInit {
 
   loadRegion(): void {
     this.backend.loadRegionForLabeling().then((result) => {
+      if (!result) {
+        this.regionImage = null;
+        this.label = '';
+        this.region = null;
+        return;
+      }
       this.thumbnail.generatePolygonImage(result.imageUrl, result.region.region.vertices)
         .then((image) => {
           this.regionImage = image;
           this.label = '';
           this.region = result.region;
         }, (reason) => {
-          this.redirectAfterError(reason);
+          this.notification.error('Failed to load the text region', `Reason: ${reason}`);
         });
     }, (reason) => {
-      this.redirectAfterError(reason);
+      this.notification.error('Failed to load the text region', `Reason: ${reason}`);
     });
   }
 
-  private redirectAfterError(reason: any): void {
-    this.notification.error('Failed to load the text region', `Reason: ${reason}`);
-    this.router.navigateByUrl('/');
-  }
-
   submit(cantLabel: boolean): void {
-    const label = cantLabel ? this.label : '';
+    const label = cantLabel ? '' : this.label;
     this.backend.labelRegion(this.region.regionId, cantLabel, label).then(() => {
       this.notification.success('Text region labeled successfully', '');
       this.loadRegion();

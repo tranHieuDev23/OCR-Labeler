@@ -15,8 +15,7 @@ export class BackendService {
     return new Promise<{ imageUrl: string, region: TextRegion }>((resolve, reject) => {
       this.http.post<any>('/api/get-image-for-labeler', {}).toPromise().then((response) => {
         if (!response) {
-          reject('No region was returned for labeling');
-          return;
+          return resolve(null);
         }
         const imageUrl: string = response.imageUrl;
         const region: TextRegion = TextRegion.parseFromJson(response.region);
@@ -27,7 +26,7 @@ export class BackendService {
 
   public labelRegion(regionId: string, cantLabel: boolean, label: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      this.http.post<void>('/api/label', { regionId, canLabel: cantLabel, label }).toPromise().then(() => {
+      this.http.post<void>('/api/label', { regionId, cantLabel, label }).toPromise().then(() => {
         resolve();
       }, reject);
     });
