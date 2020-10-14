@@ -19,6 +19,21 @@ class UserDao {
         });
     }
 
+    public getAllUser(): Promise<User[]> {
+        return new Promise<User[]>((resolve, reject) => {
+            databaseConnection.any('SELECT * FROM public."Users";').then((result) => {
+                const users: User[] = [];
+                for (let item of result) {
+                    delete item.password;
+                    users.push(User.parseFromJson(item));
+                }
+                resolve(users);
+            }, (reason) => {
+                reject(`[getAllUser()] Error happened while getting all user: ${reason}`);
+            });
+        });
+    }
+
     public findUser(username: string): Promise<User> {
         return new Promise((resolve, reject) => {
             databaseConnection.oneOrNone(
@@ -26,7 +41,7 @@ class UserDao {
                 [username]
             ).then((user) => {
                 if (!user) {
-                    reject('No user with the provided username was found');
+                    reject('[findUser()] No user with the provided username was found');
                     return;
                 }
                 delete user.password;
@@ -44,7 +59,7 @@ class UserDao {
                 [username]
             ).then((user) => {
                 if (!user) {
-                    reject('No user with the provided username was found');
+                    reject('[validateUser()] No user with the provided username was found');
                     return;
                 }
                 validate(password, user.password).then((same) => {
@@ -52,13 +67,13 @@ class UserDao {
                         delete user.password;
                         resolve(User.parseFromJson(user));
                     } else {
-                        reject('Invalid password');
+                        reject('[validateUser()] Invalid password');
                     }
                 }, (reason) => {
-                    reject(`Error happened while validating password: ${reason}`);
+                    reject(`[validateUser()] Error happened while validating password: ${reason}`);
                 });
             }, (reason) => {
-                reject(`[findUser()] Error happened while reading database: ${reason}`);
+                reject(`[validateUser()] Error happened while reading database: ${reason}`);
             });
         });
     }
@@ -76,8 +91,25 @@ class UserDao {
                 ).then(() => {
                     resolve();
                 }, (reason) => {
-                    reject(`[addUser()] Error happened while writing into database: ${reason}`);
+                    reject(`[addUser()] Error happened while writing user info into database: ${reason}`);
                 });
+            });
+        });
+    }
+
+    public updateUser(user: User): Promise<void> {
+        return new Promise((resolve, reject) => {
+            databaseConnection.none(
+                `
+                        UPDATE public."Users"
+                        SET "displayName" = $2, "canUpload" = $3, "canLabel" = $4, "canVerify" = $5, "canManageUsers" = $6
+                        WHERE username = $1;
+                    `,
+                [user.username, user.displayName, user.canUpload, user.canLabel, user.canVerify, user.canManageUsers]
+            ).then(() => {
+                resolve();
+            }, (reason) => {
+                reject(`[updateUser()] Error happened while updating user into database: ${reason}`);
             });
         });
     }

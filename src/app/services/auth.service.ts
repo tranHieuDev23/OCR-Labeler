@@ -77,4 +77,47 @@ export class AuthService {
       });
     });
   }
+
+  public getAllUser(): Promise<User[]> {
+    return new Promise<User[]>((resolve, reject) => {
+      this.getCurrentUser().then((user) => {
+        if (!user.canManageUsers) {
+          return reject('User is not authorized to manage users');
+        }
+        this.http.post<any[]>('/api/get-users', {}).toPromise().then((response) => {
+          const users: User[] = [];
+          for (let item in users) {
+            users.push(User.parseFromJson(item));
+          }
+          resolve(users);
+        }, reject);
+      }, reject);
+    });
+  }
+
+  public addUser(newUser: User): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.getCurrentUser().then((user) => {
+        if (!user.canManageUsers) {
+          return reject('User is not authorized to manage users');
+        }
+        this.http.post('/api/register', newUser).toPromise().then(() => {
+          resolve();
+        }, reject);
+      }, reject);
+    });
+  }
+
+  public updateUser(updatedUser: User): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.getCurrentUser().then((user) => {
+        if (!user.canManageUsers) {
+          return reject('User is not authorized to manage users');
+        }
+        this.http.post('/api/update-user', updatedUser).toPromise().then(() => {
+          resolve();
+        }, reject);
+      }, reject);
+    });
+  }
 }
