@@ -32,15 +32,24 @@ export class BackendService {
     });
   }
 
-  public loadRegionsForVerifying(username: string, itemCount: number): Promise<TextRegion[]> {
-    return new Promise<TextRegion[]>((resolve, reject) => {
-
+  public loadRegionForVerifying(): Promise<{ imageUrl: string, region: TextRegion }> {
+    return new Promise<{ imageUrl: string, region: TextRegion }>((resolve, reject) => {
+      this.http.post<any>('/api/get-image-for-verifier', {}).toPromise().then((response) => {
+        if (!response) {
+          return resolve(null);
+        }
+        const imageUrl: string = response.imageUrl;
+        const region: TextRegion = TextRegion.parseFromJson(response.region);
+        resolve({ imageUrl, region });
+      }, reject);
     });
   }
 
   public verifyLabel(regionId: string, isCorrect: boolean): Promise<void> {
-    return new Promise<void>((resolve, rejects) => {
-      resolve();
+    return new Promise<void>((resolve, reject) => {
+      this.http.post<void>('/api/verify', { regionId, isCorrect }).toPromise().then(() => {
+        resolve();
+      }, reject);
     });
   }
 

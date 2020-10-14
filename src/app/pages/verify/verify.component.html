@@ -1,20 +1,23 @@
 <div>
-    <h1 nz-typography>Verify results</h1>
-    <p nz-typography>Tap on an image to start verifying it</p>
+    <h1 nz-typography>Verify images</h1>
+    <p nz-typography *ngIf="regionImage">
+        Verify if the text in the region is the text in the label (with the correct casing). Press <b>Y</b> for
+        <b>Yes</b>, <b>N</b> for <b>No</b>, or press <b>Tab</b> to switch to another text region.
+    </p>
 </div>
-<app-image-grid [images]="images" emptyText="No image needs verifying" (imageClicked)="showModal($event)">
-</app-image-grid>
-<button style="margin-top: 16px; margin-left: auto; margin-right: auto; display: block;" nz-button>Refresh all</button>
-<nz-modal *ngIf="selectedRegion" [(nzVisible)]="isVisible" nzTitle="Verify label" [nzContent]="modalContent"
-    [nzFooter]="modalFooter" (nzOnCancel)="hideModal()">
-    <ng-template #modalContent>
-        <img *ngIf="selectedRegion" style="width: 100%; height: auto;" [src]="selectedRegion.imageUrl" />
-        <p nz-typography style="margin-top: 8px;">Is <b>{{ selectedRegion.label }}</b> the correct label for this
-            example?</p>
+<nz-empty *ngIf="!regionImage" [nzNotFoundContent]="emptyContent">
+    <ng-template #emptyContent>
+        <p nz-typography>No text region needs verifying</p>
     </ng-template>
-    <ng-template #modalFooter>
-        <button nz-button nzType="default" (click)="hideModal()">Cancel</button>
-        <button nz-button nzType="primary" nzDanger (click)="submit(false)">Incorrect</button>
-        <button nz-button nzType="primary" (click)="submit(true)">Correct</button>
-    </ng-template>
-</nz-modal>
+</nz-empty>
+<div *ngIf="regionImage" nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
+    <div nz-col [nzSpan]="24" [nzMd]="12">
+        <img id="region-image" [src]="regionImage" />
+    </div>
+    <div nz-col [nzSpan]="24" [nzMd]="12">
+        <p nz-typography>Is <b>{{ region.label }}</b> the correct label for this region?</p>
+        <button nz-button nzType="primary" (click)="submit(true)">Yes</button>
+        <button nz-button nzType="primary" nzDanger (click)="submit(false)">No</button>
+        <button nz-button nzType="primary" (click)="loadRegion()">Switch region</button>
+    </div>
+</div>

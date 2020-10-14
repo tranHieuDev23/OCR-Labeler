@@ -1,8 +1,9 @@
+import { HostListener } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { TextRegion } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
+import { ThumbnailService } from 'src/app/services/thumbnail.service';
 
 @Component({
   selector: 'app-label',
@@ -10,55 +11,62 @@ import { BackendService } from 'src/app/services/backend.service';
   styleUrls: ['./verify.component.scss']
 })
 export class VerifyComponent implements OnInit {
-  public textRegions: TextRegion[] = [];
-  public images: string[] = [];
-  public selectedId: number = 0;
-  public selectedRegion: TextRegion = null;
-  public isVisible: boolean = false;
+  public regionImage: string = null;
+  public region: TextRegion = null;
 
   constructor(
     private backend: BackendService,
-    private router: Router,
+    private thumbnail: ThumbnailService,
     private notification: NzNotificationService
   ) { }
 
   ngOnInit(): void {
-    this.backend.loadRegionsForVerifying('123', 10).then((result) => {
-      this.textRegions = result;
-      // this.images = this.textRegions.map((value) => value.thumbnailUrl);
+    this.loadRegion();
+  }
+
+  loadRegion(): void {
+    this.backend.loadRegionForVerifying().then((result) => {
+      if (!result) {
+        this.regionImage = null;
+        this.region = null;
+        return;
+      }
+      this.thumbnail.generatePolygonImage(result.imageUrl, result.region.region.vertices)
+        .then((image) => {
+          this.regionImage = image;
+          this.region = result.region;
+        }, (reason) => {
+          this.notification.error('Failed to load the text region', `Reason: ${reason}`);
+        });
     }, (reason) => {
-      this.notification.error('Failed to load text regions', `Reason: ${reason}`);
-      this.router.navigateByUrl('/');
+      this.notification.error('Failed to load the text region', `Reason: ${reason}`);
     });
-  }
-
-  showModal(id: number): void {
-    this.selectedId = id;
-    this.selectedRegion = this.textRegions[id];
-    this.isVisible = true;
-  }
-
-  hideModal(): void {
-    this.selectedId = 0;
-    this.selectedRegion = null;
-    this.isVisible = false;
   }
 
   submit(isCorrect: boolean): void {
-    this.backend.verifyLabel(this.selectedRegion.regionId, isCorrect).then(() => {
-      this.notification.success('Verify text region successfully', '');
-      this.backend.loadRegionsForVerifying('123', 1).then((result) => {
-        this.textRegions[this.selectedId] = result[0];
-        // this.images[this.selectedId] = result[0].thumbnailUrl;
-        this.hideModal();
-      }, (reason) => {
-        this.textRegions.splice(this.selectedId, 1);
-        this.images.splice(this.selectedId, 1);
-        this.hideModal();
-        this.notification.error('Failed to load new text region', `Reason: ${reason}`);
-      });
+    this.backend.verifyLabel(this.region.regionId, isCorrect).then(() => {
+      this.notification.success('Text region verified successfully', '');
+      this.loadRegion();
     }, (reason) => {
-      this.notification.error('Failed to verify text region', `Reason: ${reason}`);
+      this.notification.error('Failed to verify the text region', `Reason: ${reason}`);
     });
+  }
+
+  @HostListener('document: keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent): void {
+    switch (event.key) {
+      case 'y':
+        event.preventDefault();
+        this.submit(true);
+        break;
+      case 'n':
+        event.preventDefault();
+        this.submit(false);
+        break;
+      case 'Tab':
+        event.preventDefault();
+        this.loadRegion();
+        break;
+    }
   }
 }
