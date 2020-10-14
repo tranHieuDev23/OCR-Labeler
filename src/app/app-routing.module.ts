@@ -41,6 +41,12 @@ const routes: Routes = [
     canActivate: [UserLoggedInGuard]
   },
   {
+    path: 'manage-users',
+    loadChildren: () =>
+      import('./pages/manage-users/manage-users.module').then((m) => m.ManageUsersModule),
+    canActivate: [UserLoggedInGuard]
+  },
+  {
     path: 'login',
     loadChildren: () =>
       import('./pages/login/login.module').then((m) => m.LoginModule),
@@ -52,7 +58,7 @@ const routes: Routes = [
 @NgModule({
   imports: [RouterModule.forRoot(routes, {
     initialNavigation: 'enabled'
-})],
+  })],
   exports: [RouterModule],
 })
 export class AppRoutingModule { }
