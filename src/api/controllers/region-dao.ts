@@ -101,7 +101,7 @@ class TextRegionDao {
         });
     }
 
-    public getRandomTextRegion(user: User): Promise<{ imageUrl: string, region: TextRegion }> {
+    public getRandomTextRegion(user: User, status: LabelStatus): Promise<{ imageUrl: string, region: TextRegion }> {
         return new Promise<{ imageUrl: string, region: TextRegion }>((resolve, reject) => {
             databaseConnection.oneOrNone(
                 `
@@ -110,10 +110,10 @@ class TextRegionDao {
                             FROM public."TextRegions"
                             FULL JOIN public."Images" ON "TextRegions"."imageId" = "Images"."imageId"
                             WHERE "TextRegions"."uploadedBy" != $1
-                            AND "TextRegions"."uploadedBy" != $1
+                            AND "TextRegions".status = $2
                     ) SELECT * FROM ValidItems OFFSET floor(random() * (SELECT COUNT(*) FROM validItems))
                         LIMIT 1;
-                `, [user.username]
+                `, [user.username, status]
             ).then((textRegion) => {
                 if (!textRegion) {
                     resolve(null);
@@ -142,7 +142,7 @@ class TextRegionDao {
                     ) SELECT COUNT(*) FROM Updated;
                 `, [label, LabelStatus.NotVerified, user.username, regionId]
             ).then((result) => {
-                resolve(+result.count > 1);
+                resolve(+result.count > 0);
             }, reject);
         });
     }

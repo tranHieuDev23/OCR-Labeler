@@ -4,11 +4,11 @@ import { LabelComponent } from './label.component';
 import { LabelRoutingModule } from './label-routing.module';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { FormsModule } from '@angular/forms';
-import { ImageGridModule } from 'src/app/components/image-grid/image-grid.module';
 import { NzNotificationModule } from 'ng-zorro-antd/notification';
+import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzEmptyModule } from 'ng-zorro-antd/empty';
 
 
 @NgModule({
@@ -18,11 +18,11 @@ import { NzNotificationModule } from 'ng-zorro-antd/notification';
     LabelRoutingModule,
     NzButtonModule,
     NzInputModule,
-    NzModalModule,
     NzTypographyModule,
     NzNotificationModule,
-    FormsModule,
-    ImageGridModule
+    NzGridModule,
+    NzEmptyModule,
+    FormsModule
   ],
   exports: [
     LabelComponent

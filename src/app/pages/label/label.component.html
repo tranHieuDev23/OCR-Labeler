@@ -1,19 +1,24 @@
 <div>
     <h1 nz-typography>Label images</h1>
-    <p nz-typography>Tap on an image to start labeling it</p>
+    <p nz-typography *ngIf="regionImage">
+        Type in the text in this text region (with correct casing). Submit the label by pressing <b>Enter</b>, or skip
+        this text region by pressing <b>Tab</b>. If the text region doesn't contain any text, click <b>Invalid
+            region</b> to label this region as invalid.
+    </p>
 </div>
-<app-image-grid [images]="images" emptyText="No image need labeled" (imageClicked)="showModal($event)">
-</app-image-grid>
-<button style="margin-top: 16px; margin-left: auto; margin-right: auto; display: block;" nz-button>Refresh all</button>
-<nz-modal *ngIf="selectedRegion" [(nzVisible)]="isVisible" nzTitle="Type in the text in this image"
-    [nzContent]="modalContent" [nzFooter]="modalFooter" (nzOnCancel)="hideModal()">
-    <ng-template #modalContent>
-        <img *ngIf="selectedRegion" style="width: 100%; height: auto;" [src]="selectedRegion.imageUrl" />
-        <input style="margin-top: 8px;" nz-input placeholder="Label" [(ngModel)]="selectedLabel" />
+<nz-empty *ngIf="!regionImage" [nzNotFoundContent]="emptyContent">
+    <ng-template #emptyContent>
+        <p nz-typography>No text region needs labeling</p>
     </ng-template>
-    <ng-template #modalFooter>
-        <button nz-button nzType="default" (click)="hideModal()">Cancel</button>
-        <button nz-button nzType="primary" nzDanger (click)="submit(false)">Cannot label</button>
-        <button nz-button nzType="primary" (click)="submit(true)">Submit</button>
-    </ng-template>
-</nz-modal>
+</nz-empty>
+<div *ngIf="regionImage" nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
+    <div nz-col [nzSpan]="24" [nzMd]="16">
+        <img id="region-image" [src]="regionImage" />
+    </div>
+    <div nz-col [nzSpan]="24" [nzMd]="8">
+        <input id="label-input" nz-input [nzSize]="large" placeholder="Label here..." [(ngModel)]="label" /> <br />
+        <button nz-button nzType="primary" [disabled]="label.length == 0" (click)="submit(false)">Submit label</button>
+        <button nz-button nzType="primary" (click)="loadRegion()">Skip region</button>
+        <button nz-button nzType="primary" nzDanger (click)="submit(true)">Invalid region</button>
+    </div>
+</div>

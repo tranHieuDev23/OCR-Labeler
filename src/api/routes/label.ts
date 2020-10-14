@@ -17,7 +17,7 @@ labelRouter.post('/get-image-for-labeler', (request, response) => {
             console.log(`[/get-image-for-labeler] User ${user.username} is not authorized to label images`);
             return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
-        regionDao.getRandomTextRegion(user).then((region) => {
+        regionDao.getRandomTextRegion(user, LabelStatus.NotLabeled).then((region) => {
             return response.json(region);
         }, (reason) => {
             console.log(`[/get-image-for-labeler] Error happened while getting text region: ${reason}`);
