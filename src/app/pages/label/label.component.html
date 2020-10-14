@@ -12,10 +12,10 @@
     </ng-template>
 </nz-empty>
 <div *ngIf="regionImage" nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
-    <div nz-col [nzSpan]="24" [nzMd]="16">
+    <div nz-col [nzSpan]="24" [nzMd]="12">
         <img id="region-image" [src]="regionImage" />
     </div>
-    <div nz-col [nzSpan]="24" [nzMd]="8">
+    <div nz-col [nzSpan]="24" [nzMd]="12">
         <input id="label-input" nz-input [nzSize]="large" placeholder="Label here..." [(ngModel)]="label" /> <br />
         <button nz-button nzType="primary" [disabled]="label.length == 0" (click)="submit(false)">Submit label</button>
         <button nz-button nzType="primary" (click)="loadRegion()">Skip region</button>

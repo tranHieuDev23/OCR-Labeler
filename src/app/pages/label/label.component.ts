@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { TextRegion } from 'src/app/models/text-region';
@@ -54,5 +54,22 @@ export class LabelComponent implements OnInit {
     }, (reason) => {
       this.notification.error('Failed to label the text region', `Reason: ${reason}`);
     });
+  }
+
+  @HostListener('document: keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent): void {
+    switch (event.key) {
+      case 'Enter':
+        event.preventDefault();
+        if (this.label.length == 0) {
+          break;
+        }
+        this.submit(false);
+        break;
+      case 'Tab':
+        event.preventDefault();
+        this.loadRegion();
+        break;
+    }
   }
 }
