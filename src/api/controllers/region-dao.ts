@@ -100,6 +100,71 @@ class TextRegionDao {
             })
         });
     }
+
+    public getRandomTextRegion(user: User): Promise<{ imageUrl: string, region: TextRegion }> {
+        return new Promise<{ imageUrl: string, region: TextRegion }>((resolve, reject) => {
+            databaseConnection.oneOrNone(
+                `
+                    WITH ValidItems AS (
+                        SELECT "TextRegions".*, "Images"."imageUrl"
+                            FROM public."TextRegions"
+                            FULL JOIN public."Images" ON "TextRegions"."imageId" = "Images"."imageId"
+                            WHERE "TextRegions"."uploadedBy" != $1
+                            AND "TextRegions"."uploadedBy" != $1
+                    ) SELECT * FROM ValidItems OFFSET floor(random() * (SELECT COUNT(*) FROM validItems))
+                        LIMIT 1;
+                `, [user.username]
+            ).then((textRegion) => {
+                if (!textRegion) {
+                    resolve(null);
+                    return;
+                }
+                const imageUrl = textRegion.imageUrl;
+                const region = TextRegion.parseFromPostgresResult(textRegion);
+                resolve({ imageUrl, region });
+            }, (reason) => {
+                reject(`[getRandomTextRegion()] Error happened while getting random text region: ${reason}`);
+            });
+        });
+    }
+
+    public labelTextRegion(user: User, regionId: string, label: string): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            databaseConnection.one(
+                `
+                    WITH Updated AS (
+                        UPDATE public."TextRegions"
+                            SET label = $1, status= $2, "labeledBy"=$3
+                            WHERE "regionId" = $4
+                            AND "uploadedBy" != $3
+                            AND "status" = 'NotLabeled'
+                            RETURNING *
+                    ) SELECT COUNT(*) FROM Updated;
+                `, [label, LabelStatus.NotVerified, user.username, regionId]
+            ).then((result) => {
+                resolve(+result.count > 1);
+            }, reject);
+        });
+    }
+
+    public setRegionCantLabeled(user: User, regionId: string, status: LabelStatus): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            databaseConnection.one(
+                `
+                    WITH Updated AS (
+                        UPDATE public."TextRegions"
+                            SET label = NULL, status = $1, "labeledBy" = $2
+                            WHERE "regionId" = $3
+                            AND "uploadedBy" != $2
+                            AND "status" = 'NotLabeled'
+                            RETURNING *
+                    ) SELECT COUNT(*) FROM Updated;
+                `, [status, user.username, regionId]
+            ).then((result) => {
+                resolve(+result.count > 0);
+            }, reject);
+        });
+    }
 };
 
 export default TextRegionDao;

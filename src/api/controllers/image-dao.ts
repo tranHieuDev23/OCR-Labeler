@@ -132,7 +132,7 @@ class ImageDao {
         });
     }
 
-    public updateImageStatus(imageId: string, user: User, status: ImageStatus): Promise<boolean> {
+    public setImageStatus(imageId: string, user: User, status: ImageStatus): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
             databaseConnection.one(
                 `
@@ -141,7 +141,7 @@ class ImageDao {
                             SET status=$1
                             WHERE "Images"."imageId" = $2
                             AND "Images"."uploadedBy" = $3
-                        RETURNING *
+                        RETURNING * 
                     ) SELECT COUNT(*) FROM Updated
                 `, [status, imageId, user.username]
             ).then((result) => {

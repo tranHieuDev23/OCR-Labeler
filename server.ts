@@ -21,6 +21,7 @@ import { THUMBNAIL_DIRECTORY, UPLOADED_IMAGE_DIRECTORY } from 'src/environments/
 import UserDao from 'src/api/controllers/user-dao';
 import User from 'src/app/models/user';
 import imageRouter from 'src/api/routes/image';
+import labelRouter from 'src/api/routes/label';
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
@@ -44,6 +45,7 @@ export function app(): express.Express {
   server.use('/api', authRouter);
   server.use('/api', uploadRouter);
   server.use('/api', imageRouter);
+  server.use('/api', labelRouter);
 
   // Server uploaded images from /uploaded
   server.get(`*.*`, express.static(uploadedFolder, {

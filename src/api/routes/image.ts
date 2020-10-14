@@ -109,7 +109,7 @@ imageRouter.post('/publish-image', (request, response) => {
             return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
         const imageId: string = request.body.imageId;
-        imageDao.updateImageStatus(imageId, user, ImageStatus.Published).then((success) => {
+        imageDao.setImageStatus(imageId, user, ImageStatus.Published).then((success) => {
             return response.status(success ? StatusCodes.OK : StatusCodes.UNAUTHORIZED).json({});
         }, (reason) => {
             console.log(`[/add-region] Problem when updating image's status: ${reason}`);
