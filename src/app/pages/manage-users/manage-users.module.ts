@@ -6,9 +6,9 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzListModule } from 'ng-zorro-antd/list';
 import { NzNotificationModule } from 'ng-zorro-antd/notification';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzGridModule } from 'ng-zorro-antd/grid';
-import { NzModalModule } from 'ng-zorro-antd/modal';
+import { ManageUserModalModule } from 'src/app/components/manage-user-modal/manage-user-modal.module';
+import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 
 @NgModule({
   declarations: [ManageUsersComponent],
@@ -19,9 +19,9 @@ import { NzModalModule } from 'ng-zorro-antd/modal';
     NzNotificationModule,
     NzListModule,
     NzSelectModule,
-    NzStatisticModule,
     NzGridModule,
-    NzModalModule
+    NzStatisticModule,
+    ManageUserModalModule
   ], exports: [
     ManageUsersComponent
   ]

@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
+import { ManageUserModalComponent, ManageUserModalConfig } from 'src/app/components/manage-user-modal/manage-user-modal.component';
 import User from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 
@@ -10,16 +11,25 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./manage-users.component.scss']
 })
 export class ManageUsersComponent implements OnInit {
+  @ViewChild('createUserModal', { static: false }) createModal: ManageUserModalComponent;
+  @ViewChild('updateUserModal', { static: false }) updateModal: ManageUserModalComponent;
+
   public users: User[] = null;
-  public createdUser: User = null;
-  public edittedUserId: number = null;
-  public edittedUser: User = null;
+  public createModalConfig: ManageUserModalConfig;
+  public updateModalConfig: ManageUserModalConfig;
+
+  private updatedUserId: number = null;
 
   constructor(
     private auth: AuthService,
     private notification: NzNotificationService,
     private router: Router
-  ) { }
+  ) {
+    this.createModalConfig = new ManageUserModalConfig();
+    this.updateModalConfig = new ManageUserModalConfig();
+    this.updateModalConfig.username = false;
+    this.updateModalConfig.password = false;
+  }
 
   ngOnInit(): void {
     this.auth.getAllUser().then((users) => {
@@ -60,36 +70,29 @@ export class ManageUsersComponent implements OnInit {
   }
 
   openCreateUserModal(): void {
-    this.createdUser = new User('', '', '', true, true, true, false);
+    this.createModal.openModal(new User('', '', '', true, true, true, false));
   }
 
-  cancelCreateUserModal(): void {
-    this.createdUser = null;
-  }
-
-  createUser(): void {
-    this.auth.addUser(this.createdUser).then(() => {
-      this.users.push(this.createdUser);
-      this.cancelCreateUserModal();
+  createUser(user: User): void {
+    this.auth.addUser(user).then(() => {
+      this.users.push(user);
+      this.notification.success(`Successfully created user ${user.displayName}`, '');
+      this.createModal.closeModal();
     }, (reason) => {
       this.notification.error('Failed to create new user', `Reason: ${reason}`);
     });
   }
 
   openEditUserModal(id: number): void {
-    this.edittedUser = this.users[id];
-    this.edittedUserId = id;
+    this.updatedUserId = id;
+    this.updateModal.openModal(this.users[id]);
   }
 
-  cancelEditUserModal(): void {
-    this.edittedUser = null;
-    this.edittedUserId = null;
-  }
-
-  editUser(): void {
-    this.auth.updateUser(this.edittedUser).then(() => {
-      this.users[this.edittedUserId] = this.edittedUser;
-      this.cancelEditUserModal();
+  updateUser(user: User): void {
+    this.auth.updateUser(user).then(() => {
+      this.users[this.updatedUserId] = user;
+      this.notification.success(`Successfully updated user ${user.displayName}`, '');
+      this.updateModal.closeModal();
     }, (reason) => {
       this.notification.error('Failed to update user', `Reason: ${reason}`);
     });

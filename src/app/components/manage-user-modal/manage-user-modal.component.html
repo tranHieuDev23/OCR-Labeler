@@ -1,0 +1,76 @@
+<nz-modal *ngIf="baseUser" [(nzVisible)]="baseUser" [nzTitle]="title" (nzOnCancel)="onCancel()" (nzOnOk)="onSubmit()">
+    <form>
+
+        <nz-form-item *ngIf="config.username" nz-row>
+            <nz-form-label nz-col [nzSpan]="24" [nzMd]="7" nzFor="username" nzRequired>Username</nz-form-label>
+            <nz-form-control nz-col [nzSpan]="24" [nzMd]="17">
+                <input nz-input id="username" name="username" [(ngModel)]="baseUser.username" />
+            </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item *ngIf="config.password" nz-row>
+            <nz-form-label nz-col [nzSpan]="24" [nzMd]="7" nzFor="password" nzRequired>Password</nz-form-label>
+            <nz-form-control nz-col [nzSpan]="24" [nzMd]="17" nzErrorTip="Please input your password!">
+                <input nz-input type="password" id="password" name="password" [(ngModel)]="baseUser.password" />
+            </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item *ngIf="config.password" nz-row>
+            <nz-form-label nz-col [nzSpan]="24" [nzMd]="7" nzFor="checkPassword" nzRequired>Confirm Password
+            </nz-form-label>
+            <nz-form-control nz-col [nzSpan]="24" [nzMd]="17" [nzErrorTip]="errorTpl">
+                <input nz-input type="password" id="checkPassword" name="checkPassword" />
+                <ng-template #errorTpl let-control>
+                    <ng-container *ngIf="false">
+                        Please confirm your password!
+                    </ng-container>
+                    <ng-container *ngIf="false">
+                        Two passwords that you enter are not equal!
+                    </ng-container>
+                </ng-template>
+            </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item *ngIf="config.displayName" nz-row>
+            <nz-form-label nz-col [nzSpan]="24" [nzMd]="7" nzFor="displayName" nzRequired>
+                Display name
+            </nz-form-label>
+            <nz-form-control nz-col [nzSpan]="24" [nzMd]="17" nzErrorTip="Please input your display name!">
+                <input nz-input id="displayName" name="displayName" [(ngModel)]="baseUser.displayName" />
+            </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item *ngIf="config.canUpload">
+            <nz-form-control>
+                <label nz-checkbox name="canUpload" [(ngModel)]="baseUser.canUpload">
+                    Can uploade images
+                </label>
+            </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item *ngIf="config.canLabel">
+            <nz-form-control>
+                <label nz-checkbox name="canLabel" [(ngModel)]="baseUser.canLabel">
+                    Can label text regions
+                </label>
+            </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item *ngIf="config.canVerify">
+            <nz-form-control>
+                <label nz-checkbox name="canVerify" [(ngModel)]="baseUser.canVerify">
+                    Can verify text regions
+                </label>
+            </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item *ngIf="config.canManageUsers">
+            <nz-form-control>
+                <label nz-checkbox name="canManageUsers" [(ngModel)]="baseUser.canManageUsers">
+                    Can manage users
+                </label>
+            </nz-form-control>
+        </nz-form-item>
+
+    </form>
+</nz-modal>

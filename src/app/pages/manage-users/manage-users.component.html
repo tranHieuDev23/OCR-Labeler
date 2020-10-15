@@ -28,13 +28,13 @@
         </ul>
         <nz-list-item-extra>
             <nz-row [nzGutter]="8">
-                <nz-col [nzSpan]="24" [nzMd]="8">
+                <nz-col [nzSpan]="8">
                     <nz-statistic [nzValue]="1949" nzTitle="Regions uploaded"></nz-statistic>
                 </nz-col>
-                <nz-col [nzSpan]="24" [nzMd]="8">
+                <nz-col [nzSpan]="8">
                     <nz-statistic [nzValue]="2313" nzTitle="Regions labeled"></nz-statistic>
                 </nz-col>
-                <nz-col [nzSpan]="24" [nzMd]="8">
+                <nz-col [nzSpan]="8">
                     <nz-statistic [nzValue]="243" nzTitle="Regions verified"></nz-statistic>
                 </nz-col>
             </nz-row>
@@ -45,11 +45,7 @@
     </nz-list-footer>
 </ul>
 
-<nz-modal [(nzVisible)]="createdUser" nzTitle="Create a new user" (nzOnCancel)="cancelCreateUserModal()"
-    (nzOnOk)="createUser()">
-    Something something
-</nz-modal>
-
-<nz-modal [(nzVisible)]="edittedUserId" nzTitle="Edit user" (nzOnCancel)="cancelEditUserModal()" (nzOnOk)="editUser()">
-    Something something
-</nz-modal>
+<app-manage-user-modal #createUserModal title="Create new user" [config]="createModalConfig"
+    (submit)="createUser($event)"></app-manage-user-modal>
+<app-manage-user-modal #updateUserModal title="Edit user" [config]="updateModalConfig" (submit)="updateUser($event)">
+</app-manage-user-modal>
