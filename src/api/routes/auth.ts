@@ -84,10 +84,7 @@ authRouter.post('/login', (request, response) => {
     const password: string = request.body.password;
     userDao.validateUser(username, password).then((user: User) => {
         jwtDao.generateJwt(username).then((jwt) => {
-            response.cookie(AUTH_COOKIE_NAME, jwt, getCookieOption()).json({
-                username: user.username,
-                displayName: user.displayName
-            });
+            response.cookie(AUTH_COOKIE_NAME, jwt, getCookieOption()).json(user);
         }, (reason) => {
             console.log(`[/login] Authentication failed: ${reason}`);
             return response.status(StatusCodes.BAD_REQUEST).json({});
@@ -102,13 +99,11 @@ authRouter.post('/logout', (request, response) => {
     const jwt = request.cookies[AUTH_COOKIE_NAME];
     if (!jwt) {
         return response.status(StatusCodes.FORBIDDEN).json({});
-        return;
     }
     jwtDao.isValidJwt(jwt).then((isValid) => {
         if (!isValid) {
             console.log(`[/logout] Authentication failed: invalid JWT`);
             return response.status(StatusCodes.FORBIDDEN).json({});
-            return;
         }
         jwtDao.blacklistJwt(jwt);
         response.clearCookie(AUTH_COOKIE_NAME).send();
@@ -122,15 +117,11 @@ authRouter.post('/validate', (request, response) => {
     const jwt = request.cookies[AUTH_COOKIE_NAME];
     if (!jwt) {
         return response.status(StatusCodes.FORBIDDEN).json({});
-        return;
     }
     jwtDao.getUsernameFrowJwt(jwt).then((username) => {
         userDao.findUser(username).then((user) => {
             jwtDao.generateJwt(username).then((token) => {
-                response.cookie(AUTH_COOKIE_NAME, token, getCookieOption()).json({
-                    username: user.username,
-                    displayName: user.displayName
-                });
+                response.cookie(AUTH_COOKIE_NAME, token, getCookieOption()).json(user);
             }, (reason) => {
                 console.log(`[/validate] Authentication failed: ${reason}`);
                 return response.status(StatusCodes.FORBIDDEN).json({});

@@ -1,1 +1,55 @@
-<p>manage-users works!</p>
+<div>
+    <h1 nz-typography>Manage users</h1>
+</div>
+
+<ul nz-list [nzDataSource]="users" [nzLoading]="!users" nzBordered nzItemLayout="vertical">
+    <nz-list-header>
+        Sort by: <nz-select>
+            <nz-option nzLabel="Username"></nz-option>
+            <nz-option nzLabel="Display name"></nz-option>
+            <nz-option nzLabel="Regions uploaded"></nz-option>
+            <nz-option nzLabel="Regions labeled"></nz-option>
+            <nz-option nzLabel="Regions verified"></nz-option>
+        </nz-select>
+    </nz-list-header>
+    <li nz-list-item *ngFor="let item of users; index as i">
+        <nz-list-item-meta>
+            <nz-list-item-meta-title>
+                {{ item.displayName }} <i>({{ item.username }})</i>
+            </nz-list-item-meta-title>
+            <nz-list-item-meta-description>
+                Authorized to: {{ getUserPermissionString(item) }}
+            </nz-list-item-meta-description>
+        </nz-list-item-meta>
+        <ul nz-list-item-actions>
+            <nz-list-item-action>
+                <a (click)="openEditUserModal(i)">Edit</a>
+            </nz-list-item-action>
+        </ul>
+        <nz-list-item-extra>
+            <nz-row [nzGutter]="8">
+                <nz-col [nzSpan]="24" [nzMd]="8">
+                    <nz-statistic [nzValue]="1949" nzTitle="Regions uploaded"></nz-statistic>
+                </nz-col>
+                <nz-col [nzSpan]="24" [nzMd]="8">
+                    <nz-statistic [nzValue]="2313" nzTitle="Regions labeled"></nz-statistic>
+                </nz-col>
+                <nz-col [nzSpan]="24" [nzMd]="8">
+                    <nz-statistic [nzValue]="243" nzTitle="Regions verified"></nz-statistic>
+                </nz-col>
+            </nz-row>
+        </nz-list-item-extra>
+    </li>
+    <nz-list-footer>
+        <a (click)="openCreateUserModal()">Create a new user</a>
+    </nz-list-footer>
+</ul>
+
+<nz-modal [(nzVisible)]="createdUser" nzTitle="Create a new user" (nzOnCancel)="cancelCreateUserModal()"
+    (nzOnOk)="createUser()">
+    Something something
+</nz-modal>
+
+<nz-modal [(nzVisible)]="edittedUserId" nzTitle="Edit user" (nzOnCancel)="cancelEditUserModal()" (nzOnOk)="editUser()">
+    Something something
+</nz-modal>

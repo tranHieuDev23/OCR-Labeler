@@ -86,7 +86,7 @@ export class AuthService {
         }
         this.http.post<any[]>('/api/get-users', {}).toPromise().then((response) => {
           const users: User[] = [];
-          for (let item in users) {
+          for (let item of response) {
             users.push(User.parseFromJson(item));
           }
           resolve(users);
