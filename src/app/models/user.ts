@@ -45,4 +45,28 @@ class User {
   }
 }
 
+class UserManagementInfo {
+  constructor(
+    public readonly user: User,
+    public readonly uploadCount: number,
+    public readonly labelCount: number,
+    public readonly verifyCount: number
+  ) { }
+
+  static parseFromJson(obj: any): UserManagementInfo {
+    const user: User = obj.user ? User.parseFromJson(obj.user) : null;
+    const uploadCount: number = obj.uploadCount;
+    const labelCount: number = obj.labelCount;
+    const verifyCount: number = obj.verifyCount;
+    return new UserManagementInfo(
+      user,
+      uploadCount,
+      labelCount,
+      verifyCount
+    );
+  }
+};
+
 export default User;
+
+export { UserManagementInfo };

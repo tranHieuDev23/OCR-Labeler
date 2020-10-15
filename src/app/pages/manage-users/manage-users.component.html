@@ -15,10 +15,10 @@
     <li nz-list-item *ngFor="let item of users; index as i">
         <nz-list-item-meta>
             <nz-list-item-meta-title>
-                {{ item.displayName }} <i>({{ item.username }})</i>
+                {{ item.user.displayName }} <i>({{ item.user.username }})</i>
             </nz-list-item-meta-title>
             <nz-list-item-meta-description>
-                Authorized to: {{ getUserPermissionString(item) }}
+                Authorized to: {{ getUserPermissionString(item.user) }}
             </nz-list-item-meta-description>
         </nz-list-item-meta>
         <ul nz-list-item-actions>
@@ -29,13 +29,13 @@
         <nz-list-item-extra>
             <nz-row [nzGutter]="8">
                 <nz-col [nzSpan]="8">
-                    <nz-statistic [nzValue]="1949" nzTitle="Regions uploaded"></nz-statistic>
+                    <nz-statistic [nzValue]="item.uploadCount" nzTitle="Regions uploaded"></nz-statistic>
                 </nz-col>
                 <nz-col [nzSpan]="8">
-                    <nz-statistic [nzValue]="2313" nzTitle="Regions labeled"></nz-statistic>
+                    <nz-statistic [nzValue]="item.labelCount" nzTitle="Regions labeled"></nz-statistic>
                 </nz-col>
                 <nz-col [nzSpan]="8">
-                    <nz-statistic [nzValue]="243" nzTitle="Regions verified"></nz-statistic>
+                    <nz-statistic [nzValue]="item.verifyCount" nzTitle="Regions verified"></nz-statistic>
                 </nz-col>
             </nz-row>
         </nz-list-item-extra>

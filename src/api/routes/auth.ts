@@ -27,7 +27,7 @@ authRouter.post('/get-users', (request, response) => {
             console.log(`[/get-users] User ${user.username} is not authorized to manage users`);
             return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
-        userDao.getAllUser().then((allUsers) => {
+        userDao.getAllUserForManagement().then((allUsers) => {
             return response.json(allUsers);
         }, (reason) => {
             console.log(`[/get-users] Error happened while reading from database: ${reason}`);

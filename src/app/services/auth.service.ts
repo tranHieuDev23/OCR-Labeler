@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { EventEmitter, Injectable } from '@angular/core';
-import User from '../models/user';
+import User, { UserManagementInfo } from '../models/user';
 
 @Injectable({
   providedIn: 'root'
@@ -78,16 +78,16 @@ export class AuthService {
     });
   }
 
-  public getAllUser(): Promise<User[]> {
-    return new Promise<User[]>((resolve, reject) => {
+  public getAllUser(): Promise<UserManagementInfo[]> {
+    return new Promise<UserManagementInfo[]>((resolve, reject) => {
       this.getCurrentUser().then((user) => {
         if (!user.canManageUsers) {
           return reject('User is not authorized to manage users');
         }
         this.http.post<any[]>('/api/get-users', {}).toPromise().then((response) => {
-          const users: User[] = [];
+          const users: UserManagementInfo[] = [];
           for (let item of response) {
-            users.push(User.parseFromJson(item));
+            users.push(UserManagementInfo.parseFromJson(item));
           }
           resolve(users);
         }, reject);

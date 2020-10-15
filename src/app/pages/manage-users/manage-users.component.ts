@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { ManageUserModalComponent, ManageUserModalConfig } from 'src/app/components/manage-user-modal/manage-user-modal.component';
-import User from 'src/app/models/user';
+import User, { UserManagementInfo } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
@@ -14,7 +14,7 @@ export class ManageUsersComponent implements OnInit {
   @ViewChild('createUserModal', { static: false }) createModal: ManageUserModalComponent;
   @ViewChild('updateUserModal', { static: false }) updateModal: ManageUserModalComponent;
 
-  public users: User[] = null;
+  public users: UserManagementInfo[] = null;
   public createModalConfig: ManageUserModalConfig;
   public updateModalConfig: ManageUserModalConfig;
 
@@ -75,7 +75,7 @@ export class ManageUsersComponent implements OnInit {
 
   createUser(user: User): void {
     this.auth.addUser(user).then(() => {
-      this.users.push(user);
+      this.users.push(new UserManagementInfo(user, 0, 0, 0));
       this.notification.success(`Successfully created user ${user.displayName}`, '');
       this.createModal.closeModal();
     }, (reason) => {
@@ -85,12 +85,17 @@ export class ManageUsersComponent implements OnInit {
 
   openEditUserModal(id: number): void {
     this.updatedUserId = id;
-    this.updateModal.openModal(this.users[id]);
+    this.updateModal.openModal(this.users[id].user);
   }
 
   updateUser(user: User): void {
     this.auth.updateUser(user).then(() => {
-      this.users[this.updatedUserId] = user;
+      this.users[this.updatedUserId] = new UserManagementInfo(
+        user,
+        this.users[this.updatedUserId].uploadCount,
+        this.users[this.updatedUserId].labelCount,
+        this.users[this.updatedUserId].verifyCount,
+      );
       this.notification.success(`Successfully updated user ${user.displayName}`, '');
       this.updateModal.closeModal();
     }, (reason) => {

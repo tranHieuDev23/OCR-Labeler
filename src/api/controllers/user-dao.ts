@@ -1,4 +1,4 @@
-import User from 'src/app/models/user';
+import User, { UserManagementInfo } from 'src/app/models/user';
 import databaseConnection from "./database";
 import { encrypt, validate } from './encryption';
 
@@ -19,13 +19,40 @@ class UserDao {
         });
     }
 
-    public getAllUser(): Promise<User[]> {
-        return new Promise<User[]>((resolve, reject) => {
-            databaseConnection.any('SELECT * FROM public."Users";').then((result) => {
-                const users: User[] = [];
+    public getAllUserForManagement(): Promise<UserManagementInfo[]> {
+        return new Promise<UserManagementInfo[]>((resolve, reject) => {
+            databaseConnection.any(`
+                WITH UploadCount AS (
+                    SELECT "TextRegions"."uploadedBy" AS username, COUNT(*)
+                        FROM public."TextRegions"
+                        GROUP BY "TextRegions"."uploadedBy"
+                ), LabelCount AS (
+                    SELECT "TextRegions"."labeledBy" AS username, COUNT(*)
+                        FROM public."TextRegions"
+                        GROUP BY "TextRegions"."labeledBy"
+                ), VerifyCount AS (
+                    SELECT "TextRegions"."verifiedBy" As username, COUNT(*)
+                        FROM public."TextRegions"
+                        GROUP BY "TextRegions"."verifiedBy"
+                ) SELECT 
+                    "Users".*, 
+                    COALESCE(UploadCount.count, 0) AS "uploadCount",
+                    COALESCE(LabelCount.count, 0) AS "labelCount",
+                    COALESCE(VerifyCount.count, 0) AS "verifyCount"
+                    FROM public."Users"
+                    LEFT JOIN UploadCount ON "Users".username = UploadCount.username
+                    LEFT JOIN LabelCount ON "Users".username = LabelCount.username
+                    LEFT JOIN VerifyCount ON "Users".username = VerifyCount.username;
+            `).then((result) => {
+                const users: UserManagementInfo[] = [];
                 for (let item of result) {
                     delete item.password;
-                    users.push(User.parseFromJson(item));
+                    users.push(new UserManagementInfo(
+                        User.parseFromJson(item),
+                        +item.uploadCount,
+                        +item.labelCount,
+                        +item.verifyCount
+                    ));
                 }
                 resolve(users);
             }, (reason) => {
