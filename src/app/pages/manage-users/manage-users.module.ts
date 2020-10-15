@@ -9,6 +9,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { ManageUserModalModule } from 'src/app/components/manage-user-modal/manage-user-modal.module';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [ManageUsersComponent],
@@ -21,7 +22,8 @@ import { NzStatisticModule } from 'ng-zorro-antd/statistic';
     NzSelectModule,
     NzGridModule,
     NzStatisticModule,
-    ManageUserModalModule
+    ManageUserModalModule,
+    FormsModule
   ], exports: [
     ManageUsersComponent
   ]
