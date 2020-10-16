@@ -1,6 +1,7 @@
 enum ImageStatus {
   Uploaded = 'Uploaded',
   Processed = 'Processed',
+  NotProcessed = 'NotProcessed',
   Published = 'Published'
 }
 

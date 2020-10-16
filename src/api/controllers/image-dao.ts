@@ -47,7 +47,7 @@ class ImageDao {
                         item.thumbnailUrl,
                         [],
                         user,
-                        new Date(item.uploadedDate),
+                        new Date(+item.uploadedDate),
                         item.status as ImageStatus
                     ));
                 }

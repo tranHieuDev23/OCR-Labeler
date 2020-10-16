@@ -1,6 +1,28 @@
-<div *ngIf="images.length > 0" nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
-    <img style="margin-top: 16px; object-fit: contain;" *ngFor="let item of images; index as i" nz-col nzSpan="24"
-        nzMd="12" nzLg="8" nzXl="6" [src]="item" (click)="onClick(i)" />
+<div *ngIf="images.length > 0" nz-row [nzGutter]="{ xs: 8, md: 16, xl: 24, xxl: 32 }">
+    <div nz-col [nzSpan]="24" [nzMd]="12" [nzLg]="8" [nzXl]="6" *ngFor="let item of images; index as i">
+        <nz-card nzSize="small" nzHoverable
+            style="margin-left: auto; margin-right: auto; margin-bottom: 16px; width: 240px;" [nzCover]="coverTemplate"
+            (click)="onClick(i)">
+            <span *ngIf="item.status == 'Uploaded'">
+                <nz-tag nzColor="orange">Uploaded</nz-tag>
+            </span>
+            <span *ngIf="item.status == 'Processed'">
+                <nz-tag nzColor="blue">Processed with CRAFT</nz-tag>
+            </span>
+            <span *ngIf="item.status == 'NotProcessed'">
+                <nz-tag nzColor="red">Not processed with CRAFT</nz-tag>
+            </span>
+            <span *ngIf="item.status == 'Published'">
+                <nz-tag nzColor="green">Labeled</nz-tag>
+            </span>
+            <p nz-typography>
+                Uploaded on {{ dateTimeString(item.uploadedDate) }}
+            </p>
+        </nz-card>
+        <ng-template #coverTemplate>
+            <img style="width: 240px; height: 135px; object-fit: cover;" [src]="item.thumbnailUrl" />
+        </ng-template>
+    </div>
 </div>
 <nz-empty *ngIf="images.length == 0" [nzNotFoundContent]="emptyContent">
     <ng-template #emptyContent>

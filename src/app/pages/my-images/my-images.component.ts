@@ -15,7 +15,6 @@ export class MyImagesComponent implements OnInit {
   public imagesPerPage: number = IMAGES_PER_PAGE;
   public imagesCount: number = null;
   public uploadedImages: UploadedImage[] = [];
-  public images: string[] = [];
   public selectedId: number = 0;
   public selectedRegion: UploadedImage = null;
   public isVisible: boolean = false;
@@ -35,11 +34,9 @@ export class MyImagesComponent implements OnInit {
 
   loadPage(pageId: number): void {
     this.currentPage = pageId;
-    this.images = [];
     this.backend.loadUserImages(IMAGES_PER_PAGE * (pageId - 1), IMAGES_PER_PAGE).then((result) => {
       this.imagesCount = result.imagesCount;
       this.uploadedImages = result.images;
-      this.images = this.uploadedImages.map((value) => value.thumbnailUrl);
     }, (reason) => {
 
     });

@@ -17,8 +17,8 @@ import * as multer from 'multer';
 const uploadRouter: Router = Router();
 const FULL_HD_WIDTH = 1920;
 const FULL_HD_HEIGHT = 1080;
-const THUMBNAIL_WIDTH = 160;
-const THUMBNAIL_HEIGHT = 90;
+const THUMBNAIL_WIDTH = 320;
+const THUMBNAIL_HEIGHT = 180;
 
 const jwtDao: BlacklistedJwtDao = BlacklistedJwtDao.getInstance();
 const imageDao: ImageDao = ImageDao.getInstance();
@@ -104,9 +104,16 @@ uploadRouter.post('/upload', multerMiddleware, async (request, response) => {
                 );
                 imageDao.addImage(newImage).then(() => {
                     processPostUpload(imageId, user, fullImage).then(() => {
-                        console.log(`[/upload] Processed ${imageId} with CRAFT`);
+                        imageDao.setImageStatus(imageId, user, ImageStatus.Processed).then(() => {
+                            console.log(`[/upload] Processed ${imageId} with CRAFT`);
+                        }, (reason) => {
+                            console.log(`[/upload] Processed ${imageId} with CRAFT, but failed to update image status: ${reason}`);
+                        });
                     }, (reason) => {
                         console.log(`[/upload] Problem processing ${imageId} with CRAFT: ${reason}`);
+                        imageDao.setImageStatus(imageId, user, ImageStatus.NotProcessed).then(() => { }, (reason) => {
+                            console.log(`[/upload] Failed to update image status for ${imageId}: ${reason}`);
+                        });
                     });
                     return response.json(newImage);
                 }, (reason) => {
