@@ -97,7 +97,7 @@ authRouter.post('/update-user', (request, response) => {
             return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
         const updatedUser = User.parseFromJson(request.body);
-        const validation = validateRegisteredUser(updatedUser);
+        const validation = validateUpdatedUser(updatedUser);
         if (validation) {
             console.log(`[/update-user] Invalid user information: ${validation}`);
             return response.status(StatusCodes.BAD_REQUEST).json({});

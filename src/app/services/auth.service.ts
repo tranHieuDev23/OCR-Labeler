@@ -7,16 +7,16 @@ import User, { UserManagementInfo } from '../models/user';
 })
 export class AuthService {
   private currentUser: User = null;
-  public readonly loggedIn: EventEmitter<boolean> = new EventEmitter<boolean>()
+  public readonly loggedIn: EventEmitter<User> = new EventEmitter<User>()
 
   constructor(
     private http: HttpClient
   ) {
     this.getCurrentUser().then((user) => {
       this.currentUser = user;
-      this.loggedIn.emit(user != null);
+      this.loggedIn.emit(user);
     }, () => {
-      this.loggedIn.emit(false);
+      this.loggedIn.emit(null);
     });
   }
 
@@ -39,7 +39,7 @@ export class AuthService {
           username, password
         }).toPromise().then((response) => {
           this.currentUser = User.parseFromJson(response);
-          this.loggedIn.emit(true);
+          this.loggedIn.emit(this.currentUser);
           resolve(this.currentUser);
         }, reject);
       }, reject);
@@ -55,7 +55,7 @@ export class AuthService {
         }
         this.http.post('/api/logout', {}).toPromise().then(() => {
           this.currentUser = null;
-          this.loggedIn.emit(false);
+          this.loggedIn.emit(null);
           resolve();
         }, reject);
       }, reject);
@@ -70,7 +70,7 @@ export class AuthService {
       }
       this.http.post('/api/validate', {}).toPromise().then((response) => {
         this.currentUser = User.parseFromJson(response);
-        this.loggedIn.emit(true);
+        this.loggedIn.emit(this.currentUser);
         resolve(this.currentUser);
       }, () => {
         resolve(null);

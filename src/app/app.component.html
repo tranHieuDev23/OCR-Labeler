@@ -5,25 +5,25 @@
         <img src="assets/image/logo_hust.jpg" width="32" height="auto" alt="logo">
         <h1>OCR-Labeler</h1>
       </a>
-      <li *ngIf="isLoggedIn" nz-submenu nzTitle="Label" nzIcon="edit">
+      <li *ngIf="loggedInUser" nz-submenu nzTitle="Label" nzIcon="edit">
         <ul>
-          <li nz-menu-item>
+          <li *ngIf="loggedInUser.canUpload" nz-menu-item>
             <a routerLink="/upload">Upload image</a>
           </li>
-          <li nz-menu-item>
+          <li *ngIf="loggedInUser.canUpload" nz-menu-item>
             <a routerLink="/my-images">My images</a>
           </li>
-          <li nz-menu-item>
+          <li *ngIf="loggedInUser.canLabel" nz-menu-item>
             <a routerLink="/label">Label texts</a>
           </li>
-          <li nz-menu-item>
+          <li *ngIf="loggedInUser.canVerify" nz-menu-item>
             <a routerLink="/verify">Verify results</a>
           </li>
         </ul>
       </li>
-      <li *ngIf="isLoggedIn" nz-submenu nzTitle="Account" nzIcon="user">
+      <li *ngIf="loggedInUser" nz-submenu nzTitle="Account" nzIcon="user">
         <ul>
-          <li nz-menu-item>
+          <li *ngIf="loggedInUser.canManageUsers" nz-menu-item>
             <a routerLink="/manage-users">Manage users</a>
           </li>
           <li nz-menu-item (click)="logOut()">

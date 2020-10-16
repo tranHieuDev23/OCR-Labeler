@@ -7,12 +7,13 @@ import { NzIconModule, NZ_ICONS } from 'ng-zorro-antd/icon';
 import { WelcomeComponent } from './welcome.component';
 import { IconDefinition } from '@ant-design/icons-angular';
 import { EditOutline, UploadOutline, SearchOutline } from '@ant-design/icons-angular/icons';
+import { CommonModule } from '@angular/common';
 
 const icons: IconDefinition[] = [EditOutline, UploadOutline, SearchOutline];
 
 
 @NgModule({
-  imports: [WelcomeRoutingModule, NzTypographyModule, NzButtonModule, NzIconModule],
+  imports: [CommonModule, WelcomeRoutingModule, NzTypographyModule, NzButtonModule, NzIconModule],
   declarations: [WelcomeComponent],
   exports: [WelcomeComponent],
   providers: [

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import User from './models/user';
 import { AuthService } from './services/auth.service';
 
 @Component({
@@ -8,16 +9,16 @@ import { AuthService } from './services/auth.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  public isLoggedIn: boolean = false;
+  public loggedInUser: User = null;
 
   constructor(
     private auth: AuthService,
     private router: Router
   ) {
-    this.auth.isUserLoggedIn().then((result) => {
-      this.isLoggedIn = result;
-      this.auth.loggedIn.subscribe((isLoggedIn: boolean) => {
-        this.isLoggedIn = isLoggedIn;
+    this.auth.getCurrentUser().then((result) => {
+      this.loggedInUser = result;
+      this.auth.loggedIn.subscribe((loggedInUser: User) => {
+        this.loggedInUser = loggedInUser;
       });
     });
   }
