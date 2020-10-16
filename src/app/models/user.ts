@@ -17,7 +17,7 @@ class User {
     const canLabel: boolean = obj.canLabel;
     const canVerify: boolean = obj.canVerify;
     const canManageUsers: boolean = obj.canManageUsers;
-    return new User(displayName, username, password, canUpload, canLabel, canVerify, canManageUsers);
+    return new User(displayName.trim(), username, password, canUpload, canLabel, canVerify, canManageUsers);
   }
 
   static newBaseUser(displayname: string, username: string): User {

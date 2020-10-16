@@ -1,6 +1,7 @@
 import { CookieOptions, Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import User from 'src/app/models/user';
+import { validateDisplayName, validatePassword, validateUsername } from 'src/app/models/user-validate-funcs';
 import { AUTH_COOKIE_NAME } from 'src/environments/constants';
 import BlacklistedJwtDao from '../controllers/jwt-dao';
 import UserDao from '../controllers/user-dao';
@@ -39,6 +40,30 @@ authRouter.post('/get-users', (request, response) => {
     });
 });
 
+function validateUpdatedUser(user: User): { [k: string]: boolean } | null {
+    const usernameValidation = validateUsername(user.username);
+    if (usernameValidation) {
+        return usernameValidation;
+    }
+    const displayNameValidation = validateDisplayName(user.displayName);
+    if (displayNameValidation) {
+        return displayNameValidation;
+    }
+    return null;
+}
+
+function validateRegisteredUser(user: User): { [k: string]: boolean } | null {
+    const updateValidation = validateUpdatedUser(user);
+    if (updateValidation) {
+        return updateValidation;
+    }
+    const passwordValidation = validatePassword(user.password);
+    if (passwordValidation) {
+        return passwordValidation;
+    }
+    return null;
+}
+
 authRouter.post('/register', (request, response) => {
     const token: string = request.cookies[AUTH_COOKIE_NAME];
     jwtDao.getUserFromJwt(token).then((user) => {
@@ -47,6 +72,11 @@ authRouter.post('/register', (request, response) => {
             return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
         const newUser = User.parseFromJson(request.body);
+        const validation = validateRegisteredUser(newUser);
+        if (validation) {
+            console.log(`[/register] Invalid user information: ${validation}`);
+            return response.status(StatusCodes.BAD_REQUEST).json({});
+        }
         userDao.addUser(newUser).then(() => {
             response.status(StatusCodes.OK).json({});
         }, (reason) => {
@@ -67,6 +97,11 @@ authRouter.post('/update-user', (request, response) => {
             return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
         const updatedUser = User.parseFromJson(request.body);
+        const validation = validateRegisteredUser(updatedUser);
+        if (validation) {
+            console.log(`[/update-user] Invalid user information: ${validation}`);
+            return response.status(StatusCodes.BAD_REQUEST).json({});
+        }
         userDao.updateUser(updatedUser).then(() => {
             response.status(StatusCodes.OK).json({});
         }, (reason) => {

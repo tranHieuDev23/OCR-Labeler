@@ -13,8 +13,6 @@ export class ManageUserModalConfig {
   public canManageUsers: boolean = true;
 }
 
-const USERNAME_REGEX = /^([a-z]|[A-Z]|[0-9])+$/;
-
 @Component({
   selector: 'app-manage-user-modal',
   templateUrl: './manage-user-modal.component.html',
@@ -111,8 +109,6 @@ export class ManageUserModalComponent implements OnInit {
     if (this.formGroup.invalid) {
       return;
     }
-    const displayName: string = this.formGroup.controls.displayName.value;
-    this.formGroup.controls.displayName.setValue(displayName.trim());
     this.submit.emit(User.parseFromJson(this.formGroup.value));
   }
 }
