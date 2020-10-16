@@ -61,15 +61,15 @@
         </div>
 
         <button class="button-tool" nz-button nzType="primary" style="margin-top: 8px;"
-            [disabled]="croppedRegions.length == 0" nz-popconfirm
+            [disabled]="croppedRegions.length == 0 || status == 'Published'" nz-popconfirm
             nzPopconfirmTitle="Publishing this image will allow other people to label and verify its text regions."
             nzOkText="OK" nzCancelText="Cancel" (nzOnConfirm)="publishImage()" [nzLoading]="isPublishing">
+            <i nz-icon nzType="check-circle"></i>
             <span *ngIf="status != 'Published'">
-                <i nz-icon nzType="check-circle"></i> Publish this image
+                Publish this image
             </span>
             <span *ngIf="status == 'Published'">
-                <i nz-icon nzType="close-circle"></i>
-                Unpublish this image
+                Published
             </span>
         </button>
         <button class="button-tool" nz-button nzType="primary" nzDanger style="margin-top: 8px;" nz-popconfirm
