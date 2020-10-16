@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { RegionSelectedEvent, RegionSelectorComponent } from 'src/app/components/region-selector/region-selector.component';
 import ImageStatus from 'src/app/models/image-status';
-import { TextRegion, Region, Coordinate } from 'src/app/models/text-region';
+import { TextRegion, Region } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
 
