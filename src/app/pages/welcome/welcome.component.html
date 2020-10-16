@@ -1,15 +1,17 @@
-<div>
-    <h1 nz-typography>Greeting, {{ loggedInUser.displayName }}</h1>
-    <p *ngIf="!noPrivilege" nz-typography>What would you like to do?</p>
-    <p *ngIf="noPrivilege" nz-typography>You are not allowed to do anything though...</p>
-</div>
-<div nz-row nzJustify="space-around">
-    <button *ngIf="loggedInUser.canUpload" routerLink="/upload" nz-col nzSpan="24" nzMd="12" nzLg="8" nz-button
-        nzSize="large" nzType="primary"><i nz-icon nzType="upload"></i>Upload an image</button>
-    <button *ngIf="loggedInUser.canLabel" routerLink="/label" nz-col nzSpan="24" nzMd="12" nzLg="8" nz-button
-        nzSize="large" nzType="primary"><i nz-icon nzType="edit"></i>Label text regions</button>
-    <button *ngIf="loggedInUser.canVerify" routerLink="/verify" nz-col nzSpan="24" nzMd="12" nzLg="8" nz-button
-        nzSize="large" nzType="primary"><i nz-icon nzType="search"></i>Verify label results</button>
-    <button *ngIf="loggedInUser.canVerify" routerLink="/manage-users" nz-col nzSpan="24" nzMd="12" nzLg="8" nz-button
-        nzSize="large" nzType="primary"><i nz-icon nzType="user"></i>Manage Users</button>
+<div *ngIf="loggedInUser">
+    <div>
+        <h1 nz-typography>Greeting, {{ loggedInUser.displayName }}</h1>
+        <p *ngIf="!noPrivilege" nz-typography>What would you like to do?</p>
+        <p *ngIf="noPrivilege" nz-typography>You are not allowed to do anything though...</p>
+    </div>
+    <div nz-row nzJustify="space-around">
+        <button *ngIf="loggedInUser.canUpload" routerLink="/upload" nz-col nzSpan="24" nzMd="12" nzLg="8" nz-button
+            nzSize="large" nzType="primary"><i nz-icon nzType="upload"></i>Upload an image</button>
+        <button *ngIf="loggedInUser.canLabel" routerLink="/label" nz-col nzSpan="24" nzMd="12" nzLg="8" nz-button
+            nzSize="large" nzType="primary"><i nz-icon nzType="edit"></i>Label text regions</button>
+        <button *ngIf="loggedInUser.canVerify" routerLink="/verify" nz-col nzSpan="24" nzMd="12" nzLg="8" nz-button
+            nzSize="large" nzType="primary"><i nz-icon nzType="search"></i>Verify label results</button>
+        <button *ngIf="loggedInUser.canVerify" routerLink="/manage-users" nz-col nzSpan="24" nzMd="12" nzLg="8"
+            nz-button nzSize="large" nzType="primary"><i nz-icon nzType="user"></i>Manage Users</button>
+    </div>
 </div>
