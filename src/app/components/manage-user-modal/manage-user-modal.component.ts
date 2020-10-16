@@ -1,5 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn } from '@angular/forms';
 import User from 'src/app/models/user';
+import { validateDisplayName, validatePassword, validateUsername } from 'src/app/models/user-validate-funcs';
 
 export class ManageUserModalConfig {
   public username: boolean = true;
@@ -11,6 +13,8 @@ export class ManageUserModalConfig {
   public canManageUsers: boolean = true;
 }
 
+const USERNAME_REGEX = /^([a-z]|[A-Z]|[0-9])+$/;
+
 @Component({
   selector: 'app-manage-user-modal',
   templateUrl: './manage-user-modal.component.html',
@@ -18,24 +22,84 @@ export class ManageUserModalConfig {
 })
 export class ManageUserModalComponent implements OnInit {
   @Input('title') title: string;
-  @Input('config') config: ManageUserModalConfig;
+  @Input('config') config: ManageUserModalConfig = new ManageUserModalConfig();
 
   @Output('cancel') cancel: EventEmitter<void> = new EventEmitter<void>();
   @Output('submit') submit: EventEmitter<User> = new EventEmitter<User>();
 
-  baseUser: User = null;
+  showModal: boolean = false;
+  formGroup: FormGroup;
 
-  constructor() { }
-
-  ngOnInit(): void {
+  constructor(
+    formBuilder: FormBuilder
+  ) {
+    this.formGroup = formBuilder.group({
+      username: ['', [this.usernameValidator()]],
+      password: ['', [this.passwordValidator()]],
+      checkPassword: ['', [this.checkPasswordValidator()]],
+      displayName: ['', [this.displayNameValidator()]],
+      canUpload: [true],
+      canLabel: [true],
+      canVerify: [true],
+      canManageUsers: [false],
+    });
   }
 
+  private usernameValidator(): ValidatorFn {
+    return (control: AbstractControl): { [k: string]: boolean } | null => {
+      if (!this.config.username) {
+        return null;
+      }
+      const username: string = control.value;
+      return validateUsername(username);
+    };
+  }
+
+  private passwordValidator(): ValidatorFn {
+    return (control: AbstractControl): { [k: string]: boolean } | null => {
+      if (!this.config.password) {
+        return null;
+      }
+      const password: string = control.value;
+      return validatePassword(password);
+    };
+  }
+
+  private checkPasswordValidator(): ValidatorFn {
+    return (control: AbstractControl): { [k: string]: boolean } | null => {
+      if (!this.config.password) {
+        return null;
+      }
+      if (!control.value) {
+        return { error: true, required: true };
+      }
+      if (control.value != this.formGroup.controls.password.value) {
+        return { error: true, checkPassword: true };
+      }
+      return null;
+    };
+  }
+
+
+  private displayNameValidator(): ValidatorFn {
+    return (control: AbstractControl): { [k: string]: boolean } | null => {
+      if (!this.config.displayName) {
+        return null;
+      }
+      const displayName: string = control.value;
+      return validateDisplayName(displayName);
+    };
+  }
+
+  ngOnInit(): void { }
+
   openModal(baseUser: User): void {
-    this.baseUser = User.parseFromJson(baseUser);
+    this.formGroup.reset(baseUser);
+    this.showModal = true;
   }
 
   closeModal(): void {
-    this.baseUser = null;
+    this.showModal = false;
   }
 
   onCancel(): void {
@@ -43,6 +107,12 @@ export class ManageUserModalComponent implements OnInit {
   }
 
   onSubmit(): void {
-    this.submit.emit(this.baseUser);
+    this.formGroup.updateValueAndValidity();
+    if (this.formGroup.invalid) {
+      return;
+    }
+    const displayName: string = this.formGroup.controls.displayName.value;
+    this.formGroup.controls.displayName.setValue(displayName.trim());
+    this.submit.emit(User.parseFromJson(this.formGroup.value));
   }
 }

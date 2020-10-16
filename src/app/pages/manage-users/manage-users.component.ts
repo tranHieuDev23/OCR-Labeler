@@ -49,7 +49,6 @@ export class ManageUsersComponent implements OnInit {
   ngOnInit(): void {
     this.auth.getAllUser().then((users) => {
       this.users = users.sort(this.userComparator);
-      console.log(this.userComparator);
     }, (reason) => {
       this.notification.error('Failed to load all user data', `Reason: ${reason}`);
       this.router.navigateByUrl('/');
@@ -87,7 +86,6 @@ export class ManageUsersComponent implements OnInit {
 
   sortUser(): void {
     this.users = this.users.sort(this.userComparator);
-    console.log(this.userComparator);
   }
 
   openCreateUserModal(): void {

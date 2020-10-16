@@ -1,31 +1,52 @@
-<nz-modal *ngIf="baseUser" [(nzVisible)]="baseUser" [nzTitle]="title" (nzOnCancel)="onCancel()" (nzOnOk)="onSubmit()">
-    <form>
+<nz-modal *ngIf="showModal" [(nzVisible)]="showModal" [nzTitle]="title" (nzOnCancel)="onCancel()" (nzOnOk)="onSubmit()">
+    <form nz-form [formGroup]="formGroup">
 
         <nz-form-item *ngIf="config.username" nz-row>
             <nz-form-label nz-col [nzSpan]="24" [nzMd]="7" nzFor="username" nzRequired>Username</nz-form-label>
-            <nz-form-control nz-col [nzSpan]="24" [nzMd]="17">
-                <input nz-input id="username" name="username" [(ngModel)]="baseUser.username" />
+            <nz-form-control nz-col [nzSpan]="24" [nzMd]="17" [nzErrorTip]="usernameErrorTpl">
+                <input nz-input formControlName="username" id="username" name="username" autocomplete="off" />
+                <ng-template #usernameErrorTpl let-control>
+                    <ng-container *ngIf="control.errors.required">
+                        Please enter your username
+                    </ng-container>
+                    <ng-container *ngIf="control.errors.minLength">
+                        Username must be at least 6 character long
+                    </ng-container>
+                    <ng-container *ngIf="control.errors.format">
+                        Username must only contain English letters and digits
+                    </ng-container>
+                </ng-template>
             </nz-form-control>
         </nz-form-item>
 
         <nz-form-item *ngIf="config.password" nz-row>
             <nz-form-label nz-col [nzSpan]="24" [nzMd]="7" nzFor="password" nzRequired>Password</nz-form-label>
-            <nz-form-control nz-col [nzSpan]="24" [nzMd]="17" nzErrorTip="Please input your password!">
-                <input nz-input type="password" id="password" name="password" [(ngModel)]="baseUser.password" />
+            <nz-form-control nz-col [nzSpan]="24" [nzMd]="17" [nzErrorTip]="passwordErrorTpl">
+                <input nz-input formControlName="password" type="password" id="password" name="password"
+                    autocomplete="off" />
+                <ng-template #passwordErrorTpl let-control>
+                    <ng-container *ngIf="control.errors.required">
+                        Please enter your password
+                    </ng-container>
+                    <ng-container *ngIf="control.errors.minLength">
+                        Password must be at least 8 character long
+                    </ng-container>
+                </ng-template>
             </nz-form-control>
         </nz-form-item>
 
         <nz-form-item *ngIf="config.password" nz-row>
             <nz-form-label nz-col [nzSpan]="24" [nzMd]="7" nzFor="checkPassword" nzRequired>Confirm Password
             </nz-form-label>
-            <nz-form-control nz-col [nzSpan]="24" [nzMd]="17" [nzErrorTip]="errorTpl">
-                <input nz-input type="password" id="checkPassword" name="checkPassword" />
-                <ng-template #errorTpl let-control>
-                    <ng-container *ngIf="false">
-                        Please confirm your password!
+            <nz-form-control nz-col [nzSpan]="24" [nzMd]="17" [nzErrorTip]="checkPasswordErrorTpl">
+                <input nz-input formControlName="checkPassword" type="password" id="checkPassword" name="checkPassword"
+                    autocomplete="off" />
+                <ng-template #checkPasswordErrorTpl let-control>
+                    <ng-container *ngIf="control.errors.required">
+                        Please confirm your password
                     </ng-container>
-                    <ng-container *ngIf="false">
-                        Two passwords that you enter are not equal!
+                    <ng-container *ngIf="control.errors.checkPassword">
+                        Two passwords that you entered are not equal
                     </ng-container>
                 </ng-template>
             </nz-form-control>
@@ -35,14 +56,14 @@
             <nz-form-label nz-col [nzSpan]="24" [nzMd]="7" nzFor="displayName" nzRequired>
                 Display name
             </nz-form-label>
-            <nz-form-control nz-col [nzSpan]="24" [nzMd]="17" nzErrorTip="Please input your display name!">
-                <input nz-input id="displayName" name="displayName" [(ngModel)]="baseUser.displayName" />
+            <nz-form-control nz-col [nzSpan]="24" [nzMd]="17" nzErrorTip="Please enter your display name">
+                <input nz-input formControlName="displayName" id="displayName" name="displayName" autocomplete="off" />
             </nz-form-control>
         </nz-form-item>
 
         <nz-form-item *ngIf="config.canUpload">
             <nz-form-control>
-                <label nz-checkbox name="canUpload" [(ngModel)]="baseUser.canUpload">
+                <label nz-checkbox formControlName="canUpload" name="canUpload">
                     Can uploade images
                 </label>
             </nz-form-control>
@@ -50,7 +71,7 @@
 
         <nz-form-item *ngIf="config.canLabel">
             <nz-form-control>
-                <label nz-checkbox name="canLabel" [(ngModel)]="baseUser.canLabel">
+                <label nz-checkbox formControlName="canLabel" name="canLabel">
                     Can label text regions
                 </label>
             </nz-form-control>
@@ -58,7 +79,7 @@
 
         <nz-form-item *ngIf="config.canVerify">
             <nz-form-control>
-                <label nz-checkbox name="canVerify" [(ngModel)]="baseUser.canVerify">
+                <label nz-checkbox formControlName="canVerify" name="canVerify">
                     Can verify text regions
                 </label>
             </nz-form-control>
@@ -66,7 +87,7 @@
 
         <nz-form-item *ngIf="config.canManageUsers">
             <nz-form-control>
-                <label nz-checkbox name="canManageUsers" [(ngModel)]="baseUser.canManageUsers">
+                <label nz-checkbox formControlName="canManageUsers" name="canManageUsers">
                     Can manage users
                 </label>
             </nz-form-control>
