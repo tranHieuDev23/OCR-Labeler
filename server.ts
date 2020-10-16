@@ -23,6 +23,7 @@ import User from 'src/app/models/user';
 import imageRouter from 'src/api/routes/image';
 import labelRouter from 'src/api/routes/label';
 import verifyRouter from 'src/api/routes/verify';
+import * as compression from 'compression';
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
@@ -34,6 +35,7 @@ export function app(): express.Express {
 
   server.use(bodyParser.json());
   server.use(cookieParser());
+  server.use(compression());
 
   // Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
   server.engine('html', ngExpressEngine({
