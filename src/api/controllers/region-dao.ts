@@ -42,7 +42,7 @@ class TextRegionDao {
         });
     }
 
-    public getTextRegions(imageId: string): Promise<TextRegion[]> {
+    public getTextRegionsOfImage(imageId: string): Promise<TextRegion[]> {
         return new Promise<TextRegion[]>((resolve, reject) => {
             databaseConnection.any(
                 `

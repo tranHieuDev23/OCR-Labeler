@@ -91,7 +91,7 @@ class ImageDao {
                 [imageId]
             ).then((image) => {
                 userDao.findUser(image.uploadedBy).then((user) => {
-                    regionDao.getTextRegions(imageId).then((regions) => {
+                    regionDao.getTextRegionsOfImage(imageId).then((regions) => {
                         resolve(new UploadedImage(
                             imageId,
                             image.imageUrl,

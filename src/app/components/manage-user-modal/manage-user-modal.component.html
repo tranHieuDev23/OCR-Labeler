@@ -85,6 +85,14 @@
             </nz-form-control>
         </nz-form-item>
 
+        <nz-form-item *ngIf="config.canExport">
+            <nz-form-control>
+                <label nz-checkbox formControlName="canExport" name="canExport">
+                    Can request export of images
+                </label>
+            </nz-form-control>
+        </nz-form-item>
+
         <nz-form-item *ngIf="config.canManageUsers">
             <nz-form-control>
                 <label nz-checkbox formControlName="canManageUsers" name="canManageUsers">

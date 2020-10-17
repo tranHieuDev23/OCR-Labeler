@@ -24,6 +24,7 @@ import imageRouter from 'src/api/routes/image';
 import labelRouter from 'src/api/routes/label';
 import verifyRouter from 'src/api/routes/verify';
 import * as compression from 'compression';
+import exportRouter from 'src/api/routes/export';
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
@@ -50,6 +51,7 @@ export function app(): express.Express {
   server.use('/api', imageRouter);
   server.use('/api', labelRouter);
   server.use('/api', verifyRouter);
+  server.use('/api', exportRouter);
 
   // Server uploaded images from /uploaded
   server.get(`*.*`, express.static(uploadedFolder, {

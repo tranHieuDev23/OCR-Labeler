@@ -10,6 +10,7 @@ export class ManageUserModalConfig {
   public canUpload: boolean = true;
   public canLabel: boolean = true;
   public canVerify: boolean = true;
+  public canExport: boolean = true;
   public canManageUsers: boolean = true;
 }
 
@@ -39,6 +40,7 @@ export class ManageUserModalComponent implements OnInit {
       canUpload: [true],
       canLabel: [true],
       canVerify: [true],
+      canExport: [false],
       canManageUsers: [false],
     });
   }

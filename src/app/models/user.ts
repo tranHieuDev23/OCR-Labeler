@@ -6,6 +6,7 @@ class User {
     public readonly canUpload: boolean,
     public readonly canLabel: boolean,
     public readonly canVerify: boolean,
+    public readonly canExport: boolean,
     public readonly canManageUsers: boolean
   ) { }
 
@@ -16,14 +17,16 @@ class User {
     const canUpload: boolean = obj.canUpload;
     const canLabel: boolean = obj.canLabel;
     const canVerify: boolean = obj.canVerify;
+    const canExport: boolean = obj.canExport;
     const canManageUsers: boolean = obj.canManageUsers;
-    return new User(displayName.trim(), username, password, canUpload, canLabel, canVerify, canManageUsers);
+    return new User(displayName.trim(), username, password, canUpload, canLabel, canVerify, canExport, canManageUsers);
   }
 
   static newBaseUser(displayname: string, username: string): User {
     return new User(
       displayname,
       username,
+      null,
       null,
       null,
       null,
@@ -37,6 +40,7 @@ class User {
       displayName,
       username,
       password,
+      true,
       true,
       true,
       true,

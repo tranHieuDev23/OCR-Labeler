@@ -111,10 +111,19 @@ class UserDao {
                 databaseConnection.none(
                     `
                         INSERT INTO public."Users"(
-                            username, password, "displayName", "canUpload", "canLabel", "canVerify", "canManageUsers")
-                            VALUES ($1, $2, $3, $4, $5, $6, $7);
+                            username, password, "displayName", "canUpload", "canLabel", "canVerify", "canExport", "canManageUsers")
+                            VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
                     `,
-                    [user.username, hash, user.displayName, user.canUpload, user.canLabel, user.canVerify, user.canManageUsers]
+                    [
+                        user.username,
+                        hash,
+                        user.displayName,
+                        user.canUpload,
+                        user.canLabel,
+                        user.canVerify,
+                        user.canExport,
+                        user.canManageUsers
+                    ]
                 ).then(() => {
                     resolve();
                 }, (reason) => {
@@ -129,10 +138,18 @@ class UserDao {
             databaseConnection.none(
                 `
                         UPDATE public."Users"
-                        SET "displayName" = $2, "canUpload" = $3, "canLabel" = $4, "canVerify" = $5, "canManageUsers" = $6
+                        SET "displayName" = $2, "canUpload" = $3, "canLabel" = $4, "canVerify" = $5, "canExport" = $6, "canManageUsers" = $7
                         WHERE username = $1;
                     `,
-                [user.username, user.displayName, user.canUpload, user.canLabel, user.canVerify, user.canManageUsers]
+                [
+                    user.username,
+                    user.displayName,
+                    user.canUpload,
+                    user.canLabel,
+                    user.canVerify,
+                    user.canExport,
+                    user.canManageUsers
+                ]
             ).then(() => {
                 resolve();
             }, (reason) => {

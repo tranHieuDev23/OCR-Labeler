@@ -72,6 +72,12 @@ export class ManageUsersComponent implements OnInit {
       }
       result += 'Verify'
     }
+    if (user.canExport) {
+      if (result.length > 0) {
+        result += ', ';
+      }
+      result += 'Export'
+    }
     if (user.canManageUsers) {
       if (result.length > 0) {
         result += ', ';
@@ -89,7 +95,7 @@ export class ManageUsersComponent implements OnInit {
   }
 
   openCreateUserModal(): void {
-    this.createModal.openModal(new User('', '', '', true, true, true, false));
+    this.createModal.openModal(new User('', '', '', true, true, true, false, false));
   }
 
   createUser(user: User): void {
