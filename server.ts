@@ -25,6 +25,7 @@ import labelRouter from 'src/api/routes/label';
 import verifyRouter from 'src/api/routes/verify';
 import * as compression from 'compression';
 import exportRouter from 'src/api/routes/export';
+import { initializeDatabase } from 'src/api/controllers/database';
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
@@ -97,14 +98,18 @@ function run(): void {
   const port = process.env.PORT || 4000;
   mkdirp.sync(UPLOADED_IMAGE_DIRECTORY);
   mkdirp.sync(THUMBNAIL_DIRECTORY);
-  // In case no user was created, request for creation of the first admin user before launching the server
-  createFirstAdminUser().then(() => {
-    const server = app();
-    server.listen(port, () => {
-      console.log(`Node Express server listening on http://localhost:${port}`);
+  initializeDatabase().then(() => {
+    // In case no user was created, request for creation of the first admin user before launching the server
+    createFirstAdminUser().then(() => {
+      const server = app();
+      server.listen(port, () => {
+        console.log(`Node Express server listening on http://localhost:${port}`);
+      });
+    }, (reason) => {
+      console.log(`Problem when initialize server: ${reason}`);
     });
   }, (reason) => {
-    console.log(`Problem when initialize server: ${reason}`);
+    console.log(`Problem when initialize database: ${reason}`);
   });
 }
 
