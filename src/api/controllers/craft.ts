@@ -7,7 +7,7 @@ import uid from 'uid';
 
 function processImageWithCraft(imageId: string, user: User, image: Buffer): Promise<TextRegion[]> {
     return new Promise<TextRegion[]>((resolve, reject) => {
-        Axios.post(environment.craftServer, image, {
+        Axios.post(environment.craftRequest, image, {
             headers: {
                 'Content-Type': 'image/jpeg'
             }

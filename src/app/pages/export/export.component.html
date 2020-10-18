@@ -1,0 +1,24 @@
+<h1 nz-typography>Export dataset</h1>
+<div *ngIf="exported">
+    <div *ngIf="state == 'EXPORTING'">
+        <p nz-typography>Dataset export request is being handled. You can still download the latest version of the
+            dataset.</p>
+    </div>
+    <div *ngIf="state == 'READY'">
+        <p nz-typography>Dataset exported.</p>
+    </div>
+    <p nz-typography>The latest version was exported at {{ lastExported }}</p>
+</div>
+<div *ngIf="!exported">
+    <div *ngIf="state == 'EXPORTING'">
+        <p nz-typography>Dataset export request is being handled.</p>
+    </div>
+    <div *ngIf="state == 'READY'">
+        <p nz-typography>No dataset exported. Start by making an export request.</p>
+    </div>
+</div>
+<button nz-button nzSize="large" nzType="primary" (click)="requestExport()" [disabled]="state == 'EXPORTING'"
+    style="margin-right: 4px;"><i nz-icon nzType="export" nzTheme="outline"></i>Request export
+</button>
+<button nz-button nzSize="large" nzType="primary" (click)="download()" [disabled]="!exported"><i nz-icon
+        nzType="download" nzTheme="outline"></i>Download</button>

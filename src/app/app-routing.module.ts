@@ -47,6 +47,12 @@ const routes: Routes = [
     canActivate: [UserLoggedInGuard]
   },
   {
+    path: 'export',
+    loadChildren: () =>
+      import('./pages/export/export.module').then((m) => m.ExportModule),
+    canActivate: [UserLoggedInGuard]
+  },
+  {
     path: 'login',
     loadChildren: () =>
       import('./pages/login/login.module').then((m) => m.LoginModule),

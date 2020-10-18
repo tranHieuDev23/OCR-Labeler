@@ -107,4 +107,28 @@ export class BackendService {
       }, reject);
     });
   }
+
+  public getExportStatus(): Promise<{ exported: boolean, state: string, timestamp: number }> {
+    return new Promise<{ exported: boolean, state: string, timestamp: number }>((resolve, reject) => {
+      this.http.post<any>('/api/export-status', {}).toPromise().then((resp) => {
+        resolve({
+          exported: resp.exported,
+          state: resp.state,
+          timestamp: resp.timestamp,
+        });
+      }, reject);
+    });
+  }
+
+  public requestExport(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.http.post('/api/request-export', {}).toPromise().then(() => {
+        resolve();
+      }, reject);
+    });
+  }
+
+  public downloadExport(): void {
+    window.open('/api/download-export', 'blank');
+  }
 }

@@ -4,8 +4,10 @@
 
 export const environment = {
   production: false,
-  craftServer: 'http://localhost:8000/api/get-region',
-  exportServer: 'http://localhost:8080/api/export'
+  craftRequest: 'http://localhost:8000/api/get-region',
+  exportRequest: 'http://localhost:8080/api/export',
+  exportStatusRequest: 'http://localhost:8080/api/export-status',
+  exportDownloadRequest: 'http://localhost:8080/api/download'
 };
 
 /*
