@@ -24,6 +24,7 @@ import verifyRouter from 'src/api/routes/verify';
 import * as compression from 'compression';
 import exportRouter from 'src/api/routes/export';
 import { initializeDatabase } from 'src/api/controllers/database';
+import * as waitPort from 'wait-port';
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
@@ -96,18 +97,29 @@ function run(): void {
   const port = process.env.PORT || 4000;
   mkdirp.sync(UPLOADED_IMAGE_DIRECTORY);
   mkdirp.sync(THUMBNAIL_DIRECTORY);
-  initializeDatabase().then(() => {
-    // In case no user was created, request for creation of the first admin user before launching the server
-    createFirstAdminUser().then(() => {
-      const server = app();
-      server.listen(port, () => {
-        console.log(`Node Express server listening on http://localhost:${port}`);
+  waitPort({
+    host: process.env.POSTGRES_HOST,
+    port: +process.env.POSTGRES_PORT
+  }).then((open) => {
+    if (!open) {
+      console.log('PostgresSQL\'s port did not open!');
+      return;
+    }
+    initializeDatabase().then(() => {
+      // In case no user was created, request for creation of the first admin user before launching the server
+      createFirstAdminUser().then(() => {
+        const server = app();
+        server.listen(port, () => {
+          console.log(`Node Express server listening on http://localhost:${port}`);
+        });
+      }, (reason) => {
+        console.log(`Problem when initialize server: ${reason}`);
       });
     }, (reason) => {
-      console.log(`Problem when initialize server: ${reason}`);
+      console.log(`Problem when initialize database: ${reason}`);
     });
   }, (reason) => {
-    console.log(`Problem when initialize database: ${reason}`);
+    console.log(`Problem when waiting for database's port: ${reason}`);
   });
 }
 

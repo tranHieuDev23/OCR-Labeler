@@ -1,0 +1,8 @@
+node_modules
+dist
+.vscode
+thumbnail
+uploaded
+Dockerfile
+.gitignore
+.git

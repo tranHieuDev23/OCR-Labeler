@@ -15,7 +15,6 @@ const THIRTY_DAYS: number = 30 * 24 * 60 * 60 * 1000;
 function getCookieOption(): CookieOptions {
     return {
         httpOnly: true,
-        secure: true,
         sameSite: "strict",
         expires: new Date(Date.now() + THIRTY_DAYS)
     };

@@ -8,11 +8,11 @@ const initOpitions = {};
 const pgp = PgPromise(initOpitions);
 
 const connectionInfo = {
-    host: process.env.DATABASE_HOST,
-    port: +process.env.DATABASE_PORT,
-    database: process.env.DATABASE_NAME,
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_PASSWORD
+    host: process.env.POSTGRES_HOST,
+    port: +process.env.POSTGRES_PORT,
+    database: process.env.POSTGRES_NAME,
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD
 };
 const databaseConnection = pgp(connectionInfo);
 
