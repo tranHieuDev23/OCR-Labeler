@@ -1,7 +1,5 @@
 import * as dotenv from 'dotenv';
-if (process.env.NODE_ENV !== 'production') {
-    dotenv.config();
-}
+dotenv.config();
 
 import * as jwt from 'jsonwebtoken';
 import User from 'src/app/models/user';

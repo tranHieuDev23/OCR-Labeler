@@ -1,7 +1,5 @@
 import * as dotenv from 'dotenv';
-if (process.env.NODE_ENV !== 'production') {
-    dotenv.config();
-}
+dotenv.config();
 
 import * as PgPromise from 'pg-promise';
 import { DATABASE_INITIALIZE_QUERY } from 'src/environments/constants';

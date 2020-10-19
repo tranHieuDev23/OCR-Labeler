@@ -1,13 +1,15 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import { Region, TextRegion } from "src/app/models/text-region";
 import Axios from 'axios';
-import { environment } from 'src/environments/environment';
 import LabelStatus from 'src/app/models/label-status';
 import User from 'src/app/models/user';
 import uid from 'uid';
 
 function processImageWithCraft(imageId: string, user: User, image: Buffer): Promise<TextRegion[]> {
     return new Promise<TextRegion[]>((resolve, reject) => {
-        Axios.post(environment.craftRequest, image, {
+        Axios.post(process.env.CRAFT_REQUEST, image, {
             headers: {
                 'Content-Type': 'image/jpeg'
             }

@@ -19,6 +19,9 @@
           <li *ngIf="loggedInUser.canVerify" nz-menu-item>
             <a routerLink="/verify">Verify results</a>
           </li>
+          <li *ngIf="loggedInUser.canExport" nz-menu-item>
+            <a routerLink="/export">Export dataset</a>
+          </li>
         </ul>
       </li>
       <li *ngIf="loggedInUser" nz-submenu nzTitle="Account" nzIcon="user">

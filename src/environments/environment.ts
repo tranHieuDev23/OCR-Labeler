@@ -3,11 +3,7 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,
-  craftRequest: 'http://localhost:8000/api/get-region',
-  exportRequest: 'http://localhost:8080/api/export',
-  exportStatusRequest: 'http://localhost:8080/api/export-status',
-  exportDownloadRequest: 'http://localhost:8080/api/download'
+  production: false
 };
 
 /*

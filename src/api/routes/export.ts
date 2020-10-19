@@ -1,9 +1,11 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import Axios from 'axios';
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { join } from 'path';
 import { AUTH_COOKIE_NAME, UPLOADED_IMAGE_DIRECTORY } from 'src/environments/constants';
-import { environment } from 'src/environments/environment';
 import BlacklistedJwtDao from '../controllers/jwt-dao';
 
 const exportRouter: Router = Router();
@@ -18,7 +20,7 @@ exportRouter.post('/request-export', (request, response) => {
             console.log(`[/request-export] User ${user.username} is not authorized to export image files`);
             return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
-        Axios.post(environment.exportRequest, { uploadedFolder }, {
+        Axios.post(process.env.EXPORT_REQUEST, { uploadedFolder }, {
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -41,7 +43,7 @@ exportRouter.post('/export-status', (request, response) => {
             console.log(`[/export-status] User ${user.username} is not authorized to export image files`);
             return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
-        Axios.post(environment.exportStatusRequest).then((status) => {
+        Axios.post(process.env.EXPORT_STATUS_REQUEST).then((status) => {
             return response.status(StatusCodes.OK).json(status.data);
         }, (reason) => {
             console.log(`[/export-status] Request for image export status failed: ${reason}`);
@@ -60,7 +62,7 @@ exportRouter.get('/download-export', (request, response) => {
             console.log(`[/download-export] User ${user.username} is not authorized to export image files`);
             return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
-        Axios.post(environment.exportDownloadRequest, {}, {
+        Axios.post(process.env.EXPORT_DOWNLOAD_REQUEST, {}, {
             responseType: 'stream'
         }).then((data) => {
             return data.data.pipe(response);
