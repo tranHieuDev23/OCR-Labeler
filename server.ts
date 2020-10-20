@@ -15,7 +15,6 @@ import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import uploadRouter from 'src/api/routes/upload';
 import * as mkdirp from 'mkdirp';
-import { THUMBNAIL_DIRECTORY, UPLOADED_IMAGE_DIRECTORY } from 'src/environments/constants';
 import UserDao from 'src/api/controllers/user-dao';
 import User from 'src/app/models/user';
 import imageRouter from 'src/api/routes/image';
@@ -30,8 +29,8 @@ import * as waitPort from 'wait-port';
 export function app(): express.Express {
   const server = express();
   const distFolder = join(process.cwd(), 'dist/ocr-labeler/browser');
-  const uploadedFolder = join(process.cwd(), UPLOADED_IMAGE_DIRECTORY);
-  const thumbnailFolder = join(process.cwd(), THUMBNAIL_DIRECTORY);
+  const uploadedFolder = process.env.UPLOADED_DIRECTORY;
+  const thumbnailFolder = process.env.THUMBNAIL_DIRECTORY;
   const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
 
   server.use(bodyParser.json());
@@ -95,8 +94,8 @@ function createFirstAdminUser(): Promise<void> {
 
 function run(): void {
   const port = process.env.PORT || 4000;
-  mkdirp.sync(UPLOADED_IMAGE_DIRECTORY);
-  mkdirp.sync(THUMBNAIL_DIRECTORY);
+  mkdirp.sync(process.env.UPLOADED_DIRECTORY);
+  mkdirp.sync(process.env.THUMBNAIL_DIRECTORY);
   waitPort({
     host: process.env.POSTGRES_HOST,
     port: +process.env.POSTGRES_PORT

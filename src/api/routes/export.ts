@@ -4,14 +4,13 @@ dotenv.config();
 import Axios from 'axios';
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { join } from 'path';
-import { AUTH_COOKIE_NAME, UPLOADED_IMAGE_DIRECTORY } from 'src/environments/constants';
+import { AUTH_COOKIE_NAME } from 'src/environments/constants';
 import BlacklistedJwtDao from '../controllers/jwt-dao';
 
 const exportRouter: Router = Router();
 
 const jwtDao: BlacklistedJwtDao = BlacklistedJwtDao.getInstance();
-const uploadedFolder = join(process.cwd(), UPLOADED_IMAGE_DIRECTORY);
+const uploadedFolder = process.env.UPLOADED_DIRECTORY;
 
 exportRouter.post('/request-export', (request, response) => {
     const token: string = request.cookies[AUTH_COOKIE_NAME];

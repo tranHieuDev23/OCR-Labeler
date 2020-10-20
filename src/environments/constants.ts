@@ -1,6 +1,4 @@
 const AUTH_COOKIE_NAME: string = 'ocr-auth';
-const UPLOADED_IMAGE_DIRECTORY: string = 'uploaded';
-const THUMBNAIL_DIRECTORY: string = 'thumbnail';
 
 const DATABASE_INITIALIZE_QUERY = `
     CREATE TABLE IF NOT EXISTS public."BlacklistedJwts" (
@@ -67,4 +65,4 @@ const DATABASE_INITIALIZE_QUERY = `
         ADD CONSTRAINT "VERIFIED_BY" FOREIGN KEY ("verifiedBy") REFERENCES public."Users"(username);
 `;
 
-export { AUTH_COOKIE_NAME, UPLOADED_IMAGE_DIRECTORY, THUMBNAIL_DIRECTORY, DATABASE_INITIALIZE_QUERY };
+export { AUTH_COOKIE_NAME, DATABASE_INITIALIZE_QUERY };

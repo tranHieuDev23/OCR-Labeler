@@ -1,8 +1,11 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import * as path from 'path';
 import * as fs from 'fs';
-import { UPLOADED_IMAGE_DIRECTORY, THUMBNAIL_DIRECTORY, AUTH_COOKIE_NAME } from 'src/environments/constants';
+import { AUTH_COOKIE_NAME } from 'src/environments/constants';
 import uid from 'uid';
 import { resizeImage } from '../controllers/image-resize';
 import BlacklistedJwtDao from '../controllers/jwt-dao';
@@ -23,6 +26,8 @@ const THUMBNAIL_HEIGHT = 180;
 const jwtDao: BlacklistedJwtDao = BlacklistedJwtDao.getInstance();
 const imageDao: ImageDao = ImageDao.getInstance();
 const regionDao: TextRegionDao = TextRegionDao.getInstance();
+const uploadDirectory = process.env.UPLOADED_DIRECTORY;
+const thumbnailDirectory = process.env.THUMBNAIL_DIRECTORY;
 
 function generateImageAndThumbnail(image: any): Promise<{ fullImage: Buffer, thumbnail: Buffer }> {
     return new Promise<{ fullImage: Buffer, thumbnail: Buffer }>((resolve, reject) => {
@@ -41,11 +46,11 @@ function saveImageAndThumbnail(
     thumbnail: Buffer
 ): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        fs.writeFile(path.join(UPLOADED_IMAGE_DIRECTORY, imageFileName), fullImage, (reason) => {
+        fs.writeFile(path.join(uploadDirectory, imageFileName), fullImage, (reason) => {
             if (reason) {
                 reject(reason);
             }
-            fs.writeFile(path.join(THUMBNAIL_DIRECTORY, thumbnailName), thumbnail, (reason) => {
+            fs.writeFile(path.join(thumbnailDirectory, thumbnailName), thumbnail, (reason) => {
                 if (reason) {
                     reject(reason);
                 }
