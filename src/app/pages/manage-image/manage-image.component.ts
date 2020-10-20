@@ -62,6 +62,7 @@ export class ManageImageComponent implements OnInit {
       })).then((regionImages) => {
         this.croppedRegions = result.textRegions;
         this.croppedRegionImages = regionImages;
+        this.regionSelector.highlight(result.textRegions.map(item => item.region.vertices));
       }, (reason) => {
         this.notification.error('Failed to load file', `Reason: ${reason}`);
         this.router.navigateByUrl('/');
@@ -84,6 +85,7 @@ export class ManageImageComponent implements OnInit {
         this.croppedRegions.push(newTextRegion);
         this.croppedRegionImages.push(regionImage);
         this.regionSelector.clearSelected();
+        this.regionSelector.highlight(this.croppedRegions.map(item => item.region.vertices));
         this.selectedRegion = null;
         this.selectedRegionImage = null;
       });
@@ -91,7 +93,7 @@ export class ManageImageComponent implements OnInit {
   }
 
   regionClicked(id: number): void {
-    this.regionSelector.highlight(this.croppedRegions[id].region.vertices);
+
   }
 
   deleteRegion(id: number) {
@@ -99,6 +101,7 @@ export class ManageImageComponent implements OnInit {
       this.notification.success('Text region deleted successfully', '');
       this.croppedRegions.splice(id, 1);
       this.croppedRegionImages.splice(id, 1);
+      this.regionSelector.highlight(this.croppedRegions.map(item => item.region.vertices));
     }, (reason) => {
       this.notification.error('Failed to delete text region', `Reason: ${reason}`);
     });

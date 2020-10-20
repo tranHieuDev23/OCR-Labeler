@@ -2,11 +2,58 @@ import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild }
 import { Coordinate, Region } from 'src/app/models/text-region';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
 
+const EPSILON = Math.exp(-5);
+
 export class RegionSelectedEvent {
   constructor(
     public readonly region: Region,
     public readonly imageBase64: string
   ) { }
+}
+
+class State {
+  constructor(
+    public readonly imageElement: HTMLImageElement,
+    public readonly selectedCoordinates: Coordinate[],
+    public readonly dragCoordinates: { start: Coordinate, end: Coordinate },
+    public readonly highlightedCoordinates: Coordinate[][],
+  ) { }
+
+  public cloneWithImageElement(imageElement: HTMLImageElement): State {
+    return new State(
+      imageElement,
+      this.selectedCoordinates,
+      this.dragCoordinates,
+      this.highlightedCoordinates
+    );
+  }
+
+  public cloneWithSelectedCoordinates(selectedCoordinates: Coordinate[]): State {
+    return new State(
+      this.imageElement,
+      selectedCoordinates,
+      this.dragCoordinates,
+      this.highlightedCoordinates
+    );
+  }
+
+  public cloneWithDragCoordinates(dragCoordinates: { start: Coordinate, end: Coordinate }): State {
+    return new State(
+      this.imageElement,
+      this.selectedCoordinates,
+      dragCoordinates,
+      this.highlightedCoordinates
+    );
+  }
+
+  public cloneWithHighlightCoordinates(highlightedCoordinates: Coordinate[][]): State {
+    return new State(
+      this.imageElement,
+      this.selectedCoordinates,
+      this.dragCoordinates,
+      highlightedCoordinates
+    );
+  }
 }
 
 @Component({
@@ -19,29 +66,49 @@ export class RegionSelectorComponent implements OnInit {
   @Input('imageSrc') imageSrc: string;
   @Output('imageCropped') public imageCropped: EventEmitter<RegionSelectedEvent> = new EventEmitter<RegionSelectedEvent>();
 
-  private imageElement = new Image();
+  private state: State;
   private isImageLoaded: boolean = false;
-  private selectedCoordinates: Coordinate[] = [];
-  private highlightedCoordinates: Coordinate[] = [];
+  private dragStart: Coordinate = null;
 
   constructor(
     private thumbnail: ThumbnailService
-  ) { }
+  ) {
+    this.state = new State(null, null, null, []);
+  }
 
   ngOnInit(): void {
-    this.imageElement.onload = () => {
+    const imageElement = new Image();
+    imageElement.onload = () => {
       this.isImageLoaded = true;
-      this.drawCanvas();
-    };
+      this.setState(this.state.cloneWithImageElement(imageElement));
+    }
+    imageElement.src = this.imageSrc;
     if (window) {
       window.onresize = () => {
-        this.drawCanvas();
+        this.drawCanvasState(this.state);
       };
     }
-    this.imageElement.src = this.imageSrc;
-    this.canvas.nativeElement.addEventListener('mousedown', (event) => {
-      this.handleMouseOnCanvas(this.getCanvasPosition(event.clientX, event.clientY));
+    this.canvas.nativeElement.addEventListener('dblclick', (event) => {
+      this.handleDbClick(this.getCanvasPosition(event.clientX, event.clientY));
     });
+    this.canvas.nativeElement.addEventListener('mousedown', (event) => {
+      event.preventDefault();
+      this.handleMouseDown(this.getCanvasPosition(event.clientX, event.clientY));
+    });
+    this.canvas.nativeElement.addEventListener('mousemove', (event) => {
+      this.handleMouseMove(this.getCanvasPosition(event.clientX, event.clientY));
+    });
+    this.canvas.nativeElement.addEventListener('mouseup', (event) => {
+      this.handleMouseUp(this.getCanvasPosition(event.clientX, event.clientY));
+    });
+  }
+
+  private setState(state: State): void {
+    if (state === this.state) {
+      return;
+    }
+    this.state = state;
+    this.drawCanvasState(state);
   }
 
   private getCanvasPosition(clientX: number, clientY: number): Coordinate {
@@ -52,33 +119,95 @@ export class RegionSelectorComponent implements OnInit {
   }
 
   public clearSelected(): void {
-    this.selectedCoordinates = [];
-    this.drawCanvas();
+    this.setState(this.state.cloneWithSelectedCoordinates(null).cloneWithDragCoordinates(null));
   }
 
-  public highlight(coordinates: Coordinate[]): void {
-    this.highlightedCoordinates = coordinates;
-    this.drawCanvas();
+  public highlight(coordinates: Coordinate[][]): void {
+    this.setState(this.state.cloneWithHighlightCoordinates(coordinates));
   }
 
-  private handleMouseOnCanvas(coordinate: Coordinate) {
-    if (this.selectedCoordinates.length == 4) {
-      this.selectedCoordinates = [];
+  private handleDbClick(coordinate: Coordinate): void {
+    this.dragStart = null;
+    let selected: Coordinate[] = this.state.selectedCoordinates || [];
+    if (selected.length == 4) {
+      selected = [];
     }
-    this.selectedCoordinates.push(coordinate);
-    if (this.selectedCoordinates.length == 4) {
-      this.thumbnail.generatePolygonImage(this.imageSrc, this.selectedCoordinates)
+    selected.push(coordinate);
+    this.setState(
+      this.state
+        .cloneWithDragCoordinates(null)
+        .cloneWithSelectedCoordinates(selected)
+    );
+    if (selected.length == 4) {
+      this.thumbnail.generatePolygonImage(this.imageSrc, selected)
         .then((result) => {
           this.imageCropped.emit(new RegionSelectedEvent(
-            new Region(this.selectedCoordinates),
+            new Region(selected),
             result
           ));
         });
     }
-    this.drawCanvas();
   }
 
-  private drawCanvas(): void {
+  private handleMouseDown(coordinate: Coordinate): void {
+    this.dragStart = coordinate;
+    this.setState(this.state.cloneWithDragCoordinates(null));
+  }
+
+  private handleMouseMove(coordinate: Coordinate): void {
+    if (!this.dragStart) {
+      return;
+    }
+    this.setState(this.state
+      .cloneWithSelectedCoordinates(null)
+      .cloneWithDragCoordinates({
+        start: this.dragStart,
+        end: coordinate
+      })
+    );
+  }
+
+  private handleMouseUp(coordinate: Coordinate): void {
+    if (!this.dragStart) {
+      return;
+    }
+    if (this.dragTooShort(this.dragStart, coordinate)) {
+      this.setState(this.state.cloneWithDragCoordinates(null));
+      this.dragStart = null;
+      return;
+    }
+    this.setState(this.state
+      .cloneWithDragCoordinates({
+        start: this.dragStart,
+        end: coordinate
+      })
+    );
+    const vertices: Coordinate[] = [
+      this.dragStart,
+      new Coordinate(this.dragStart.x, coordinate.y),
+      coordinate,
+      new Coordinate(coordinate.x, this.dragStart.y)
+    ];
+    this.thumbnail.generatePolygonImage(this.imageSrc, vertices).then((result) => {
+      this.imageCropped.emit(new RegionSelectedEvent(
+        new Region(vertices),
+        result
+      ));
+    });
+    this.dragStart = null;
+  }
+
+  private dragTooShort(start: Coordinate, end: Coordinate): boolean {
+    if (Math.abs(start.x - end.x) < EPSILON) {
+      return true;
+    }
+    if (Math.abs(start.y - end.y) < EPSILON) {
+      return true;
+    }
+    return false;
+  }
+
+  private drawCanvasState(state: State): void {
     const ctx = this.canvas.nativeElement.getContext('2d');
     const canvasWidth = this.canvas.nativeElement.width;
     const canvasHeight = this.canvas.nativeElement.height;
@@ -88,36 +217,43 @@ export class RegionSelectorComponent implements OnInit {
     }
     this.canvas.nativeElement.style.width = '100%';
     const newCanvasWidth = this.canvas.nativeElement.offsetWidth;
-    const newCanvasHeight = Math.ceil(this.imageElement.height * newCanvasWidth / this.imageElement.width);
+    const newCanvasHeight = Math.ceil(state.imageElement.height * newCanvasWidth / state.imageElement.width);
     this.canvas.nativeElement.style.height = newCanvasHeight.toString() + 'px';
     this.canvas.nativeElement.width = newCanvasWidth;
     this.canvas.nativeElement.height = newCanvasHeight;
 
-    ctx.drawImage(this.imageElement, 0, 0, newCanvasWidth, newCanvasHeight);
-    this.drawHighlight(newCanvasWidth, newCanvasHeight, ctx);
-    this.drawSelected(newCanvasWidth, newCanvasHeight, ctx);
+    ctx.drawImage(state.imageElement, 0, 0, newCanvasWidth, newCanvasHeight);
+    this.drawHighlight(newCanvasWidth, newCanvasHeight, ctx, state);
+    this.drawSelected(newCanvasWidth, newCanvasHeight, ctx, state);
   }
 
-  private drawSelected(width: number, height: number, ctx: CanvasRenderingContext2D): void {
-    if (this.selectedCoordinates.length == 0) {
-      return;
+  private drawSelected(width: number, height: number, ctx: CanvasRenderingContext2D, state: State): void {
+    if (state.selectedCoordinates !== null && state.selectedCoordinates.length > 0) {
+      let lastItem: Coordinate = state.selectedCoordinates[state.selectedCoordinates.length - 1];
+      for (let item of state.selectedCoordinates) {
+        this.drawCircle(width, height, ctx, item, 1, 'red');
+        this.drawLine(width, height, ctx, lastItem, item, 'red');
+        lastItem = item;
+      }
     }
-    let lastItem: Coordinate = this.selectedCoordinates[this.selectedCoordinates.length - 1];
-    for (let item of this.selectedCoordinates) {
-      this.drawCircle(width, height, ctx, item, 1, 'red');
-      this.drawLine(width, height, ctx, lastItem, item, 'red');
-      lastItem = item;
+    if (state.dragCoordinates !== null) {
+      this.drawRect(width, height, ctx, state.dragCoordinates.start, state.dragCoordinates.end, 'red');
     }
   }
 
-  private drawHighlight(width: number, height: number, ctx: CanvasRenderingContext2D): void {
-    if (!this.highlightedCoordinates || this.highlightedCoordinates.length == 0) {
+  private drawHighlight(width: number, height: number, ctx: CanvasRenderingContext2D, state: State): void {
+    if (state.highlightedCoordinates === null || state.highlightedCoordinates.length === 0) {
       return;
     }
-    let lastItem: Coordinate = this.highlightedCoordinates[this.highlightedCoordinates.length - 1];
-    for (let item of this.highlightedCoordinates) {
-      this.drawLine(width, height, ctx, lastItem, item, 'green');
-      lastItem = item;
+    for (let item of state.highlightedCoordinates) {
+      if (item === null || item.length === 0) {
+        continue;
+      }
+      let lastVert: Coordinate = item[item.length - 1];
+      for (let vert of item) {
+        this.drawLine(width, height, ctx, lastVert, vert, 'green');
+        lastVert = vert;
+      }
     }
   }
 
@@ -138,5 +274,14 @@ export class RegionSelectorComponent implements OnInit {
     ctx.lineWidth = 1;
     ctx.strokeStyle = color;
     ctx.stroke();
+  }
+
+  private drawRect(width: number, height: number, ctx: CanvasRenderingContext2D, start: Coordinate, end: Coordinate, color: string): void {
+    const p1: Coordinate = new Coordinate(start.x, end.y);
+    const p2: Coordinate = new Coordinate(end.x, start.y);
+    this.drawLine(width, height, ctx, start, p1, color);
+    this.drawLine(width, height, ctx, p1, end, color);
+    this.drawLine(width, height, ctx, end, p2, color);
+    this.drawLine(width, height, ctx, p2, start, color);
   }
 }
