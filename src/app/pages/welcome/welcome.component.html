@@ -14,6 +14,6 @@
                         nzType="search"></i>Verify label results</button>
         <button *ngIf="loggedInUser.canExport" routerLink="/export" nz-button nzSize="large" nzType="primary"><i nz-icon
                         nzType="export"></i>Export dataset</button>
-        <button *ngIf="loggedInUser.canVerify" routerLink="/manage-users" nz-button nzSize="large" nzType="primary"><i
-                        nz-icon nzType="user"></i>Manage Users</button>
+        <button *ngIf="loggedInUser.canManageUsers" routerLink="/manage-users" nz-button nzSize="large"
+                nzType="primary"><i nz-icon nzType="user"></i>Manage Users</button>
 </div>
