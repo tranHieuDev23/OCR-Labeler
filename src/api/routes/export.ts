@@ -12,6 +12,13 @@ const exportRouter: Router = Router();
 const jwtDao: BlacklistedJwtDao = BlacklistedJwtDao.getInstance();
 const uploadedFolder = process.env.UPLOADED_DIRECTORY;
 
+const exportHost = process.env.EXPORT_HOST;
+const exportPort = process.env.EXPORT_PORT;
+
+function getExportApi(api: string): string {
+    return `http://${exportHost}:${exportPort}${api}`;
+}
+
 exportRouter.post('/request-export', (request, response) => {
     const token: string = request.cookies[AUTH_COOKIE_NAME];
     jwtDao.getUserFromJwt(token).then((user) => {
@@ -19,7 +26,7 @@ exportRouter.post('/request-export', (request, response) => {
             console.log(`[/request-export] User ${user.username} is not authorized to export image files`);
             return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
-        Axios.post(process.env.EXPORT_REQUEST, { uploadedFolder }, {
+        Axios.post(getExportApi('/api/export'), { uploadedFolder }, {
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -42,7 +49,7 @@ exportRouter.post('/export-status', (request, response) => {
             console.log(`[/export-status] User ${user.username} is not authorized to export image files`);
             return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
-        Axios.post(process.env.EXPORT_STATUS_REQUEST).then((status) => {
+        Axios.post(getExportApi('/api/export-status')).then((status) => {
             return response.status(StatusCodes.OK).json(status.data);
         }, (reason) => {
             console.log(`[/export-status] Request for image export status failed: ${reason}`);
@@ -61,7 +68,7 @@ exportRouter.get('/download-export', (request, response) => {
             console.log(`[/download-export] User ${user.username} is not authorized to export image files`);
             return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
-        Axios.post(process.env.EXPORT_DOWNLOAD_REQUEST, {}, {
+        Axios.post(getExportApi('/api/download'), {}, {
             responseType: 'stream'
         }).then((data) => {
             return data.data.pipe(response);

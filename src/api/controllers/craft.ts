@@ -7,9 +7,16 @@ import LabelStatus from 'src/app/models/label-status';
 import User from 'src/app/models/user';
 import uid from 'uid';
 
+const craftHost: string = process.env.CRAFT_HOST;
+const craftPort: string = process.env.CRAFT_PORT;
+
+function getCraftApi(api: string): string {
+    return `http://${craftHost}:${craftPort}${api}`;
+}
+
 function processImageWithCraft(imageId: string, user: User, image: Buffer): Promise<TextRegion[]> {
     return new Promise<TextRegion[]>((resolve, reject) => {
-        Axios.post(process.env.CRAFT_REQUEST, image, {
+        Axios.post(getCraftApi('/api/get-region'), image, {
             headers: {
                 'Content-Type': 'image/jpeg'
             }

@@ -76,6 +76,14 @@ export function app(): express.Express {
   return server;
 }
 
+async function waitForService(host: string, port: number): Promise<boolean> {
+  const open: boolean = await waitPort({ host, port });
+  if (!open) {
+    console.log(`${host}:${port} did not open!`);
+  }
+  return open;
+}
+
 function createFirstAdminUser(): Promise<void> {
   const userDao: UserDao = UserDao.getInstance();
   return new Promise<void>((resolve, reject) => {
@@ -92,33 +100,27 @@ function createFirstAdminUser(): Promise<void> {
   });
 }
 
-function run(): void {
+async function run() {
   const port = process.env.PORT || 4000;
   mkdirp.sync(process.env.UPLOADED_DIRECTORY);
   mkdirp.sync(process.env.THUMBNAIL_DIRECTORY);
-  waitPort({
-    host: process.env.POSTGRES_HOST,
-    port: +process.env.POSTGRES_PORT
-  }).then((open) => {
-    if (!open) {
-      console.log('PostgresSQL\'s port did not open!');
-      return;
-    }
-    initializeDatabase().then(() => {
-      // In case no user was created, request for creation of the first admin user before launching the server
-      createFirstAdminUser().then(() => {
-        const server = app();
-        server.listen(port, () => {
-          console.log(`Node Express server listening on http://localhost:${port}`);
-        });
-      }, (reason) => {
-        console.log(`Problem when initialize server: ${reason}`);
+  const serviceOpen = await waitForService(process.env.POSTGRES_HOST, +process.env.POSTGRES_PORT)
+    && await waitForService(process.env.EXPORT_HOST, +process.env.EXPORT_PORT);
+  if (!serviceOpen) {
+    return;
+  }
+  initializeDatabase().then(() => {
+    // In case no user was created, request for creation of the first admin user before launching the server
+    createFirstAdminUser().then(() => {
+      const server = app();
+      server.listen(port, () => {
+        console.log(`Node Express server listening on http://localhost:${port}`);
       });
     }, (reason) => {
-      console.log(`Problem when initialize database: ${reason}`);
+      console.log(`Problem when initialize server: ${reason}`);
     });
   }, (reason) => {
-    console.log(`Problem when waiting for database's port: ${reason}`);
+    console.log(`Problem when initialize database: ${reason}`);
   });
 }
 
