@@ -1,19 +1,27 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import ImageStatus from 'src/app/models/image-status';
 import LabelStatus from 'src/app/models/label-status';
 import { Region, TextRegion } from 'src/app/models/text-region';
+import UploadedImage from 'src/app/models/uploaded-image';
 import { AUTH_COOKIE_NAME } from 'src/environments/constants';
 import uid from 'uid';
 import ImageDao from '../controllers/image-dao';
 import BlacklistedJwtDao from '../controllers/jwt-dao';
 import TextRegionDao from '../controllers/region-dao';
+import * as fs from 'fs';
+import { join } from 'path';
 
 const imageRouter: Router = Router();
 
 const jwtDao: BlacklistedJwtDao = BlacklistedJwtDao.getInstance();
 const imageDao: ImageDao = ImageDao.getInstance();
 const regionDao: TextRegionDao = TextRegionDao.getInstance();
+const uploadedFolder = process.env.UPLOADED_DIRECTORY;
+const thumbnailFolder = process.env.THUMBNAIL_DIRECTORY;
 
 imageRouter.post('/get-user-images', (request, response) => {
     const token: string = request.cookies[AUTH_COOKIE_NAME];
@@ -138,6 +146,18 @@ imageRouter.post('/delete-region', (request, response) => {
     });
 });
 
+function deleteImage(filename: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        fs.unlink(filename, (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        })
+    });
+}
+
 imageRouter.post('/delete-image', (request, response) => {
     const token: string = request.cookies[AUTH_COOKIE_NAME];
     jwtDao.getUserFromJwt(token).then((user) => {
@@ -146,11 +166,32 @@ imageRouter.post('/delete-image', (request, response) => {
             return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
         const imageId: string = request.body.imageId;
-        imageDao.deleteImage(imageId, user.username).then((success) => {
-            return response.status(success ? StatusCodes.OK : StatusCodes.UNAUTHORIZED).json({});
+        imageDao.getImage(imageId).then((image: UploadedImage) => {
+            if (image.uploadedBy.username !== user.username) {
+                console.log(`[/delete-image] User ${user.username} is trying to delete unauthorized image`);
+                return response.status(StatusCodes.UNAUTHORIZED).json({});
+            }
+            imageDao.deleteImage(imageId).then((success) => {
+                if (!success) {
+                    console.log(`[/delete-image] Image ${image.imageId} has already been deleted`);
+                    return response.status(StatusCodes.BAD_REQUEST).json({});
+                }
+                Promise.all([
+                    deleteImage(join(uploadedFolder, image.imageUrl)),
+                    deleteImage(join(thumbnailFolder, image.thumbnailUrl))
+                ]).then(() => {
+                    return response.status(StatusCodes.OK).json({});
+                }, (reason) => {
+                    console.log(`[/delete-image] Problem when deleting image file: ${reason}`);
+                    return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+                })
+            }, (reason) => {
+                console.log(`[/delete-image] Problem when deleting image from database: ${reason}`);
+                return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+            });
         }, (reason) => {
-            console.log(`[/delete-image] Problem when delete image region: ${reason}`);
-            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+            console.log(`[/delete-image] Problem when retrieving image: ${reason}`);
+            return response.status(StatusCodes.BAD_REQUEST).json({});
         });
     }, (reason) => {
         console.log(`[/delete-image] Problem when authorizing user to retrieve image: ${reason}`);
