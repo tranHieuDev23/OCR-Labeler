@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { RegionSelectedEvent, RegionSelectorComponent } from 'src/app/components/region-selector/region-selector.component';
@@ -6,6 +6,7 @@ import ImageStatus from 'src/app/models/image-status';
 import { TextRegion, Region } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
+import { FocusableDirective } from './focusable.directive';
 
 @Component({
   selector: 'app-manage-image',
@@ -14,6 +15,7 @@ import { ThumbnailService } from 'src/app/services/thumbnail.service';
 })
 export class ManageImageComponent implements OnInit {
   @ViewChild(RegionSelectorComponent, { static: false }) regionSelector: RegionSelectorComponent;
+  @ViewChildren(FocusableDirective) regionCards: QueryList<FocusableDirective>;
 
   public imageUrl: string;
   public croppedRegions: TextRegion[];
@@ -93,7 +95,10 @@ export class ManageImageComponent implements OnInit {
   }
 
   regionClicked(id: number): void {
-
+    const targetCard: FocusableDirective = this.regionCards.filter(item => {
+      return item.id === id;
+    })[0];
+    targetCard.focus();
   }
 
   deleteRegion(id: number) {

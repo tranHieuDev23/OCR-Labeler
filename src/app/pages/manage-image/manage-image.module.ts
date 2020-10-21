@@ -16,11 +16,12 @@ import { IconDefinition } from '@ant-design/icons-angular';
 import { PlusOutline, DeleteOutline, UploadOutline } from '@ant-design/icons-angular/icons';
 import { RegionSelectorModule } from 'src/app/components/region-selector/region-selector.module';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { FocusableDirective } from './focusable.directive';
 
 const icons: IconDefinition[] = [PlusOutline, DeleteOutline, UploadOutline];
 
 @NgModule({
-  declarations: [ManageImageComponent],
+  declarations: [ManageImageComponent, FocusableDirective],
   imports: [
     CommonModule,
     ManageImageRoutingModule,

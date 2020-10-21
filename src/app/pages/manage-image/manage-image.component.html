@@ -1,10 +1,16 @@
 <div>
     <h1 nz-typography>Manage your image</h1>
-    <p nz-typography>Click on 4 points on the image to select a text region, and click <b>Add selected</b> to add that
-        region</p>
+    <p nz-typography>You can select a text region on this image by two way:</p>
+    <ul>
+        <li>Rectangular selection: Left-click and drag your mouse on the image</li>
+        <li>Free polygonial selection: Right-click 4 points on the image</li>
+    </ul>
+    <p nz-typography>Once selected, click <b>Add selected</b> to add the new text region.</p>
+    <p nz-typography>Double click on a region to see its status.</p>
 </div>
 
-<app-region-selector *ngIf="imageUrl" [imageSrc]="imageUrl" (imageCropped)="cropped($event)">
+<app-region-selector *ngIf="imageUrl" [imageSrc]="imageUrl" (imageCropped)="cropped($event)"
+    (regionSelected)="regionClicked($event)">
 </app-region-selector>
 
 <div *ngIf="imageUrl" nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
@@ -24,7 +30,7 @@
             <div *ngFor="let item of croppedRegions; index as i " nz-col nzSpan="24" nzMd="12" nzLg="8"
                 style="margin-top: 8px; margin-bottom: 8px;">
                 <nz-card style="width:100%;" [nzHoverable]="true" [nzCover]="coverTemplate"
-                    [nzActions]="[deleteSetting]" (click)="regionClicked(i)">
+                    [nzActions]="[deleteSetting]" [appFocusable]="i">
                     <span *ngIf="item.status == 'NotLabeled'">
                         <nz-tag nzColor="blue">Not labeled</nz-tag>
                     </span>

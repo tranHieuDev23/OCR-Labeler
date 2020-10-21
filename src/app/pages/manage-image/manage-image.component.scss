@@ -22,6 +22,10 @@ nz-empty {
   margin-bottom: 8px;
 }
 
+nz-card.focused {
+  outline: #f5222d dashed 2px;
+}
+
 .item-thumbnail {
   width: 100%;
   height: 90px;

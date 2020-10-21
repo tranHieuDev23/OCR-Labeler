@@ -1,6 +1,8 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { Coordinate, Region } from 'src/app/models/text-region';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
+import { point, polygon } from '@turf/helpers';
 
 const EPSILON = Math.exp(-5);
 
@@ -65,10 +67,12 @@ export class RegionSelectorComponent implements OnInit {
   @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
   @Input('imageSrc') imageSrc: string;
   @Output('imageCropped') public imageCropped: EventEmitter<RegionSelectedEvent> = new EventEmitter<RegionSelectedEvent>();
+  @Output('regionSelected') public regionSelected: EventEmitter<number> = new EventEmitter<number>();
 
   private state: State;
   private isImageLoaded: boolean = false;
   private dragStart: Coordinate = null;
+  private polygonToCheckInside: any[] = [];
 
   constructor(
     private thumbnail: ThumbnailService
@@ -89,11 +93,18 @@ export class RegionSelectorComponent implements OnInit {
       };
     }
     this.canvas.nativeElement.addEventListener('dblclick', (event) => {
-      this.handleDbClick(this.getCanvasPosition(event.clientX, event.clientY));
+      if (this.isEventLeftMouse(event)) {
+        this.handleDbClick(this.getCanvasPosition(event.clientX, event.clientY));
+      }
     });
     this.canvas.nativeElement.addEventListener('mousedown', (event) => {
       event.preventDefault();
-      this.handleMouseDown(this.getCanvasPosition(event.clientX, event.clientY));
+      if (this.isEventLeftMouse(event)) {
+        this.handleLeftMouseDown(this.getCanvasPosition(event.clientX, event.clientY));
+      }
+      if (this.isEventRightMouse(event)) {
+        this.handleRightMouseDown(this.getCanvasPosition(event.clientX, event.clientY));
+      }
     });
     this.canvas.nativeElement.addEventListener('mousemove', (event) => {
       this.handleMouseMove(this.getCanvasPosition(event.clientX, event.clientY));
@@ -101,6 +112,14 @@ export class RegionSelectorComponent implements OnInit {
     this.canvas.nativeElement.addEventListener('mouseup', (event) => {
       this.handleMouseUp(this.getCanvasPosition(event.clientX, event.clientY));
     });
+  }
+
+  private isEventLeftMouse(event: MouseEvent): boolean {
+    return event.button === 0;
+  }
+
+  private isEventRightMouse(event: MouseEvent): boolean {
+    return event.button === 2;
   }
 
   private setState(state: State): void {
@@ -123,10 +142,26 @@ export class RegionSelectorComponent implements OnInit {
   }
 
   public highlight(coordinates: Coordinate[][]): void {
+    this.polygonToCheckInside = coordinates.map(item => {
+      const ply = [];
+      for (let v of item) {
+        ply.push([v.x, v.y]);
+      }
+      ply.push([item[0].x, item[0].y]);
+      return polygon([ply]);
+    });
     this.setState(this.state.cloneWithHighlightCoordinates(coordinates));
   }
 
   private handleDbClick(coordinate: Coordinate): void {
+    const insideId: number = this.isInHighlighted(coordinate);
+    if (insideId !== -1) {
+      this.regionSelected.emit(insideId);
+      return;
+    }
+  }
+
+  private handleRightMouseDown(coordinate: Coordinate): void {
     this.dragStart = null;
     let selected: Coordinate[] = this.state.selectedCoordinates || [];
     if (selected.length == 4) {
@@ -149,7 +184,7 @@ export class RegionSelectorComponent implements OnInit {
     }
   }
 
-  private handleMouseDown(coordinate: Coordinate): void {
+  private handleLeftMouseDown(coordinate: Coordinate): void {
     this.dragStart = coordinate;
     this.setState(this.state.cloneWithDragCoordinates(null));
   }
@@ -205,6 +240,13 @@ export class RegionSelectorComponent implements OnInit {
       return true;
     }
     return false;
+  }
+
+  private isInHighlighted(coordinate: Coordinate): number {
+    const pt = point([coordinate.x, coordinate.y]);
+    return this.polygonToCheckInside.findIndex(item => {
+      return booleanPointInPolygon(pt, item);
+    });
   }
 
   private drawCanvasState(state: State): void {
