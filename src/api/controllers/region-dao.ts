@@ -109,8 +109,7 @@ class TextRegionDao {
                         SELECT "TextRegions".*, "Images"."imageUrl"
                             FROM public."TextRegions"
                             FULL JOIN public."Images" ON "TextRegions"."imageId" = "Images"."imageId"
-                            WHERE "TextRegions"."uploadedBy" IS DISTINCT FROM $1
-                            AND "TextRegions"."labeledBy" IS DISTINCT FROM $1
+                            WHERE "TextRegions"."labeledBy" IS DISTINCT FROM $1
                             AND "TextRegions"."verifiedBy" IS DISTINCT FROM $1
                             AND "TextRegions".status = $2
                             AND "Images".status = 'Published'
@@ -139,7 +138,6 @@ class TextRegionDao {
                         UPDATE public."TextRegions"
                             SET label = $1, status= $2, "labeledBy"=$3
                             WHERE "regionId" = $4
-                            AND "uploadedBy" != $3
                             AND "status" = 'NotLabeled'
                             RETURNING *
                     ) SELECT COUNT(*) FROM Updated;
@@ -158,7 +156,6 @@ class TextRegionDao {
                         UPDATE public."TextRegions"
                             SET label = NULL, status = $1, "labeledBy" = $2
                             WHERE "regionId" = $3
-                            AND "uploadedBy" != $2
                             AND "status" = 'NotLabeled'
                             RETURNING *
                     ) SELECT COUNT(*) FROM Updated;
@@ -176,7 +173,6 @@ class TextRegionDao {
                     UPDATE public."TextRegions"
                         SET status= 'Verified', "verifiedBy" = $1
                         WHERE "regionId" = $2
-                        AND "uploadedBy" != $1
                         AND "labeledBy" != $1
                         AND "status" = 'NotVerified'
                         RETURNING *
@@ -187,7 +183,6 @@ class TextRegionDao {
                     UPDATE public."TextRegions"
                         SET label = NULL, status= 'NotLabeled', "verifiedBy" = $1
                         WHERE "regionId" = $2
-                        AND "uploadedBy" != $1
                         AND "labeledBy" != $1
                         AND "status" = 'NotVerified'
                         RETURNING *
