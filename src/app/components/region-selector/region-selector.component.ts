@@ -273,13 +273,13 @@ export class RegionSelectorComponent implements OnInit {
     if (state.selectedCoordinates !== null && state.selectedCoordinates.length > 0) {
       let lastItem: Coordinate = state.selectedCoordinates[state.selectedCoordinates.length - 1];
       for (let item of state.selectedCoordinates) {
-        this.drawCircle(width, height, ctx, item, 1, 'red');
-        this.drawLine(width, height, ctx, lastItem, item, 'red');
+        this.drawCircle(width, height, ctx, item, 1, '#f5222d');
+        this.drawLine(width, height, ctx, lastItem, item, '#f5222d');
         lastItem = item;
       }
     }
     if (state.dragCoordinates !== null) {
-      this.drawRect(width, height, ctx, state.dragCoordinates.start, state.dragCoordinates.end, 'red');
+      this.drawRect(width, height, ctx, state.dragCoordinates.start, state.dragCoordinates.end, '#f5222d');
     }
   }
 
@@ -293,7 +293,7 @@ export class RegionSelectorComponent implements OnInit {
       }
       let lastVert: Coordinate = item[item.length - 1];
       for (let vert of item) {
-        this.drawLine(width, height, ctx, lastVert, vert, 'green');
+        this.drawLine(width, height, ctx, lastVert, vert, '#52c41a');
         lastVert = vert;
       }
     }
@@ -313,7 +313,7 @@ export class RegionSelectorComponent implements OnInit {
     ctx.beginPath();
     ctx.moveTo(start.x * width, start.y * height);
     ctx.lineTo(end.x * width, end.y * height);
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 2;
     ctx.strokeStyle = color;
     ctx.stroke();
   }
