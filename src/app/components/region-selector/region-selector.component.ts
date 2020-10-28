@@ -3,6 +3,7 @@ import { Coordinate, Region } from 'src/app/models/text-region';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import { point, polygon } from '@turf/helpers';
+import { CanvasService } from 'src/app/services/canvas.service';
 
 const EPSILON = Math.exp(-5);
 
@@ -75,6 +76,7 @@ export class RegionSelectorComponent implements OnInit {
   private polygonToCheckInside: any[] = [];
 
   constructor(
+    private canvasService: CanvasService,
     private thumbnail: ThumbnailService
   ) {
     this.state = new State(null, null, null, []);
@@ -273,13 +275,13 @@ export class RegionSelectorComponent implements OnInit {
     if (state.selectedCoordinates !== null && state.selectedCoordinates.length > 0) {
       let lastItem: Coordinate = state.selectedCoordinates[state.selectedCoordinates.length - 1];
       for (let item of state.selectedCoordinates) {
-        this.drawCircle(width, height, ctx, item, 1, '#f5222d');
-        this.drawLine(width, height, ctx, lastItem, item, '#f5222d');
+        this.canvasService.drawCircle(width, height, ctx, item, 1, '#f5222d');
+        this.canvasService.drawLine(width, height, ctx, lastItem, item, '#f5222d');
         lastItem = item;
       }
     }
     if (state.dragCoordinates !== null) {
-      this.drawRect(width, height, ctx, state.dragCoordinates.start, state.dragCoordinates.end, '#f5222d');
+      this.canvasService.drawRect(width, height, ctx, state.dragCoordinates.start, state.dragCoordinates.end, '#f5222d');
     }
   }
 
@@ -291,39 +293,7 @@ export class RegionSelectorComponent implements OnInit {
       if (item === null || item.length === 0) {
         continue;
       }
-      let lastVert: Coordinate = item[item.length - 1];
-      for (let vert of item) {
-        this.drawLine(width, height, ctx, lastVert, vert, '#52c41a');
-        lastVert = vert;
-      }
+      this.canvasService.drawPolygon(width, height, ctx, item, '#52c41a');
     }
-  }
-
-  private drawCircle(width: number, height: number, ctx: CanvasRenderingContext2D, center: Coordinate, radius: number, color: string): void {
-    ctx.beginPath();
-    ctx.arc(center.x * width, center.y * height, radius, 0, 2 * Math.PI, false);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = color;
-    ctx.stroke();
-  }
-
-  private drawLine(width: number, height: number, ctx: CanvasRenderingContext2D, start: Coordinate, end: Coordinate, color: string): void {
-    ctx.beginPath();
-    ctx.moveTo(start.x * width, start.y * height);
-    ctx.lineTo(end.x * width, end.y * height);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = color;
-    ctx.stroke();
-  }
-
-  private drawRect(width: number, height: number, ctx: CanvasRenderingContext2D, start: Coordinate, end: Coordinate, color: string): void {
-    const p1: Coordinate = new Coordinate(start.x, end.y);
-    const p2: Coordinate = new Coordinate(end.x, start.y);
-    this.drawLine(width, height, ctx, start, p1, color);
-    this.drawLine(width, height, ctx, p1, end, color);
-    this.drawLine(width, height, ctx, end, p2, color);
-    this.drawLine(width, height, ctx, p2, start, color);
   }
 }

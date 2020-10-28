@@ -24,7 +24,9 @@ export class WelcomeComponent implements OnInit {
 
   private setLoggedInUser(user: User): void {
     this.loggedInUser = user;
-    this.noPrivilege = !(user.canUpload || user.canLabel || user.canVerify || user.canManageUsers);
+    if (user) {
+      this.noPrivilege = !(user.canUpload || user.canLabel || user.canVerify || user.canManageUsers);
+    }
   }
 
   ngOnInit() {

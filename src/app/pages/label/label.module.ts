@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { NzNotificationModule } from 'ng-zorro-antd/notification';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { ImageRegionViewerModule } from 'src/app/components/image-region-viewer/image-region-viewer.module';
 
 
 @NgModule({
@@ -22,7 +23,8 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
     NzNotificationModule,
     NzGridModule,
     NzEmptyModule,
-    FormsModule
+    FormsModule,
+    ImageRegionViewerModule
   ],
   exports: [
     LabelComponent

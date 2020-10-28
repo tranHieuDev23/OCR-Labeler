@@ -1,18 +1,19 @@
 <div>
     <h1 nz-typography>Verify images</h1>
-    <p nz-typography *ngIf="regionImage">
+    <p nz-typography *ngIf="imageUrl">
         Verify if the text in the region is the text in the label (with the correct casing). Press <b>Y</b> for
         <b>Yes</b>, <b>N</b> for <b>No</b>, or press <b>Tab</b> to switch to another text region.
     </p>
 </div>
-<nz-empty *ngIf="!regionImage" [nzNotFoundContent]="emptyContent">
+<nz-empty *ngIf="!imageUrl" [nzNotFoundContent]="emptyContent">
     <ng-template #emptyContent>
         <p nz-typography>No text region needs verifying</p>
     </ng-template>
 </nz-empty>
-<div *ngIf="regionImage" nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
+<div *ngIf="imageUrl" nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
     <div nz-col [nzSpan]="24" [nzMd]="12">
-        <img id="region-image" [src]="regionImage" />
+        <app-image-region-viewer [imageSrc]="imageUrl" [region]="region">
+        </app-image-region-viewer>
     </div>
     <div nz-col [nzSpan]="24" [nzMd]="12">
         <span nz-typography id="label"><b>{{ region.label }}</b></span><br />

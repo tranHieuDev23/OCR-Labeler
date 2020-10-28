@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Coordinate } from '../models/text-region';
+import { CanvasService } from './canvas.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ThumbnailService {
 
-  constructor() { }
+  constructor(
+    private canvasService: CanvasService
+  ) { }
 
   public generateThumbnail(imageSrc: string, maxWidth: number, maxHeight: number): Promise<string> {
     return new Promise<string>((resolve) => {
@@ -72,5 +75,23 @@ export class ThumbnailService {
     }
     ctx.closePath();
     ctx.clip();
+  }
+
+  public generateHighlightedImage(imageSrc: string, vertices: Coordinate[]): Promise<string> {
+    return new Promise<string>((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        this.canvasService.drawPolygon(canvas.width, canvas.height, ctx, vertices, '#f5222d')
+        resolve(canvas.toDataURL());
+      };
+
+      img.src = imageSrc;
+    });
   }
 }

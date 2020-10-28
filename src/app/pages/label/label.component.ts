@@ -2,7 +2,6 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { TextRegion } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
-import { ThumbnailService } from 'src/app/services/thumbnail.service';
 
 @Component({
   selector: 'app-label',
@@ -10,13 +9,12 @@ import { ThumbnailService } from 'src/app/services/thumbnail.service';
   styleUrls: ['./label.component.scss']
 })
 export class LabelComponent implements OnInit {
-  public regionImage: string = null;
+  public imageUrl: string = null;
   public label: string = '';
   private region: TextRegion = null;
 
   constructor(
     private backend: BackendService,
-    private thumbnail: ThumbnailService,
     private notification: NzNotificationService
   ) { }
 
@@ -27,19 +25,14 @@ export class LabelComponent implements OnInit {
   loadRegion(): void {
     this.backend.loadRegionForLabeling().then((result) => {
       if (!result) {
-        this.regionImage = null;
+        this.imageUrl = null;
         this.label = '';
         this.region = null;
         return;
       }
-      this.thumbnail.generatePolygonImage(result.imageUrl, result.region.region.vertices)
-        .then((image) => {
-          this.regionImage = image;
-          this.label = '';
-          this.region = result.region;
-        }, (reason) => {
-          this.notification.error('Failed to load the text region', `Reason: ${reason}`);
-        });
+      this.imageUrl = result.imageUrl;
+      this.label = '';
+      this.region = result.region;
     }, (reason) => {
       this.notification.error('Failed to load the text region', `Reason: ${reason}`);
     });

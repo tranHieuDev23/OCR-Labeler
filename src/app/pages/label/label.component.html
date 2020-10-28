@@ -1,19 +1,20 @@
 <div>
     <h1 nz-typography>Label images</h1>
-    <p nz-typography *ngIf="regionImage">
+    <p nz-typography *ngIf="imageUrl">
         Type in the text in this text region (with correct casing). Submit the label by pressing <b>Enter</b>, or skip
         this text region by pressing <b>Tab</b>. If the text region doesn't contain any text, click <b>Invalid
             region</b> to label this region as invalid.
     </p>
 </div>
-<nz-empty *ngIf="!regionImage" [nzNotFoundContent]="emptyContent">
+<nz-empty *ngIf="!imageUrl" [nzNotFoundContent]="emptyContent">
     <ng-template #emptyContent>
         <p nz-typography>No text region needs labeling</p>
     </ng-template>
 </nz-empty>
-<div *ngIf="regionImage" nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
+<div *ngIf="imageUrl" nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
     <div nz-col [nzSpan]="24" [nzMd]="12">
-        <img id="region-image" [src]="regionImage" />
+        <app-image-region-viewer [imageSrc]="imageUrl" [region]="region">
+        </app-image-region-viewer>
     </div>
     <div nz-col [nzSpan]="24" [nzMd]="12">
         <input id="label-input" nz-input [nzSize]="large" placeholder="Label here..." autocomplete="off"
