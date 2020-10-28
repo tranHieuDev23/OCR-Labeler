@@ -1,6 +1,10 @@
 #region-image {
   width: 100%;
-  margin-bottom: 16px;
+  max-height: 50vh;
+  object-fit: contain;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 8px;
 }
 
 #label-input {
