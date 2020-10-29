@@ -29,8 +29,7 @@
         <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
             <div *ngFor="let item of croppedRegions; index as i " nz-col nzSpan="24" nzMd="12" nzLg="8"
                 style="margin-top: 8px; margin-bottom: 8px;">
-                <nz-card style="width:100%;" [nzHoverable]="true" [nzCover]="coverTemplate"
-                    [nzActions]="[deleteSetting]" [appFocusable]="i">
+                <nz-card style="width:100%;" [nzHoverable]="true" [nzCover]="coverTemplate" (click)="regionClicked(i)">
                     <span *ngIf="item.status == 'NotLabeled'">
                         <nz-tag nzColor="blue">Not labeled</nz-tag>
                     </span>
@@ -57,12 +56,6 @@
                 <ng-template #coverTemplate>
                     <img class="item-thumbnail" [src]="croppedRegionImages[i]" />
                 </ng-template>
-                <ng-template #deleteSetting>
-                    <button nz-button nzDanger nz-popconfirm nzPopconfirmTitle="Are you sure?" nzOkText="OK"
-                        nzCancelText="Cancel" (nzOnConfirm)="deleteRegion(i)">
-                        <i nz-icon nzType="delete"></i>
-                    </button>
-                </ng-template>
             </div>
         </div>
 
@@ -85,3 +78,35 @@
         </button>
     </div>
 </div>
+
+<nz-modal *ngIf="modalRegion" nzTitle="Region status" [nzVisible]="modalRegion" [nzClosable]="false"
+    [nzCancelText]="Close" (nzOnCancel)="closeModal()" [nzOkText]="null">
+    <img class="modal-image" [src]="modalRegionImage" />
+    <span *ngIf="modalRegion.status == 'NotLabeled'">
+        <nz-tag nzColor="blue">Not labeled</nz-tag>
+    </span>
+    <span *ngIf="modalRegion.status == 'CantLabel'">
+        <nz-tag nzColor="red">Can't be labeled</nz-tag>
+    </span>
+    <span *ngIf="modalRegion.status == 'NotVerified'">
+        <nz-tag nzColor="yellow">Labeled</nz-tag>
+    </span>
+    <span *ngIf="modalRegion.status == 'Verified'">
+        <nz-tag nzColor="green">Verified</nz-tag>
+    </span>
+    <br />
+    <span *ngIf="modalRegion.status == 'NotVerified' || modalRegion.status == 'Verified'" nz-typography>
+        Labeled by <b>{{ modalRegion.labeledBy.displayName }}</b> as <b>{{ modalRegion.label }}</b><br />
+    </span>
+    <span *ngIf="modalRegion.status == 'CantLabel'" nz-typography>
+        Reported by <b>{{ modalRegion.labeledBy.displayName }}</b><br />
+    </span>
+    <span *ngIf="modalRegion.status == 'Verified'" nz-typography>
+        Verified by <b>{{ modalRegion.verifiedBy.displayName }}</b><br />
+    </span>
+
+    <button nz-button nzDanger nzType="primary" nz-popconfirm nzPopconfirmTitle="Are you sure?" nzOkText="OK"
+        nzCancelText="Cancel" (nzOnConfirm)="deleteRegion(modalRegionId)" style="margin-top: 8px;">
+        <i nz-icon nzType="delete"></i> Delete this region
+    </button>
+</nz-modal>

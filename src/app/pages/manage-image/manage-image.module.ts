@@ -12,16 +12,16 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzNotificationModule } from 'ng-zorro-antd/notification';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 import { IconDefinition } from '@ant-design/icons-angular';
 import { PlusOutline, DeleteOutline, UploadOutline } from '@ant-design/icons-angular/icons';
 import { RegionSelectorModule } from 'src/app/components/region-selector/region-selector.module';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
-import { FocusableDirective } from './focusable.directive';
 
 const icons: IconDefinition[] = [PlusOutline, DeleteOutline, UploadOutline];
 
 @NgModule({
-  declarations: [ManageImageComponent, FocusableDirective],
+  declarations: [ManageImageComponent],
   imports: [
     CommonModule,
     ManageImageRoutingModule,
@@ -36,7 +36,8 @@ const icons: IconDefinition[] = [PlusOutline, DeleteOutline, UploadOutline];
     NzEmptyModule,
     NzTagModule,
     FormsModule,
-    RegionSelectorModule
+    RegionSelectorModule,
+    NzModalModule
   ],
   exports: [
     ManageImageComponent
