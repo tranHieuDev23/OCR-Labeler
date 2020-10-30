@@ -14,6 +14,7 @@ import BlacklistedJwtDao from '../controllers/jwt-dao';
 import TextRegionDao from '../controllers/region-dao';
 import * as fs from 'fs';
 import { join } from 'path';
+import { ImageComparationOption } from 'src/app/models/image-compare-funcs';
 
 const imageRouter: Router = Router();
 
@@ -30,18 +31,22 @@ imageRouter.post('/get-user-images', (request, response) => {
             console.log(`[/get-user-images] User ${user.username} is not authorized to upload image!`);
             return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
-        const startFrom: number = request.body.startFrom;
+        let startFrom: number = request.body.startFrom;
         const itemCount: number = request.body.itemCount;
-        imageDao.getUserImagesCount(user).then((imagesCount) => {
+        const sortOption: ImageComparationOption = request.body.sortOption;
+        const filteredStatuses: ImageStatus[] = request.body.filteredStatuses;
+        let pageId: number = (startFrom / itemCount) + 1;
+        imageDao.getUserImagesCount(user, filteredStatuses).then((imagesCount) => {
             if (imagesCount <= startFrom) {
                 console.log(
-                    `[/get-user-images] User ${user.username} is trying to access more image than allowed: startFrom=${startFrom}, imagesCount=${imagesCount}`
+                    `[/get-user-images] User ${user.username} is trying to access more image than allowed: startFrom=${startFrom}, imagesCount=${imagesCount}. Reset to page one.`
                 );
-                return response.status(StatusCodes.BAD_REQUEST).json({});
+                startFrom = 0;
+                pageId = 1;
             }
-            imageDao.getUserImages(user, startFrom, itemCount).then((images) => {
+            imageDao.getUserImages(user, startFrom, itemCount, sortOption, filteredStatuses).then((images) => {
                 return response.json({
-                    imagesCount, images
+                    imagesCount, images, pageId
                 });
             }, (reason) => {
                 console.log(`[/get-user-images] Problem when retrieving image: ${reason}`);

@@ -1,5 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { ImageComparationOption } from '../models/image-compare-funcs';
+import ImageStatus from '../models/image-status';
 import { TextRegion, Region } from '../models/text-region';
 import UploadedImage from '../models/uploaded-image';
 
@@ -53,15 +55,16 @@ export class BackendService {
     });
   }
 
-  public loadUserImages(startFrom: number, itemCount: number): Promise<{ imagesCount: number, images: UploadedImage[] }> {
-    return new Promise<{ imagesCount: number, images: UploadedImage[] }>((resolve, reject) => {
-      this.http.post<any>('/api/get-user-images', { startFrom, itemCount }).toPromise().then((response) => {
+  public loadUserImages(startFrom: number, itemCount: number, sortOption: ImageComparationOption, filteredStatuses: ImageStatus[]): Promise<{ imagesCount: number, images: UploadedImage[], pageId: number }> {
+    return new Promise<{ imagesCount: number, images: UploadedImage[], pageId: number }>((resolve, reject) => {
+      this.http.post<any>('/api/get-user-images', { startFrom, itemCount, sortOption, filteredStatuses }).toPromise().then((response) => {
         const imagesCount: number = +response.imagesCount;
         const images: UploadedImage[] = [];
         for (let item of response.images) {
           images.push(UploadedImage.parseFromJson(item));
         }
-        resolve({ imagesCount, images });
+        const pageId: number = +response.pageId;
+        resolve({ imagesCount, images, pageId });
       }, reject);
     });
   }

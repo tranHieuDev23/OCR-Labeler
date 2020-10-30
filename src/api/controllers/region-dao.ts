@@ -12,6 +12,10 @@ class TextRegionDao {
 
     public addTextRegions(regions: TextRegion[]): Promise<void> {
         return new Promise<void>((resolve, reject) => {
+            if (!regions || regions.length == 0) {
+                resolve();
+                return;
+            }
             const cs = new pgp.helpers.ColumnSet([
                 'regionId',
                 'imageId',

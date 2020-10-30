@@ -3,18 +3,9 @@
         <nz-card nzSize="small" nzHoverable
             style="margin-left: auto; margin-right: auto; margin-bottom: 16px; width: 240px;" [nzCover]="coverTemplate"
             (click)="onClick(i)">
-            <span *ngIf="item.status == 'Uploaded'">
-                <nz-tag nzColor="orange">Uploaded</nz-tag>
-            </span>
-            <span *ngIf="item.status == 'Processed'">
-                <nz-tag nzColor="blue">Processed with CRAFT</nz-tag>
-            </span>
-            <span *ngIf="item.status == 'NotProcessed'">
-                <nz-tag nzColor="red">Not processed with CRAFT</nz-tag>
-            </span>
-            <span *ngIf="item.status == 'Published'">
-                <nz-tag nzColor="green">Published</nz-tag>
-            </span>
+            <nz-tag [nzColor]="statusColor(item.status)">
+                {{ statusString(item.status) }}
+            </nz-tag>
             <p nz-typography>
                 Uploaded on {{ dateTimeString(item.uploadedDate) }}
             </p>

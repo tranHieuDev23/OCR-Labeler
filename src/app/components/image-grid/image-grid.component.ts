@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import ImageStatus, { getImageStatusColor, getImageStatusString } from 'src/app/models/image-status';
 import UploadedImage from 'src/app/models/uploaded-image';
 
 @Component({
@@ -14,6 +15,14 @@ export class ImageGridComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  statusColor(status: ImageStatus): string {
+    return getImageStatusColor(status);
+  }
+
+  statusString(status: ImageStatus): string {
+    return getImageStatusString(status);
   }
 
   dateTimeString(date: Date): string {

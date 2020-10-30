@@ -3,8 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { MyImagesComponent } from './my-images.component';
 
 const routes: Routes = [
-  { path: '', component: MyImagesComponent },
-  { path: ':id', component: MyImagesComponent },
+  { path: '', component: MyImagesComponent }
 ];
 
 @NgModule({

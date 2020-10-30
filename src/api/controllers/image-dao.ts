@@ -1,4 +1,5 @@
-import ImageStatus from 'src/app/models/image-status';
+import { getOrderByClause, ImageComparationOption } from 'src/app/models/image-compare-funcs';
+import ImageStatus, { getImageStatusFilterClause } from 'src/app/models/image-status';
 import UploadedImage from "src/app/models/uploaded-image";
 import User from 'src/app/models/user';
 import databaseConnection from './database';
@@ -15,10 +16,14 @@ class ImageDao {
         return new ImageDao();
     }
 
-    public getUserImagesCount(user: User): Promise<number> {
+    public getUserImagesCount(user: User, filteredStatuses: ImageStatus[]): Promise<number> {
         return new Promise<number>((resolve, reject) => {
             databaseConnection.one(
-                `SELECT COUNT(*) FROM public."Images" WHERE "Images"."uploadedBy" = $1;`,
+                `
+                    SELECT COUNT(*) FROM public."Images"
+                        WHERE "Images"."uploadedBy" = $1
+                        ${getImageStatusFilterClause(filteredStatuses)};
+                `,
                 [user.username]
             ).then((result) => {
                 resolve(+result.count);
@@ -28,13 +33,14 @@ class ImageDao {
         });
     }
 
-    public getUserImages(user: User, startFrom: number, itemCount: number): Promise<UploadedImage[]> {
+    public getUserImages(user: User, startFrom: number, itemCount: number, sortOption: ImageComparationOption, filteredStatuses: ImageStatus[]): Promise<UploadedImage[]> {
         return new Promise<UploadedImage[]>((resolve, reject) => {
             databaseConnection.any(
                 `
                     SELECT * FROM public."Images"
                         WHERE "Images"."uploadedBy" = $1
-                        ORDER BY "Images"."uploadedDate" DESC
+                        ${getImageStatusFilterClause(filteredStatuses)}
+                        ${getOrderByClause(sortOption)}
                         OFFSET $2 LIMIT $3;
                 `,
                 [user.username, startFrom, itemCount]
