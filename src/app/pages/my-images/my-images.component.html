@@ -22,7 +22,7 @@
 
 <ng-template #tagPlaceHolder let-selectedList>and {{ selectedList.length }} more</ng-template>
 <app-image-grid [images]="uploadedImages" emptyText="You haven't uploaded any image"
-    (imageClicked)="onImageClicked($event)">
+    (imageClicked)="onImageClicked($event)" [loading]="loading">
 </app-image-grid>
 <div *ngIf="imagesCount" id="pagination">
     <nz-pagination [nzPageIndex]="currentPage" [nzPageSize]="imagesPerPage" [nzTotal]="imagesCount" nzShowQuickJumper

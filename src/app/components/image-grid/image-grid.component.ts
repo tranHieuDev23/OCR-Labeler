@@ -10,6 +10,7 @@ import UploadedImage from 'src/app/models/uploaded-image';
 export class ImageGridComponent implements OnInit {
   @Input('images') public images: UploadedImage[];
   @Input('emptyText') public emptyText: string = "There is no image";
+  @Input('loading') public loading: boolean = true;
   @Output('imageClicked') public imageClicked = new EventEmitter<number>();
 
   constructor() { }

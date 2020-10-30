@@ -17,9 +17,7 @@ export class MyImagesComponent implements OnInit {
   public imagesPerPage: number = IMAGES_PER_PAGE;
   public imagesCount: number = null;
   public uploadedImages: UploadedImage[] = [];
-  public selectedId: number = 0;
-  public selectedRegion: UploadedImage = null;
-  public isVisible: boolean = false;
+  public loading: boolean = true;
 
   public sortOptions: { label: string, value: ImageComparationOption }[] = [
     { label: 'Upload date (Latest first)', value: ImageComparationOption.UPLOAD_LATEST_FIRST },
@@ -51,6 +49,7 @@ export class MyImagesComponent implements OnInit {
   }
 
   loadPage(pageId: number, sortOption: ImageComparationOption, filteredStatuses: ImageStatus[]): void {
+    this.loading = true;
     this.currentPage = pageId;
     this.selectedSortOption = sortOption;
     this.filteredStatuses = filteredStatuses;
@@ -58,6 +57,7 @@ export class MyImagesComponent implements OnInit {
       this.currentPage = result.pageId;
       this.imagesCount = result.imagesCount;
       this.uploadedImages = result.images;
+      this.loading = false;
     }, (reason) => {
 
     });

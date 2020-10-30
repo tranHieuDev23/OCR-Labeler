@@ -5,6 +5,8 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
+import { NzEmptyModule } from 'ng-zorro-antd/empty';
 
 @NgModule({
   declarations: [ImageGridComponent],
@@ -13,7 +15,9 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
     NzGridModule,
     NzTypographyModule,
     NzCardModule,
-    NzTagModule
+    NzTagModule,
+    NzSkeletonModule,
+    NzEmptyModule
   ],
   exports: [
     ImageGridComponent
