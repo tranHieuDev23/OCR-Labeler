@@ -30,8 +30,8 @@ const DATABASE_INITIALIZE_QUERY = `
         "canUpload" boolean NOT NULL,
         "canLabel" boolean NOT NULL,
         "canVerify" boolean NOT NULL,
-        "canManageUsers" boolean NOT NULL,
-        "canManageAllImage" boolean NOT NULL,
+        "canManageUsers" boolean DEFAULT false NOT NULL,
+        "canManageAllImage" boolean DEFAULT false NOT NULL,
         "canExport" boolean NOT NULL
     );
 
