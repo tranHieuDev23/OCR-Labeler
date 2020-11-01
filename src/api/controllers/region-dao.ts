@@ -146,6 +146,7 @@ class TextRegionDao {
                             AND "TextRegions"."verifiedBy" IS DISTINCT FROM $1
                             AND "TextRegions".status = $2
                             AND "Images".status = 'Published'
+                            LIMIT 1000
                     ) SELECT * FROM ValidItems OFFSET floor(random() * (SELECT COUNT(*) FROM validItems))
                         LIMIT 1;
                 `, [user.username, status]

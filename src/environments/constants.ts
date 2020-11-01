@@ -34,6 +34,21 @@ const DATABASE_INITIALIZE_QUERY = `
         "canManageAllImage" boolean NOT NULL,
         "canExport" boolean NOT NULL
     );
+
+    DROP INDEX IF EXISTS "IMAGES_ID_INDEX" CASCADE;
+    DROP INDEX IF EXISTS "IMAGES_UPLOADED_BY_INDEX" CASCADE;
+    CREATE UNIQUE INDEX IF NOT EXISTS "IMAGES_ID_HASH_INDEX" ON public."Images" USING btree ("imageId");
+    CREATE INDEX IF NOT EXISTS "IMAGES_UPLOADED_BY_HASH_INDEX" ON public."Images" USING hash ("uploadedBy");
+
+    DROP INDEX IF EXISTS "TEXT_REGIONS_REGION_ID_INDEX" CASCADE;
+    CREATE INDEX IF NOT EXISTS "TEXT_REGIONS_IMAGE_ID_INDEX" ON public."TextRegions" USING hash ("imageId");
+    CREATE UNIQUE INDEX IF NOT EXISTS "TEXT_REGIONS_REGION_ID_HASH_INDEX" ON public."TextRegions" USING btree ("regionId");
+    
+    CREATE INDEX IF NOT EXISTS "TOKEN_ID_INDEX" ON public."BlacklistedJwts" USING hash (jwtid);
+
+    CREATE UNIQUE INDEX IF NOT EXISTS "USERS_USERNAME_INDEX" ON public."Users" USING btree (username);
+
+    
     ALTER TABLE public."TextRegions" DROP CONSTRAINT IF EXISTS "TextRegions_pkey" CASCADE;
     ALTER TABLE ONLY public."TextRegions"
         ADD CONSTRAINT "TextRegions_pkey" PRIMARY KEY ("regionId");
@@ -43,12 +58,7 @@ const DATABASE_INITIALIZE_QUERY = `
     ALTER TABLE public."Users" DROP CONSTRAINT IF EXISTS "Users_pkey" CASCADE;
     ALTER TABLE ONLY public."Users"
         ADD CONSTRAINT "Users_pkey" PRIMARY KEY (username);
-    CREATE UNIQUE INDEX IF NOT EXISTS "IMAGES_ID_INDEX" ON public."Images" USING btree ("imageId");
-    CREATE INDEX IF NOT EXISTS "IMAGES_UPLOADED_BY_INDEX" ON public."Images" USING btree ("uploadedBy", "uploadedDate" DESC NULLS LAST);
-    CREATE INDEX IF NOT EXISTS "TEXT_REGIONS_IMAGE_ID_INDEX" ON public."TextRegions" USING hash ("imageId");
-    CREATE INDEX IF NOT EXISTS "TEXT_REGIONS_REGION_ID_INDEX" ON public."TextRegions" USING btree ("regionId", "uploadedBy", "labeledBy", "verifiedBy", status);
-    CREATE INDEX IF NOT EXISTS "TOKEN_ID_INDEX" ON public."BlacklistedJwts" USING hash (jwtid);
-    CREATE UNIQUE INDEX IF NOT EXISTS "USERS_USERNAME_INDEX" ON public."Users" USING btree (username);
+
     ALTER TABLE public."Images" DROP CONSTRAINT IF EXISTS "IMAGE_UPLOADED_BY";
     ALTER TABLE ONLY public."Images"
         ADD CONSTRAINT "IMAGE_UPLOADED_BY" FOREIGN KEY ("uploadedBy") REFERENCES public."Users"(username) ON DELETE CASCADE;

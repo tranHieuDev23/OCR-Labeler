@@ -204,7 +204,7 @@ class ImageDao {
                 `
                     WITH Updated AS (
                         UPDATE public."Images"
-                            SET status=$1
+                            SET status = $1
                             WHERE "Images"."imageId" = $2
                         RETURNING * 
                     ) SELECT COUNT(*) FROM Updated
