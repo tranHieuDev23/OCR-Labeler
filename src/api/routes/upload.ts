@@ -16,6 +16,7 @@ import ImageDao from '../controllers/image-dao';
 import { processImageWithCraft } from '../controllers/craft';
 import TextRegionDao from '../controllers/region-dao';
 import * as multer from 'multer';
+import { jwtMiddlewareFactory } from './jwt-middleware';
 
 const uploadRouter: Router = Router();
 const FULL_HD_WIDTH = 1920;
@@ -82,60 +83,53 @@ const multerMiddleware = multer({
     }
 }).any();
 
-uploadRouter.post('/upload', multerMiddleware, async (request, response) => {
-    const jwt = request.cookies[AUTH_COOKIE_NAME];
-    jwtDao.getUserFromJwt(jwt).then((user) => {
-        if (!user.canUpload) {
-            console.log(`[/upload] User ${user.username} is not authorized to upload images!`);
-            return response.status(StatusCodes.UNAUTHORIZED).json({});
-        }
-        if (request.files.length === 0 || !request.files[0].buffer) {
-            console.log(`[/upload] User ${user.username} is trying to upload unsupported file!`);
-            return response.status(StatusCodes.BAD_REQUEST).json({});
-        }
-        generateImageAndThumbnail(request.files[0].buffer).then(({ fullImage, thumbnail }) => {
-            const imageFileName: string = uid(33) + '.jpeg';
-            const thumbnailName: string = uid(34) + '.jpeg';
-            saveImageAndThumbnail(imageFileName, fullImage, thumbnailName, thumbnail).then(() => {
-                const imageId: string = uid(32);
-                const newImage: UploadedImage = new UploadedImage(
-                    imageId,
-                    `/${imageFileName}`,
-                    `/${thumbnailName}`,
-                    [],
-                    user,
-                    new Date(),
-                    ImageStatus.Uploaded
-                );
-                imageDao.addImage(newImage).then(() => {
-                    processPostUpload(imageId, user, fullImage).then(() => {
-                        imageDao.setImageStatus(imageId, user, ImageStatus.Processed).then(() => {
-                            console.log(`[/upload] Processed ${imageId} with CRAFT`);
-                        }, (reason) => {
-                            console.log(`[/upload] Processed ${imageId} with CRAFT, but failed to update image status: ${reason}`);
-                        });
+const uploadJwtMiddleware: Router = jwtMiddlewareFactory(user => user.canUpload);
+
+uploadRouter.post('/upload', uploadJwtMiddleware, multerMiddleware, async (request, response) => {
+    const user: User = response.locals.user;
+    if (request.files.length === 0 || !request.files[0].buffer) {
+        console.log(`[/upload] User ${user.username} is trying to upload unsupported file!`);
+        return response.status(StatusCodes.BAD_REQUEST).json({});
+    }
+    generateImageAndThumbnail(request.files[0].buffer).then(({ fullImage, thumbnail }) => {
+        const imageFileName: string = uid(33) + '.jpeg';
+        const thumbnailName: string = uid(34) + '.jpeg';
+        saveImageAndThumbnail(imageFileName, fullImage, thumbnailName, thumbnail).then(() => {
+            const imageId: string = uid(32);
+            const newImage: UploadedImage = new UploadedImage(
+                imageId,
+                `/${imageFileName}`,
+                `/${thumbnailName}`,
+                [],
+                user,
+                new Date(),
+                ImageStatus.Uploaded
+            );
+            imageDao.addImage(newImage).then(() => {
+                processPostUpload(imageId, user, fullImage).then(() => {
+                    imageDao.setImageStatus(imageId, user, ImageStatus.Processed).then(() => {
+                        console.log(`[/upload] Processed ${imageId} with CRAFT`);
                     }, (reason) => {
-                        console.log(`[/upload] Problem processing ${imageId} with CRAFT: ${reason}`);
-                        imageDao.setImageStatus(imageId, user, ImageStatus.NotProcessed).then(() => { }, (reason) => {
-                            console.log(`[/upload] Failed to update image status for ${imageId}: ${reason}`);
-                        });
+                        console.log(`[/upload] Processed ${imageId} with CRAFT, but failed to update image status: ${reason}`);
                     });
-                    return response.json(newImage);
                 }, (reason) => {
-                    console.log(`[/upload] Problem adding image to database: ${reason}`);
-                    return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+                    console.log(`[/upload] Problem processing ${imageId} with CRAFT: ${reason}`);
+                    imageDao.setImageStatus(imageId, user, ImageStatus.NotProcessed).then(() => { }, (reason) => {
+                        console.log(`[/upload] Failed to update image status for ${imageId}: ${reason}`);
+                    });
                 });
+                return response.json(newImage);
             }, (reason) => {
-                console.log(`[/upload] Problem saving image: ${reason}`);
+                console.log(`[/upload] Problem adding image to database: ${reason}`);
                 return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
             });
         }, (reason) => {
-            console.log(`[/upload] Problem resizing image: ${reason}`);
-            return response.status(StatusCodes.BAD_REQUEST).json({});
+            console.log(`[/upload] Problem saving image: ${reason}`);
+            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
         });
     }, (reason) => {
-        console.log(`[/upload] Problem validating JWT: ${reason}`);
-        return response.status(StatusCodes.UNAUTHORIZED).json({});
+        console.log(`[/upload] Problem resizing image: ${reason}`);
+        return response.status(StatusCodes.BAD_REQUEST).json({});
     });
 });
 

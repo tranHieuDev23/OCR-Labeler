@@ -5,6 +5,7 @@ import { validateDisplayName, validatePassword, validateUsername } from 'src/app
 import { AUTH_COOKIE_NAME } from 'src/environments/constants';
 import BlacklistedJwtDao from '../controllers/jwt-dao';
 import UserDao from '../controllers/user-dao';
+import { jwtMiddlewareFactory } from './jwt-middleware';
 
 const authRouter: Router = Router();
 const userDao: UserDao = UserDao.getInstance();
@@ -20,41 +21,23 @@ function getCookieOption(): CookieOptions {
     };
 }
 
-authRouter.post('/get-users', (request, response) => {
-    const token: string = request.cookies[AUTH_COOKIE_NAME];
-    jwtDao.getUserFromJwt(token).then((user) => {
-        if (!user.canManageUsers) {
-            console.log(`[/get-users] User ${user.username} is not authorized to manage users`);
-            return response.status(StatusCodes.UNAUTHORIZED).json({});
-        }
-        userDao.getAllUser().then((allUsers) => {
-            return response.json(allUsers);
-        }, (reason) => {
-            console.log(`[/get-users] Error happened while reading from database: ${reason}`);
-            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
-        });
+const adminJwtMiddleware: Router = jwtMiddlewareFactory((user) => user.canManageUsers);
+
+authRouter.post('/get-users', adminJwtMiddleware, (request, response) => {
+    userDao.getAllUser().then((allUsers) => {
+        return response.json(allUsers);
     }, (reason) => {
-        console.log(`[/get-users] Error happened while validating user: ${reason}`);
-        return response.status(StatusCodes.UNAUTHORIZED).json({});
+        console.log(`[/get-users] Error happened while reading from database: ${reason}`);
+        return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
     });
 });
 
-authRouter.post('/get-users-full', (request, response) => {
-    const token: string = request.cookies[AUTH_COOKIE_NAME];
-    jwtDao.getUserFromJwt(token).then((user) => {
-        if (!user.canManageUsers) {
-            console.log(`[/get-users-full] User ${user.username} is not authorized to manage users`);
-            return response.status(StatusCodes.UNAUTHORIZED).json({});
-        }
-        userDao.getAllUserForManagement().then((allUsers) => {
-            return response.json(allUsers);
-        }, (reason) => {
-            console.log(`[/get-users-full] Error happened while reading from database: ${reason}`);
-            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
-        });
+authRouter.post('/get-users-full', adminJwtMiddleware, (request, response) => {
+    userDao.getAllUserForManagement().then((allUsers) => {
+        return response.json(allUsers);
     }, (reason) => {
-        console.log(`[/get-users-full] Error happened while validating user: ${reason}`);
-        return response.status(StatusCodes.UNAUTHORIZED).json({});
+        console.log(`[/get-users-full] Error happened while reading from database: ${reason}`);
+        return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
     });
 });
 
@@ -82,53 +65,33 @@ function validateRegisteredUser(user: User): { [k: string]: boolean } | null {
     return null;
 }
 
-authRouter.post('/register', (request, response) => {
-    const token: string = request.cookies[AUTH_COOKIE_NAME];
-    jwtDao.getUserFromJwt(token).then((user) => {
-        if (!user.canManageUsers) {
-            console.log(`[/register] User ${user.username} is not authorized to manage users`);
-            return response.status(StatusCodes.UNAUTHORIZED).json({});
-        }
-        const newUser = User.parseFromJson(request.body);
-        const validation = validateRegisteredUser(newUser);
-        if (validation) {
-            console.log(`[/register] Invalid user information: ${validation}`);
-            return response.status(StatusCodes.BAD_REQUEST).json({});
-        }
-        userDao.addUser(newUser).then(() => {
-            response.status(StatusCodes.OK).json({});
-        }, (reason) => {
-            console.log(`[/register] Register failed: ${reason}`);
-            return response.status(StatusCodes.BAD_REQUEST).json({});
-        });
+authRouter.post('/register', adminJwtMiddleware, (request, response) => {
+    const newUser = User.parseFromJson(request.body);
+    const validation = validateRegisteredUser(newUser);
+    if (validation) {
+        console.log(`[/register] Invalid user information: ${validation}`);
+        return response.status(StatusCodes.BAD_REQUEST).json({});
+    }
+    userDao.addUser(newUser).then(() => {
+        response.status(StatusCodes.OK).json({});
     }, (reason) => {
-        console.log(`[/register] Error happened while validating user: ${reason}`);
-        return response.status(StatusCodes.UNAUTHORIZED).json({});
+        console.log(`[/register] Register failed: ${reason}`);
+        return response.status(StatusCodes.BAD_REQUEST).json({});
     });
 });
 
-authRouter.post('/update-user', (request, response) => {
-    const token: string = request.cookies[AUTH_COOKIE_NAME];
-    jwtDao.getUserFromJwt(token).then((user) => {
-        if (!user.canManageUsers) {
-            console.log(`[/update-user] User ${user.username} is not authorized to manage users`);
-            return response.status(StatusCodes.UNAUTHORIZED).json({});
-        }
-        const updatedUser = User.parseFromJson(request.body);
-        const validation = validateUpdatedUser(updatedUser);
-        if (validation) {
-            console.log(`[/update-user] Invalid user information: ${validation}`);
-            return response.status(StatusCodes.BAD_REQUEST).json({});
-        }
-        userDao.updateUser(updatedUser).then(() => {
-            response.status(StatusCodes.OK).json({});
-        }, (reason) => {
-            console.log(`[/update-user] Update user failed: ${reason}`);
-            return response.status(StatusCodes.BAD_REQUEST).json({});
-        });
+authRouter.post('/update-user', adminJwtMiddleware, (request, response) => {
+    const updatedUser = User.parseFromJson(request.body);
+    const validation = validateUpdatedUser(updatedUser);
+    if (validation) {
+        console.log(`[/update-user] Invalid user information: ${validation}`);
+        return response.status(StatusCodes.BAD_REQUEST).json({});
+    }
+    userDao.updateUser(updatedUser).then(() => {
+        response.status(StatusCodes.OK).json({});
     }, (reason) => {
-        console.log(`[/update-user] Error happened while validating user: ${reason}`);
-        return response.status(StatusCodes.UNAUTHORIZED).json({});
+        console.log(`[/update-user] Update user failed: ${reason}`);
+        return response.status(StatusCodes.BAD_REQUEST).json({});
     });
 });
 
