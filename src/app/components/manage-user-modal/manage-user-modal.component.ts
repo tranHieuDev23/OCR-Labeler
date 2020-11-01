@@ -11,6 +11,7 @@ export class ManageUserModalConfig {
   public canLabel: boolean = true;
   public canVerify: boolean = true;
   public canExport: boolean = true;
+  public canManageAllImage: boolean = true;
   public canManageUsers: boolean = true;
 }
 
@@ -41,6 +42,7 @@ export class ManageUserModalComponent implements OnInit {
       canLabel: [true],
       canVerify: [true],
       canExport: [false],
+      canManageAllImage: [false],
       canManageUsers: [false],
     });
   }
@@ -73,7 +75,7 @@ export class ManageUserModalComponent implements OnInit {
       if (!control.value) {
         return { error: true, required: true };
       }
-      if (control.value != this.formGroup.controls.password.value) {
+      if (control.value !== this.formGroup.controls.password.value) {
         return { error: true, checkPassword: true };
       }
       return null;

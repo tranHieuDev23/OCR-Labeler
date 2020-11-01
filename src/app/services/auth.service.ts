@@ -23,7 +23,7 @@ export class AuthService {
   public isUserLoggedIn(): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       this.getCurrentUser().then((user) => {
-        resolve(user != null);
+        resolve(user !== null);
       }, (error) => {
         reject(error.error.error);
       });
@@ -74,7 +74,7 @@ export class AuthService {
 
   public getCurrentUser(): Promise<User> {
     return new Promise<User>((resolve, reject) => {
-      if (this.currentUser != null) {
+      if (this.currentUser !== null) {
         resolve(this.currentUser);
         return;
       }
@@ -153,6 +153,7 @@ export class AuthService {
         if (!user.canManageUsers) {
           return reject('User is not authorized to manage users');
         }
+        console.log(updatedUser);
         this.http.post('/api/update-user', updatedUser).toPromise().then(() => {
           resolve();
         }, (error) => {

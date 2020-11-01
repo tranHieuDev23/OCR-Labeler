@@ -113,6 +113,7 @@ export class ManageImageComponent implements OnInit {
       this.croppedRegions.splice(id, 1);
       this.croppedRegionImages.splice(id, 1);
       this.regionSelector.highlight(this.croppedRegions.map(item => item.region.vertices));
+      this.closeModal();
     }, (reason) => {
       this.notification.error('Failed to delete text region', `Reason: ${reason}`);
     });

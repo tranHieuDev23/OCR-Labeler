@@ -17,9 +17,9 @@ export function getOrderByClause(option: ImageComparationOption): string {
             return 'ORDER BY "Images".status';
         case ImageComparationOption.STATUS_DESC:
             return 'ORDER BY "Images".status DESC';
-        case ImageComparationOption.STATUS_ASC:
+        case ImageComparationOption.USER_ASC:
             return 'ORDER BY "Images"."uploadedBy"';
-        case ImageComparationOption.STATUS_DESC:
+        case ImageComparationOption.USER_DESC:
             return 'ORDER BY "Images"."uploadedBy" DESC';
         default:
             return '';

@@ -31,7 +31,8 @@ const DATABASE_INITIALIZE_QUERY = `
         "canLabel" boolean NOT NULL,
         "canVerify" boolean NOT NULL,
         "canManageUsers" boolean NOT NULL,
-        "canExport" boolean DEFAULT false NOT NULL
+        "canManageAllImage" boolean NOT NULL,
+        "canExport" boolean NOT NULL
     );
     ALTER TABLE public."TextRegions" DROP CONSTRAINT IF EXISTS "TextRegions_pkey" CASCADE;
     ALTER TABLE ONLY public."TextRegions"

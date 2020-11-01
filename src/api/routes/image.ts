@@ -23,8 +23,8 @@ const regionDao: TextRegionDao = TextRegionDao.getInstance();
 const uploadedFolder = process.env.UPLOADED_DIRECTORY;
 const thumbnailFolder = process.env.THUMBNAIL_DIRECTORY;
 
-const uploadJwtMiddleware: Router = jwtMiddlewareFactory((user) => user.canUpload);
-const adminJwtMiddleware: Router = jwtMiddlewareFactory((user) => user.canManageUsers);
+const uploadJwtMiddleware: Router = jwtMiddlewareFactory((user) => user.canUpload || user.canManageAllImage);
+const canManageAllImageJwtMiddleware: Router = jwtMiddlewareFactory((user) => user.canManageAllImage);
 
 imageRouter.post('/get-user-images', uploadJwtMiddleware, (request, response) => {
     const user: User = response.locals.user;
@@ -52,7 +52,7 @@ imageRouter.post('/get-user-images', uploadJwtMiddleware, (request, response) =>
     });
 });
 
-imageRouter.post('/get-all-user-images', adminJwtMiddleware, (request, response) => {
+imageRouter.post('/get-all-user-images', canManageAllImageJwtMiddleware, (request, response) => {
     const user: User = response.locals.user;
     let startFrom: number = request.body.startFrom;
     const itemCount: number = request.body.itemCount;
@@ -83,9 +83,9 @@ imageRouter.post('/get-image', uploadJwtMiddleware, (request, response) => {
     const user: User = response.locals.user;
     const imageId: string = request.body.imageId;
     imageDao.getImage(imageId).then((image) => {
-        if (image.uploadedBy.username != user.username) {
+        if (image.uploadedBy.username !== user.username && !user.canManageAllImage) {
             console.log(`[/get-image] User ${user.username} is trying to access other's images!`);
-            return response.status(StatusCodes.BAD_REQUEST).json({ error: 'Can\'t retrieve image' });
+            return response.status(StatusCodes.UNAUTHORIZED).json({ error: 'Trying to access other\'s images' });
         }
         return response.json(image);
     }, (reason) => {
@@ -108,10 +108,19 @@ imageRouter.post('/add-region', uploadJwtMiddleware, (request, response) => {
         null,
         null
     );
-    regionDao.addTextRegions([textRegion]).then(() => {
-        response.json(textRegion);
+    imageDao.getImage(imageId).then((image) => {
+        if (image.uploadedBy.username !== user.username && !user.canManageAllImage) {
+            console.log(`[/add-region] User ${user.username} is trying to add region to other's images!`);
+            return response.status(StatusCodes.UNAUTHORIZED).json({ error: 'Trying to add region to other\'s images!' });
+        }
+        regionDao.addTextRegions([textRegion]).then(() => {
+            response.json(textRegion);
+        }, (reason) => {
+            console.log(`[/add-region] Problem when storing new image region: ${reason}`);
+            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
+        });
     }, (reason) => {
-        console.log(`[/add-region] Problem when storing new image region: ${reason}`);
+        console.log(`[/add-region] Problem when retrieving image: ${reason}`);
         return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
     });
 });
@@ -119,10 +128,19 @@ imageRouter.post('/add-region', uploadJwtMiddleware, (request, response) => {
 imageRouter.post('/publish-image', uploadJwtMiddleware, (request, response) => {
     const user: User = response.locals.user;
     const imageId: string = request.body.imageId;
-    imageDao.setImageStatus(imageId, user, ImageStatus.Published).then((success) => {
-        return response.status(success ? StatusCodes.OK : StatusCodes.UNAUTHORIZED).json({});
+    imageDao.getImage(imageId).then((image) => {
+        if (image.uploadedBy.username !== user.username && !user.canManageAllImage) {
+            console.log(`[/get-image] User ${user.username} is trying to publish other's images!`);
+            return response.status(StatusCodes.UNAUTHORIZED).json({ error: 'Trying to publish other\'s images' });
+        }
+        imageDao.setImageStatus(imageId, ImageStatus.Published).then((success) => {
+            return response.status(success ? StatusCodes.OK : StatusCodes.UNAUTHORIZED).json({});
+        }, (reason) => {
+            console.log(`[/publish-image] Problem when updating image's status: ${reason}`);
+            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
+        });
     }, (reason) => {
-        console.log(`[/publish-image] Problem when updating image's status: ${reason}`);
+        console.log(`[/publish-image] Problem when retrieve image: ${reason}`);
         return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
     });
 });
@@ -130,10 +148,19 @@ imageRouter.post('/publish-image', uploadJwtMiddleware, (request, response) => {
 imageRouter.post('/delete-region', uploadJwtMiddleware, (request, response) => {
     const user: User = response.locals.user;
     const regionId: string = request.body.regionId;
-    regionDao.deleteTextRegion(regionId, user.username).then((success) => {
-        return response.status(success ? StatusCodes.OK : StatusCodes.UNAUTHORIZED).json({});
+    regionDao.getTextRegionFast(regionId).then((region) => {
+        if (region.uploadedBy.username !== user.username && !user.canManageAllImage) {
+            console.log(`[/delete-region] User ${user.username} is trying to delete region of another's image!`);
+            return response.status(StatusCodes.UNAUTHORIZED).json({ error: 'Trying to delete region of another\'s image' });
+        }
+        regionDao.deleteTextRegion(regionId).then((success) => {
+            return response.status(success ? StatusCodes.OK : StatusCodes.UNAUTHORIZED).json({});
+        }, (reason) => {
+            console.log(`[/delete-region] Problem when storing new image region: ${reason}`);
+            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
+        });
     }, (reason) => {
-        console.log(`[/delete-region] Problem when storing new image region: ${reason}`);
+        console.log(`[/delete-region] Problem when retrieve image: ${reason}`);
         return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
     });
 });
@@ -154,8 +181,8 @@ imageRouter.post('/delete-image', uploadJwtMiddleware, (request, response) => {
     const user: User = response.locals.user;
     const imageId: string = request.body.imageId;
     imageDao.getImage(imageId).then((image: UploadedImage) => {
-        if (image.uploadedBy.username !== user.username) {
-            console.log(`[/delete-image] User ${user.username} is trying to delete unauthorized image`);
+        if (image.uploadedBy.username !== user.username && !user.canManageAllImage) {
+            console.log(`[/delete-image] User ${user.username} is trying to delete unauthorized image!`);
             return response.status(StatusCodes.UNAUTHORIZED).json({ error: 'Trying to delete unauthorized image' });
         }
         imageDao.deleteImage(imageId).then((success) => {

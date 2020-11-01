@@ -25,8 +25,8 @@ export class AllImageComponent implements OnInit {
     { label: 'Upload date (Oldest first)', value: ImageComparationOption.UPLOAD_OLDEST_FIRST },
     { label: 'Status (Asc.)', value: ImageComparationOption.STATUS_ASC },
     { label: 'Status (Desc.)', value: ImageComparationOption.STATUS_DESC },
-    { label: 'User (Asc.)', value: ImageComparationOption.STATUS_DESC },
-    { label: 'User (Desc.)', value: ImageComparationOption.STATUS_DESC }
+    { label: 'User (Asc.)', value: ImageComparationOption.USER_ASC },
+    { label: 'User (Desc.)', value: ImageComparationOption.USER_DESC }
   ];
   public selectedSortOption: ImageComparationOption = ImageComparationOption.UPLOAD_LATEST_FIRST;
 

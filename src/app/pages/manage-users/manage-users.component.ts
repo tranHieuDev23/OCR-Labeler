@@ -78,6 +78,12 @@ export class ManageUsersComponent implements OnInit {
       }
       result += 'Export'
     }
+    if (user.canManageAllImage) {
+      if (result.length > 0) {
+        result += ', ';
+      }
+      result += 'Manage all image'
+    }
     if (user.canManageUsers) {
       if (result.length > 0) {
         result += ', ';
@@ -95,7 +101,7 @@ export class ManageUsersComponent implements OnInit {
   }
 
   openCreateUserModal(): void {
-    this.createModal.openModal(new User('', '', '', true, true, true, false, false));
+    this.createModal.openModal(User.newBaseUser('', ''));
   }
 
   createUser(user: User): void {

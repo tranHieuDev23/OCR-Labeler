@@ -128,8 +128,16 @@ class UserDao {
                 databaseConnection.none(
                     `
                         INSERT INTO public."Users"(
-                            username, password, "displayName", "canUpload", "canLabel", "canVerify", "canExport", "canManageUsers")
-                            VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+                            username,
+                            password,
+                            "displayName",
+                            "canUpload",
+                            "canLabel",
+                            "canVerify",
+                            "canExport",
+                            "canManageAllImage",
+                            "canManageUsers")
+                            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
                     `,
                     [
                         user.username,
@@ -139,6 +147,7 @@ class UserDao {
                         user.canLabel,
                         user.canVerify,
                         user.canExport,
+                        user.canManageAllImage,
                         user.canManageUsers
                     ]
                 ).then(() => {
@@ -155,7 +164,14 @@ class UserDao {
             databaseConnection.none(
                 `
                         UPDATE public."Users"
-                        SET "displayName" = $2, "canUpload" = $3, "canLabel" = $4, "canVerify" = $5, "canExport" = $6, "canManageUsers" = $7
+                        SET
+                            "displayName" = $2,
+                            "canUpload" = $3,
+                            "canLabel" = $4,
+                            "canVerify" = $5,
+                            "canExport" = $6,
+                            "canManageUsers" = $7,
+                            "canManageAllImage" = $8
                         WHERE username = $1;
                     `,
                 [
@@ -165,7 +181,8 @@ class UserDao {
                     user.canLabel,
                     user.canVerify,
                     user.canExport,
-                    user.canManageUsers
+                    user.canManageUsers,
+                    user.canManageAllImage
                 ]
             ).then(() => {
                 resolve();

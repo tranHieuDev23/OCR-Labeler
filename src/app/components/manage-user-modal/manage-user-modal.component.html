@@ -93,6 +93,14 @@
             </nz-form-control>
         </nz-form-item>
 
+        <nz-form-item *ngIf="config.canManageAllImage">
+            <nz-form-control>
+                <label nz-checkbox formControlName="canManageAllImage" name="canManageAllImage">
+                    Can manage all user's images
+                </label>
+            </nz-form-control>
+        </nz-form-item>
+
         <nz-form-item *ngIf="config.canManageUsers">
             <nz-form-control>
                 <label nz-checkbox formControlName="canManageUsers" name="canManageUsers">

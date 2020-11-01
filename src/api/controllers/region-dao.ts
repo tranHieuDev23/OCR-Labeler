@@ -10,6 +10,35 @@ class TextRegionDao {
         return new TextRegionDao();
     }
 
+    public getTextRegionFast(regiondId: string): Promise<TextRegion> {
+        return new Promise<TextRegion>((resolve, reject) => {
+            databaseConnection.oneOrNone(
+                `
+                    SELECT * FROM public."TextRegions" 
+                        WHERE "TextRegions"."regionId" = $1;
+                `,
+                [regiondId]
+            ).then((result) => {
+                if (!result) {
+                    return resolve(null);
+                }
+                const region: TextRegion = new TextRegion(
+                    result.regionId,
+                    result.imageId,
+                    Region.parseFromPostgresPolygonString(result.region),
+                    result.label,
+                    result.status as LabelStatus,
+                    User.newBaseUser(result.uploadedBy, result.uploadedBy),
+                    result.labeledBy ? User.newBaseUser(result.labeledBy, result.labeledBy) : null,
+                    result.verifiedBy ? User.newBaseUser(result.verifiedBy, result.verifiedBy) : null
+                );
+                resolve(region);
+            }, (reason) => {
+                reject(`[getTextRegion()] Error happened while reading regions from database: ${reason}`);
+            });
+        });
+    }
+
     public addTextRegions(regions: TextRegion[]): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             if (!regions || regions.length == 0) {
@@ -88,15 +117,15 @@ class TextRegionDao {
         });
     }
 
-    public deleteTextRegion(regionId: string, uploadedBy: string): Promise<boolean> {
+    public deleteTextRegion(regionId: string): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
             databaseConnection.one(
                 `
                     WITH Deleted AS (
-                        DELETE FROM public."TextRegions" WHERE "regionId" = $1 AND "uploadedBy" = $2 RETURNING *
+                        DELETE FROM public."TextRegions" WHERE "regionId" = $1 RETURNING *
                     ) SELECT COUNT(*) FROM Deleted;
                 `,
-                [regionId, uploadedBy]
+                [regionId]
             ).then((result) => {
                 resolve(+result.count === 1);
             }, (reason) => {

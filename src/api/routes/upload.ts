@@ -107,14 +107,14 @@ uploadRouter.post('/upload', uploadJwtMiddleware, multerMiddleware, async (reque
             );
             imageDao.addImage(newImage).then(() => {
                 processPostUpload(imageId, user, fullImage).then(() => {
-                    imageDao.setImageStatus(imageId, user, ImageStatus.Processed).then(() => {
+                    imageDao.setImageStatus(imageId, ImageStatus.Processed).then(() => {
                         console.log(`[/upload] Processed ${imageId} with CRAFT`);
                     }, (reason) => {
                         console.log(`[/upload] Processed ${imageId} with CRAFT, but failed to update image status: ${reason}`);
                     });
                 }, (reason) => {
                     console.log(`[/upload] Problem processing ${imageId} with CRAFT: ${reason}`);
-                    imageDao.setImageStatus(imageId, user, ImageStatus.NotProcessed).then(() => { }, (reason) => {
+                    imageDao.setImageStatus(imageId, ImageStatus.NotProcessed).then(() => { }, (reason) => {
                         console.log(`[/upload] Failed to update image status for ${imageId}: ${reason}`);
                     });
                 });
