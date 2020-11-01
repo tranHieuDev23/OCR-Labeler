@@ -50,7 +50,7 @@ class ImageDao {
         return new Promise<UploadedImage[]>((resolve, reject) => {
             databaseConnection.any(
                 `
-                    SELECT * FROM public."Images"
+                    SELECT * FROM public."Images" JOIN public."Users" ON "Images"."uploadedBy" = "Users".username
                         ${getFilterClause(filteredStatuses, filteredUsers)}
                         ${getOrderByClause(sortOption)}
                         OFFSET $1 LIMIT $2;
@@ -59,12 +59,13 @@ class ImageDao {
             ).then((results) => {
                 const images: UploadedImage[] = [];
                 for (let item of results) {
+                    const user = User.parseFromJson(item);
                     images.push(new UploadedImage(
                         item.imageId,
                         item.imageUrl,
                         item.thumbnailUrl,
                         [],
-                        null,
+                        user,
                         new Date(+item.uploadedDate),
                         item.status as ImageStatus
                     ));

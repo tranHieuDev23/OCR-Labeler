@@ -11,7 +11,7 @@
                     {{ statusString(item.status) }}
                 </nz-tag>
                 <p nz-typography>
-                    Uploaded on {{ dateTimeString(item.uploadedDate) }}
+                    Uploaded on {{ dateTimeString(item.uploadedDate) }} by <b>{{ item.uploadedBy.displayName }}</b>
                 </p>
             </nz-card>
             <ng-template #coverTemplate>
