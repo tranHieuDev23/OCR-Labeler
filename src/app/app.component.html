@@ -13,6 +13,9 @@
           <li *ngIf="loggedInUser.canUpload" nz-menu-item>
             <a routerLink="/my-images">My images</a>
           </li>
+          <li *ngIf="loggedInUser.canManageUsers" nz-menu-item>
+            <a routerLink="/all-image">Manage all images</a>
+          </li>
           <li *ngIf="loggedInUser.canLabel" nz-menu-item>
             <a routerLink="/label">Label texts</a>
           </li>

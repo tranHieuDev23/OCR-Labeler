@@ -27,7 +27,7 @@ authRouter.post('/get-users', (request, response) => {
             console.log(`[/get-users] User ${user.username} is not authorized to manage users`);
             return response.status(StatusCodes.UNAUTHORIZED).json({});
         }
-        userDao.getAllUserForManagement().then((allUsers) => {
+        userDao.getAllUser().then((allUsers) => {
             return response.json(allUsers);
         }, (reason) => {
             console.log(`[/get-users] Error happened while reading from database: ${reason}`);
@@ -35,6 +35,25 @@ authRouter.post('/get-users', (request, response) => {
         });
     }, (reason) => {
         console.log(`[/get-users] Error happened while validating user: ${reason}`);
+        return response.status(StatusCodes.UNAUTHORIZED).json({});
+    });
+});
+
+authRouter.post('/get-users-full', (request, response) => {
+    const token: string = request.cookies[AUTH_COOKIE_NAME];
+    jwtDao.getUserFromJwt(token).then((user) => {
+        if (!user.canManageUsers) {
+            console.log(`[/get-users-full] User ${user.username} is not authorized to manage users`);
+            return response.status(StatusCodes.UNAUTHORIZED).json({});
+        }
+        userDao.getAllUserForManagement().then((allUsers) => {
+            return response.json(allUsers);
+        }, (reason) => {
+            console.log(`[/get-users-full] Error happened while reading from database: ${reason}`);
+            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+        });
+    }, (reason) => {
+        console.log(`[/get-users-full] Error happened while validating user: ${reason}`);
         return response.status(StatusCodes.UNAUTHORIZED).json({});
     });
 });

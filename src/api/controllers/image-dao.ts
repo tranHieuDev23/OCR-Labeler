@@ -9,11 +9,71 @@ import UserDao from './user-dao';
 const userDao: UserDao = UserDao.getInstance();
 const regionDao: TextRegionDao = TextRegionDao.getInstance();
 
+function getFilterClause(filteredStatuses: ImageStatus[], filteredUsers: string[]): string {
+    const emptyFilterStatuses: boolean = (!filteredStatuses || filteredStatuses.length === 0);
+    const emptyFilterUsers: boolean = (!filteredUsers || filteredUsers.length === 0);
+    if (emptyFilterStatuses && emptyFilterUsers) {
+        return '';
+    }
+    const statusClause: string = emptyFilterStatuses
+        ? ''
+        : `"Images".status IN (${filteredStatuses.map(item => `'${item}'`).join(',')})`;
+    const userClause: string = emptyFilterUsers
+        ? ''
+        : `"Images"."uploadedBy" IN (${filteredUsers.map(item => `'${item}'`).join(',')})`;
+    return `WHERE ${statusClause} ${(!emptyFilterStatuses && !emptyFilterUsers) ? 'AND' : ''} ${userClause}`;
+}
+
 class ImageDao {
     private constructor() { }
 
     public static getInstance(): ImageDao {
         return new ImageDao();
+    }
+
+    public getImagesCount(filteredStatuses: ImageStatus[], filteredUsers: string[]): Promise<number> {
+        return new Promise<number>((resolve, reject) => {
+            databaseConnection.one(
+                `
+                    SELECT COUNT(*) FROM public."Images"
+                        ${getFilterClause(filteredStatuses, filteredUsers)};
+                `,
+            ).then((result) => {
+                resolve(+result.count);
+            }, (reason) => {
+                reject(`[getImagesCount()] Error happened while writing into database: ${reason}`);
+            });
+        });
+    }
+
+    public getImages(startFrom: number, itemCount: number, sortOption: ImageComparationOption, filteredStatuses: ImageStatus[], filteredUsers: string[]): Promise<UploadedImage[]> {
+        return new Promise<UploadedImage[]>((resolve, reject) => {
+            databaseConnection.any(
+                `
+                    SELECT * FROM public."Images"
+                        ${getFilterClause(filteredStatuses, filteredUsers)}
+                        ${getOrderByClause(sortOption)}
+                        OFFSET $1 LIMIT $2;
+                `,
+                [startFrom, itemCount]
+            ).then((results) => {
+                const images: UploadedImage[] = [];
+                for (let item of results) {
+                    images.push(new UploadedImage(
+                        item.imageId,
+                        item.imageUrl,
+                        item.thumbnailUrl,
+                        [],
+                        null,
+                        new Date(+item.uploadedDate),
+                        item.status as ImageStatus
+                    ));
+                }
+                resolve(images);
+            }, (reason) => {
+                reject(`[getImages()] Error happened while writing into database: ${reason}`);
+            });
+        });
     }
 
     public getUserImagesCount(user: User, filteredStatuses: ImageStatus[]): Promise<number> {
@@ -28,7 +88,7 @@ class ImageDao {
             ).then((result) => {
                 resolve(+result.count);
             }, (reason) => {
-                reject(`[addImage()] Error happened while writing into database: ${reason}`);
+                reject(`[getUserImagesCount()] Error happened while writing into database: ${reason}`);
             });
         });
     }
@@ -59,7 +119,7 @@ class ImageDao {
                 }
                 resolve(images);
             }, (reason) => {
-                reject(`[addImage()] Error happened while writing into database: ${reason}`);
+                reject(`[getUserImages()] Error happened while writing into database: ${reason}`);
             });
         });
     }
@@ -152,7 +212,7 @@ class ImageDao {
             ).then((result) => {
                 resolve(+result.count > 0);
             }, (reason) => {
-                reject(`[updateImageStatus()] Error happened while updating image status: ${reason}`);
+                reject(`[setImageStatus()] Error happened while updating image status: ${reason}`);
             })
         });
     }

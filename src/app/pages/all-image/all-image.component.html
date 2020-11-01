@@ -1,0 +1,40 @@
+<div>
+    <h1 nz-typography>All uploaded image</h1>
+    <p nz-typography>Select an image to manage its text regions, or delete it</p>
+</div>
+<nz-row nzJustify="start" [nzGutter]="{ md: 8 }" style="margin-bottom: 16px;">
+    <nz-col nzSpan="24" nzLg="6">
+        Sort by <br />
+        <nz-select id="sort-select" [(ngModel)]="selectedSortOption" (ngModelChange)="refresh()">
+            <nz-option *ngFor="let item of sortOptions" [nzLabel]="item.label" [nzValue]="item.value"></nz-option>
+        </nz-select>
+    </nz-col>
+    <nz-col nzSpan="24" nzMd="12" nzLg="9">
+        Filter status <br />
+        <nz-select [nzMaxTagCount]="1" [nzMaxTagPlaceholder]="tagPlaceHolder" nzMode="multiple"
+            nzPlaceHolder="Filter image status" [(ngModel)]="filteredStatuses" class="filter-select"
+            (ngModelChange)="refresh()">
+            <nz-option *ngFor="let item of filterStatusOptions" [nzLabel]="item.label" [nzValue]="item.value">
+            </nz-option>
+        </nz-select>
+    </nz-col>
+    <nz-col nzSpan="24" nzMd="12" nzLg="9">
+        Filter uploader <br />
+        <nz-select [nzMaxTagCount]="2" [nzMaxTagPlaceholder]="tagPlaceHolder" nzMode="multiple"
+            nzPlaceHolder="Filter uploader" [(ngModel)]="filteredUsers" class="filter-select"
+            (ngModelChange)="refresh()">
+            <nz-option *ngFor="let item of filterUserOptions" [nzLabel]="item.label" [nzValue]="item.value">
+            </nz-option>
+        </nz-select>
+    </nz-col>
+</nz-row>
+
+<ng-template #tagPlaceHolder let-selectedList>and {{ selectedList.length }} more</ng-template>
+<app-image-grid [images]="uploadedImages" emptyText="You haven't uploaded any image"
+    (imageClicked)="onImageClicked($event)" [loading]="loading">
+</app-image-grid>
+<div *ngIf="imagesCount" id="pagination">
+    <nz-pagination [nzPageIndex]="currentPage" [nzPageSize]="imagesPerPage" [nzTotal]="imagesCount" nzShowQuickJumper
+        (nzPageIndexChange)="changePage($event)">
+    </nz-pagination>
+</div>

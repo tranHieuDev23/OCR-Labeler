@@ -42,6 +42,7 @@ class UserLoggedInGuard implements CanActivate {
             case 'export':
                 return user.canExport;
             case 'manage-users':
+            case 'all-image':
                 return user.canManageUsers;
             default:
                 return true;

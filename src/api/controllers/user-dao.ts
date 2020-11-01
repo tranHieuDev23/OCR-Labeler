@@ -19,6 +19,23 @@ class UserDao {
         });
     }
 
+    public getAllUser(): Promise<User[]> {
+        return new Promise<User[]>((resolve, reject) => {
+            databaseConnection.any(`
+                SELECT * FROM public."Users";
+            `).then((result) => {
+                const users: User[] = [];
+                for (let item of result) {
+                    delete item.password;
+                    users.push(User.parseFromJson(item));
+                }
+                resolve(users);
+            }, (reason) => {
+                reject(`[getAllUser()] Error happened while getting all user: ${reason}`);
+            });
+        });
+    }
+
     public getAllUserForManagement(): Promise<UserManagementInfo[]> {
         return new Promise<UserManagementInfo[]>((resolve, reject) => {
             databaseConnection.any(`
@@ -56,7 +73,7 @@ class UserDao {
                 }
                 resolve(users);
             }, (reason) => {
-                reject(`[getAllUser()] Error happened while getting all user: ${reason}`);
+                reject(`[getAllUserForManagement()] Error happened while getting all user: ${reason}`);
             });
         });
     }

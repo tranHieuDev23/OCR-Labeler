@@ -78,13 +78,30 @@ export class AuthService {
     });
   }
 
-  public getAllUser(): Promise<UserManagementInfo[]> {
-    return new Promise<UserManagementInfo[]>((resolve, reject) => {
+  public getAllUser(): Promise<User[]> {
+    return new Promise<User[]>((resolve, reject) => {
       this.getCurrentUser().then((user) => {
         if (!user.canManageUsers) {
           return reject('User is not authorized to manage users');
         }
         this.http.post<any[]>('/api/get-users', {}).toPromise().then((response) => {
+          const users: User[] = [];
+          for (let item of response) {
+            users.push(User.parseFromJson(item));
+          }
+          resolve(users);
+        }, reject);
+      }, reject);
+    });
+  }
+
+  public getAllUserForManagement(): Promise<UserManagementInfo[]> {
+    return new Promise<UserManagementInfo[]>((resolve, reject) => {
+      this.getCurrentUser().then((user) => {
+        if (!user.canManageUsers) {
+          return reject('User is not authorized to manage users');
+        }
+        this.http.post<any[]>('/api/get-users-full', {}).toPromise().then((response) => {
           const users: UserManagementInfo[] = [];
           for (let item of response) {
             users.push(UserManagementInfo.parseFromJson(item));

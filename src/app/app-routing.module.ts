@@ -58,6 +58,12 @@ const routes: Routes = [
       import('./pages/login/login.module').then((m) => m.LoginModule),
     canActivate: [UserLoggedOutGuard]
   },
+  {
+    path: 'all-image',
+    loadChildren: () =>
+      import('./pages/all-image/all-image.module').then((m) => m.AllImageModule),
+    canActivate: [UserLoggedInGuard]
+  },
   { path: '', pathMatch: 'full', redirectTo: '/welcome' },
 ];
 

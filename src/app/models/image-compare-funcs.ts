@@ -2,7 +2,9 @@ export enum ImageComparationOption {
     UPLOAD_LATEST_FIRST,
     UPLOAD_OLDEST_FIRST,
     STATUS_ASC,
-    STATUS_DESC
+    STATUS_DESC,
+    USER_ASC,
+    USER_DESC
 }
 
 export function getOrderByClause(option: ImageComparationOption): string {
@@ -15,6 +17,10 @@ export function getOrderByClause(option: ImageComparationOption): string {
             return 'ORDER BY "Images".status';
         case ImageComparationOption.STATUS_DESC:
             return 'ORDER BY "Images".status DESC';
+        case ImageComparationOption.STATUS_ASC:
+            return 'ORDER BY "Images"."uploadedBy"';
+        case ImageComparationOption.STATUS_DESC:
+            return 'ORDER BY "Images"."uploadedBy" DESC';
         default:
             return '';
     }

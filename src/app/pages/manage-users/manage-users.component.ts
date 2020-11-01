@@ -47,7 +47,7 @@ export class ManageUsersComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.auth.getAllUser().then((users) => {
+    this.auth.getAllUserForManagement().then((users) => {
       this.users = users.sort(this.userComparator);
     }, (reason) => {
       this.notification.error('Failed to load all user data', `Reason: ${reason}`);

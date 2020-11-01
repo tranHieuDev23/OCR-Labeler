@@ -59,6 +59,42 @@ imageRouter.post('/get-user-images', (request, response) => {
     });
 });
 
+imageRouter.post('/get-all-user-images', (request, response) => {
+    const token: string = request.cookies[AUTH_COOKIE_NAME];
+    jwtDao.getUserFromJwt(token).then((user) => {
+        if (!user.canManageUsers) {
+            console.log(`[/get-all-user-images] User ${user.username} is not authorized to view all image!`);
+            return response.status(StatusCodes.UNAUTHORIZED).json({});
+        }
+        let startFrom: number = request.body.startFrom;
+        const itemCount: number = request.body.itemCount;
+        const sortOption: ImageComparationOption = request.body.sortOption;
+        const filteredStatuses: ImageStatus[] = request.body.filteredStatuses;
+        const filteredUsers: string[] = request.body.filteredUsers;
+        let pageId: number = (startFrom / itemCount) + 1;
+        imageDao.getImagesCount(filteredStatuses, filteredUsers).then((imagesCount) => {
+            if (imagesCount <= startFrom) {
+                console.log(
+                    `[/get-all-user-images] User ${user.username} is trying to access more image than allowed: startFrom=${startFrom}, imagesCount=${imagesCount}. Reset to page one.`
+                );
+                startFrom = 0;
+                pageId = 1;
+            }
+            imageDao.getImages(startFrom, itemCount, sortOption, filteredStatuses, filteredUsers).then((images) => {
+                return response.json({
+                    imagesCount, images, pageId
+                });
+            }, (reason) => {
+                console.log(`[/get-all-user-images] Problem when retrieving image: ${reason}`);
+                return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+            });
+        })
+    }, (reason) => {
+        console.log(`[/get-all-user-images] Problem when authorizing user to retrieve image: ${reason}`);
+        return response.status(StatusCodes.UNAUTHORIZED).json({});
+    });
+});
+
 imageRouter.post('/get-image', (request, response) => {
     const token: string = request.cookies[AUTH_COOKIE_NAME];
     jwtDao.getUserFromJwt(token).then((user) => {

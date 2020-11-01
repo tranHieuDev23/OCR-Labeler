@@ -69,6 +69,27 @@ export class BackendService {
     });
   }
 
+  public loadAllUserImages(
+    startFrom: number,
+    itemCount: number,
+    sortOption: ImageComparationOption,
+    filteredStatuses: ImageStatus[],
+    filteredUsers: string[]): Promise<{ imagesCount: number, images: UploadedImage[], pageId: number }> {
+    return new Promise<{ imagesCount: number, images: UploadedImage[], pageId: number }>((resolve, reject) => {
+      this.http.post<any>('/api/get-all-user-images', {
+        startFrom, itemCount, sortOption, filteredStatuses, filteredUsers
+      }).toPromise().then((response) => {
+        const imagesCount: number = +response.imagesCount;
+        const images: UploadedImage[] = [];
+        for (let item of response.images) {
+          images.push(UploadedImage.parseFromJson(item));
+        }
+        const pageId: number = +response.pageId;
+        resolve({ imagesCount, images, pageId });
+      }, reject);
+    });
+  }
+
   public loadImage(imageId: string): Promise<UploadedImage> {
     return new Promise<UploadedImage>((resolve, reject) => {
       this.http.post('/api/get-image', { imageId }).toPromise().then((response) => {
