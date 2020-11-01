@@ -47,7 +47,7 @@ imageRouter.post('/get-user-images', uploadJwtMiddleware, (request, response) =>
             });
         }, (reason) => {
             console.log(`[/get-user-images] Problem when retrieving image: ${reason}`);
-            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
         });
     });
 });
@@ -74,7 +74,7 @@ imageRouter.post('/get-all-user-images', adminJwtMiddleware, (request, response)
             });
         }, (reason) => {
             console.log(`[/get-all-user-images] Problem when retrieving image: ${reason}`);
-            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
         });
     });
 });
@@ -85,12 +85,12 @@ imageRouter.post('/get-image', uploadJwtMiddleware, (request, response) => {
     imageDao.getImage(imageId).then((image) => {
         if (image.uploadedBy.username != user.username) {
             console.log(`[/get-image] User ${user.username} is trying to access other's images!`);
-            return response.status(StatusCodes.UNAUTHORIZED).json({});
+            return response.status(StatusCodes.BAD_REQUEST).json({ error: 'Can\'t retrieve image' });
         }
         return response.json(image);
     }, (reason) => {
         console.log(`[/get-image] Problem when retrieving image: ${reason}`);
-        return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+        return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
     });
 });
 
@@ -112,7 +112,7 @@ imageRouter.post('/add-region', uploadJwtMiddleware, (request, response) => {
         response.json(textRegion);
     }, (reason) => {
         console.log(`[/add-region] Problem when storing new image region: ${reason}`);
-        return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+        return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
     });
 });
 
@@ -123,7 +123,7 @@ imageRouter.post('/publish-image', uploadJwtMiddleware, (request, response) => {
         return response.status(success ? StatusCodes.OK : StatusCodes.UNAUTHORIZED).json({});
     }, (reason) => {
         console.log(`[/publish-image] Problem when updating image's status: ${reason}`);
-        return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+        return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
     });
 });
 
@@ -134,7 +134,7 @@ imageRouter.post('/delete-region', uploadJwtMiddleware, (request, response) => {
         return response.status(success ? StatusCodes.OK : StatusCodes.UNAUTHORIZED).json({});
     }, (reason) => {
         console.log(`[/delete-region] Problem when storing new image region: ${reason}`);
-        return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+        return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
     });
 });
 
@@ -156,12 +156,12 @@ imageRouter.post('/delete-image', uploadJwtMiddleware, (request, response) => {
     imageDao.getImage(imageId).then((image: UploadedImage) => {
         if (image.uploadedBy.username !== user.username) {
             console.log(`[/delete-image] User ${user.username} is trying to delete unauthorized image`);
-            return response.status(StatusCodes.UNAUTHORIZED).json({});
+            return response.status(StatusCodes.UNAUTHORIZED).json({ error: 'Trying to delete unauthorized image' });
         }
         imageDao.deleteImage(imageId).then((success) => {
             if (!success) {
                 console.log(`[/delete-image] Image ${image.imageId} has already been deleted`);
-                return response.status(StatusCodes.BAD_REQUEST).json({});
+                return response.status(StatusCodes.BAD_REQUEST).json({ error: 'Image has already been deleted' });
             }
             Promise.all([
                 deleteImage(join(uploadedFolder, image.imageUrl)),
@@ -170,15 +170,15 @@ imageRouter.post('/delete-image', uploadJwtMiddleware, (request, response) => {
                 return response.status(StatusCodes.OK).json({});
             }, (reason) => {
                 console.log(`[/delete-image] Problem when deleting image file: ${reason}`);
-                return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+                return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
             })
         }, (reason) => {
             console.log(`[/delete-image] Problem when deleting image from database: ${reason}`);
-            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
         });
     }, (reason) => {
         console.log(`[/delete-image] Problem when retrieving image: ${reason}`);
-        return response.status(StatusCodes.BAD_REQUEST).json({});
+        return response.status(StatusCodes.BAD_REQUEST).json({ error: 'Can find the required image' });
     });
 });
 

@@ -38,7 +38,7 @@ exportRouter.post('/export-status', (request, response) => {
         return response.status(StatusCodes.OK).json(status.data);
     }, (reason) => {
         console.log(`[/export-status] Request for image export status failed: ${reason}`);
-        return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+        return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
     });
 });
 
@@ -49,7 +49,7 @@ exportRouter.get('/download-export', (request, response) => {
         return data.data.pipe(response);
     }, (reason) => {
         console.log(`[/download-export] Request for image export status failed: ${reason}`);
-        return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+        return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
     });
 });
 

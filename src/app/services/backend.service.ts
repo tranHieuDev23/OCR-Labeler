@@ -22,7 +22,9 @@ export class BackendService {
         const imageUrl: string = response.imageUrl;
         const region: TextRegion = TextRegion.parseFromJson(response.region);
         resolve({ imageUrl, region });
-      }, reject);
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 
@@ -30,7 +32,9 @@ export class BackendService {
     return new Promise<void>((resolve, reject) => {
       this.http.post<void>('/api/label', { regionId, cantLabel, label }).toPromise().then(() => {
         resolve();
-      }, reject);
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 
@@ -43,7 +47,9 @@ export class BackendService {
         const imageUrl: string = response.imageUrl;
         const region: TextRegion = TextRegion.parseFromJson(response.region);
         resolve({ imageUrl, region });
-      }, reject);
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 
@@ -51,7 +57,9 @@ export class BackendService {
     return new Promise<void>((resolve, reject) => {
       this.http.post<void>('/api/verify', { regionId, isCorrect }).toPromise().then(() => {
         resolve();
-      }, reject);
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 
@@ -65,7 +73,9 @@ export class BackendService {
         }
         const pageId: number = +response.pageId;
         resolve({ imagesCount, images, pageId });
-      }, reject);
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 
@@ -86,7 +96,9 @@ export class BackendService {
         }
         const pageId: number = +response.pageId;
         resolve({ imagesCount, images, pageId });
-      }, reject);
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 
@@ -94,7 +106,9 @@ export class BackendService {
     return new Promise<UploadedImage>((resolve, reject) => {
       this.http.post('/api/get-image', { imageId }).toPromise().then((response) => {
         resolve(UploadedImage.parseFromJson(response));
-      }, reject);
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 
@@ -102,7 +116,9 @@ export class BackendService {
     return new Promise<TextRegion>((resolve, reject) => {
       this.http.post('/api/add-region', { imageId, region }).toPromise().then((response) => {
         resolve(TextRegion.parseFromJson(response));
-      }, reject);
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 
@@ -120,7 +136,9 @@ export class BackendService {
     return new Promise<void>((resolve, reject) => {
       this.http.post('/api/publish-image', { imageId }).toPromise().then(() => {
         resolve();
-      }, reject);
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 
@@ -128,7 +146,9 @@ export class BackendService {
     return new Promise<void>((resolve, reject) => {
       this.http.post('/api/delete-image', { imageId }).toPromise().then(() => {
         resolve();
-      }, reject);
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 
@@ -140,7 +160,9 @@ export class BackendService {
           state: resp.state,
           timestamp: resp.timestamp,
         });
-      }, reject);
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 
@@ -148,7 +170,9 @@ export class BackendService {
     return new Promise<void>((resolve, reject) => {
       this.http.post('/api/request-export', {}).toPromise().then(() => {
         resolve();
-      }, reject);
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 

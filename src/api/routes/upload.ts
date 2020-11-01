@@ -89,7 +89,7 @@ uploadRouter.post('/upload', uploadJwtMiddleware, multerMiddleware, async (reque
     const user: User = response.locals.user;
     if (request.files.length === 0 || !request.files[0].buffer) {
         console.log(`[/upload] User ${user.username} is trying to upload unsupported file!`);
-        return response.status(StatusCodes.BAD_REQUEST).json({});
+        return response.status(StatusCodes.BAD_REQUEST).json({ error: 'Trying to upload unsupported file' });
     }
     generateImageAndThumbnail(request.files[0].buffer).then(({ fullImage, thumbnail }) => {
         const imageFileName: string = uid(33) + '.jpeg';
@@ -121,15 +121,15 @@ uploadRouter.post('/upload', uploadJwtMiddleware, multerMiddleware, async (reque
                 return response.json(newImage);
             }, (reason) => {
                 console.log(`[/upload] Problem adding image to database: ${reason}`);
-                return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+                return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
             });
         }, (reason) => {
             console.log(`[/upload] Problem saving image: ${reason}`);
-            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({});
+            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
         });
     }, (reason) => {
         console.log(`[/upload] Problem resizing image: ${reason}`);
-        return response.status(StatusCodes.BAD_REQUEST).json({});
+        return response.status(StatusCodes.BAD_REQUEST).json({ error: 'Problem when processing the image' });
     });
 });
 

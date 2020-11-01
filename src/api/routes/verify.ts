@@ -16,7 +16,7 @@ verifyRouter.post('/get-image-for-verifier', (request, response) => {
         return response.json(region);
     }, (reason) => {
         console.log(`[/get-image-for-verifier] Error happened while getting text region: ${reason}`);
-        return response.status(StatusCodes.BAD_REQUEST).json({});
+        return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
     });
 });
 
@@ -28,7 +28,7 @@ verifyRouter.post('/verify', (request, response) => {
         return response.status(updated ? StatusCodes.OK : StatusCodes.BAD_REQUEST).json({});
     }, (reason) => {
         console.log(`[/verify] Error happened while verifying text region: ${reason}`);
-        return response.status(StatusCodes.UNAUTHORIZED).json({});
+        return response.status(StatusCodes.UNAUTHORIZED).json({ error: 'Can\t verify the image' });
     });
 });
 

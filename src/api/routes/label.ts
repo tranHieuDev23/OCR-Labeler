@@ -6,9 +6,7 @@ import TextRegionDao from '../controllers/region-dao';
 import { jwtMiddlewareFactory } from './jwt-middleware';
 
 const labelRouter = Router();
-
 const regionDao: TextRegionDao = TextRegionDao.getInstance();
-
 const labelJwtMiddleware: Router = jwtMiddlewareFactory(user => user.canLabel);
 labelRouter.use(labelJwtMiddleware);
 
@@ -18,7 +16,7 @@ labelRouter.post('/get-image-for-labeler', (request, response) => {
         return response.json(region);
     }, (reason) => {
         console.log(`[/get-image-for-labeler] Error happened while getting text region: ${reason}`);
-        return response.status(StatusCodes.BAD_REQUEST).json({});
+        return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
     });
 });
 
@@ -34,7 +32,7 @@ labelRouter.post('/label', (request, response) => {
         return response.status(updated ? StatusCodes.OK : StatusCodes.BAD_REQUEST).json({});
     }, (reason) => {
         console.log(`[/label] Error happened while labeling text region: ${reason}`);
-        return response.status(StatusCodes.UNAUTHORIZED).json({});
+        return response.status(StatusCodes.UNAUTHORIZED).json({ error: 'Can\t label the image' });
     });
 });
 

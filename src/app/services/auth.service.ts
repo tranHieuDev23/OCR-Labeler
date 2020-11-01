@@ -24,7 +24,9 @@ export class AuthService {
     return new Promise<boolean>((resolve, reject) => {
       this.getCurrentUser().then((user) => {
         resolve(user != null);
-      }, reject);
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 
@@ -41,8 +43,12 @@ export class AuthService {
           this.currentUser = User.parseFromJson(response);
           this.loggedIn.emit(this.currentUser);
           resolve(this.currentUser);
-        }, reject);
-      }, reject);
+        }, (error) => {
+          reject(error.error.error);
+        });
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 
@@ -57,8 +63,12 @@ export class AuthService {
           this.currentUser = null;
           this.loggedIn.emit(null);
           resolve();
-        }, reject);
-      }, reject);
+        }, (error) => {
+          reject(error.error.error);
+        });
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 
@@ -90,8 +100,12 @@ export class AuthService {
             users.push(User.parseFromJson(item));
           }
           resolve(users);
-        }, reject);
-      }, reject);
+        }, (error) => {
+          reject(error.error.error);
+        });
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 
@@ -107,8 +121,12 @@ export class AuthService {
             users.push(UserManagementInfo.parseFromJson(item));
           }
           resolve(users);
-        }, reject);
-      }, reject);
+        }, (error) => {
+          reject(error.error.error);
+        });
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 
@@ -120,8 +138,12 @@ export class AuthService {
         }
         this.http.post('/api/register', newUser).toPromise().then(() => {
           resolve();
-        }, reject);
-      }, reject);
+        }, (error) => {
+          reject(error.error.error);
+        });
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 
@@ -133,8 +155,12 @@ export class AuthService {
         }
         this.http.post('/api/update-user', updatedUser).toPromise().then(() => {
           resolve();
-        }, reject);
-      }, reject);
+        }, (error) => {
+          reject(error.error.error);
+        });
+      }, (error) => {
+        reject(error.error.error);
+      });
     });
   }
 }
