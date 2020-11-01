@@ -8,6 +8,8 @@
                         nzType="upload"></i>Upload an image</button>
         <button *ngIf="loggedInUser.canUpload" routerLink="/my-images" nz-button nzSize="large" nzType="primary"><i
                         nz-icon nzType="appstore"></i>Manage your images</button>
+        <button *ngIf="loggedInUser.canManageAllImage" routerLink="/all-image" nz-button nzSize="large"
+                nzType="primary"><i nz-icon nzType="appstore"></i>Manage all images</button>
         <button *ngIf="loggedInUser.canLabel" routerLink="/label" nz-button nzSize="large" nzType="primary"><i nz-icon
                         nzType="edit"></i>Label text regions</button>
         <button *ngIf="loggedInUser.canVerify" routerLink="/verify" nz-button nzSize="large" nzType="primary"><i nz-icon
