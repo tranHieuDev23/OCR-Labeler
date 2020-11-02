@@ -34,6 +34,8 @@ const DATABASE_INITIALIZE_QUERY = `
         "canManageAllImage" boolean DEFAULT false NOT NULL,
         "canExport" boolean NOT NULL
     );
+    ALTER TABLE public."Users" ADD COLUMN IF NOT EXISTS
+	    "canManageAllImage" boolean DEFAULT false NOT NULL;
 
     DROP INDEX IF EXISTS "IMAGES_ID_INDEX" CASCADE;
     DROP INDEX IF EXISTS "IMAGES_UPLOADED_BY_INDEX" CASCADE;
