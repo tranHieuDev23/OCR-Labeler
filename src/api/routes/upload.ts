@@ -5,16 +5,12 @@ import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import * as path from 'path';
 import * as fs from 'fs';
-import { AUTH_COOKIE_NAME } from 'src/environments/constants';
 import uid from 'uid';
 import { resizeImage } from '../controllers/image-resize';
-import BlacklistedJwtDao from '../controllers/jwt-dao';
 import UploadedImage from 'src/app/models/uploaded-image';
 import User from 'src/app/models/user';
 import ImageStatus from 'src/app/models/image-status';
 import ImageDao from '../controllers/image-dao';
-import { processImageWithCraft } from '../controllers/craft';
-import TextRegionDao from '../controllers/region-dao';
 import * as multer from 'multer';
 import { jwtMiddlewareFactory } from './jwt-middleware';
 
@@ -24,9 +20,7 @@ const FULL_HD_HEIGHT = 1080;
 const THUMBNAIL_WIDTH = 320;
 const THUMBNAIL_HEIGHT = 180;
 
-const jwtDao: BlacklistedJwtDao = BlacklistedJwtDao.getInstance();
 const imageDao: ImageDao = ImageDao.getInstance();
-const regionDao: TextRegionDao = TextRegionDao.getInstance();
 const uploadDirectory = process.env.UPLOADED_DIRECTORY;
 const thumbnailDirectory = process.env.THUMBNAIL_DIRECTORY;
 
@@ -58,16 +52,6 @@ function saveImageAndThumbnail(
                 resolve();
             });
         });
-    });
-}
-
-function processPostUpload(imageId: string, user: User, image: any): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        processImageWithCraft(imageId, user, image).then((regions) => {
-            regionDao.addTextRegions(regions).then(() => {
-                resolve();
-            }, reject);
-        }, reject);
     });
 }
 
@@ -103,21 +87,9 @@ uploadRouter.post('/upload', uploadJwtMiddleware, multerMiddleware, async (reque
                 [],
                 user,
                 new Date(),
-                ImageStatus.Uploaded
+                ImageStatus.NotProcessed
             );
             imageDao.addImage(newImage).then(() => {
-                processPostUpload(imageId, user, fullImage).then(() => {
-                    imageDao.setImageStatus(imageId, ImageStatus.Processed).then(() => {
-                        console.log(`[/upload] Processed ${imageId} with CRAFT`);
-                    }, (reason) => {
-                        console.log(`[/upload] Processed ${imageId} with CRAFT, but failed to update image status: ${reason}`);
-                    });
-                }, (reason) => {
-                    console.log(`[/upload] Problem processing ${imageId} with CRAFT: ${reason}`);
-                    imageDao.setImageStatus(imageId, ImageStatus.NotProcessed).then(() => { }, (reason) => {
-                        console.log(`[/upload] Failed to update image status for ${imageId}: ${reason}`);
-                    });
-                });
                 return response.json(newImage);
             }, (reason) => {
                 console.log(`[/upload] Problem adding image to database: ${reason}`);

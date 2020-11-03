@@ -1,5 +1,5 @@
 enum ImageStatus {
-  Uploaded = 'Uploaded',
+  Processing = 'Processing',
   Processed = 'Processed',
   NotProcessed = 'NotProcessed',
   Published = 'Published'
@@ -14,7 +14,7 @@ export function getImageStatusFilterClause(filteredStatuses: ImageStatus[]): str
 
 export function getImageStatusColor(status: ImageStatus): string {
   switch (status) {
-    case ImageStatus.Uploaded:
+    case ImageStatus.Processing:
       return 'orange';
     case ImageStatus.Processed:
       return 'blue';
@@ -29,8 +29,8 @@ export function getImageStatusColor(status: ImageStatus): string {
 
 export function getImageStatusString(status: ImageStatus): string {
   switch (status) {
-    case ImageStatus.Uploaded:
-      return 'Just uploaded';
+    case ImageStatus.Processing:
+      return 'Processing';
     case ImageStatus.Processed:
       return 'Processed with CRAFT';
     case ImageStatus.NotProcessed:

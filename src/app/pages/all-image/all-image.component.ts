@@ -31,7 +31,7 @@ export class AllImageComponent implements OnInit {
   public selectedSortOption: ImageComparationOption = ImageComparationOption.UPLOAD_LATEST_FIRST;
 
   public filterStatusOptions: { label: string, value: ImageStatus }[] = [
-    { label: getImageStatusString(ImageStatus.Uploaded), value: ImageStatus.Uploaded },
+    { label: getImageStatusString(ImageStatus.Processing), value: ImageStatus.Processing },
     { label: getImageStatusString(ImageStatus.Processed), value: ImageStatus.Processed },
     { label: getImageStatusString(ImageStatus.NotProcessed), value: ImageStatus.NotProcessed },
     { label: getImageStatusString(ImageStatus.Published), value: ImageStatus.Published }
