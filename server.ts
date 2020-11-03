@@ -105,8 +105,7 @@ async function run() {
   mkdirp.sync(process.env.UPLOADED_DIRECTORY);
   mkdirp.sync(process.env.THUMBNAIL_DIRECTORY);
   const serviceOpen = await waitForService(process.env.POSTGRES_HOST, +process.env.POSTGRES_PORT)
-    && await waitForService(process.env.EXPORT_HOST, +process.env.EXPORT_PORT)
-    && await waitForService(process.env.CRAFT_HOST, +process.env.CRAFT_PORT);
+    && await waitForService(process.env.EXPORT_HOST, +process.env.EXPORT_PORT);
   if (!serviceOpen) {
     return;
   }
