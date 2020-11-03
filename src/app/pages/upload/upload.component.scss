@@ -37,17 +37,23 @@ nz-alert {
   max-height: 50vh;
 }
 
-.image-notification {
+.notification {
   &-icon {
-    color: #52c41a;
     position: absolute;
     margin-left: 4px;
     font-size: 24px;
     line-height: 24px;
+
+    &-success {
+      color: #52c41a;
+    }
+
+    &-failure {
+      color: #f5222d;
+    }
   }
 
   &-title {
-    margin-bottom: 4px;
     margin-left: 48px;
     font-size: 16px;
     padding-right: 24px;
@@ -57,7 +63,7 @@ nz-alert {
   }
 
   &-description {
-    margin-bottom: 8px;
+    margin-top: 4px;
     margin-left: 48px;
     font-size: 14px;
     line-height: 1.5715;
@@ -66,6 +72,7 @@ nz-alert {
   }
 
   &-image {
+    margin-top: 8px;
     margin-left: 48px;
 
     img {
