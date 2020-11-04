@@ -1,10 +1,10 @@
 export enum ImageComparationOption {
-    UPLOAD_LATEST_FIRST,
-    UPLOAD_OLDEST_FIRST,
-    STATUS_ASC,
-    STATUS_DESC,
-    USER_ASC,
-    USER_DESC
+    UPLOAD_LATEST_FIRST = 'UPLOAD_LATEST_FIRST',
+    UPLOAD_OLDEST_FIRST = 'UPLOAD_OLDEST_FIRST',
+    STATUS_ASC = 'STATUS_ASC',
+    STATUS_DESC = 'STATUS_DESC',
+    USER_ASC = 'USER_ASC',
+    USER_DESC = 'USER_DESC'
 }
 
 export function getOrderByClause(option: ImageComparationOption): string {

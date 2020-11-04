@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ImageComparationOption } from 'src/app/models/image-compare-funcs';
 import ImageStatus, { getImageStatusString } from 'src/app/models/image-status';
 import UploadedImage from 'src/app/models/uploaded-image';
@@ -37,15 +37,28 @@ export class MyImagesComponent implements OnInit {
 
   constructor(
     private backend: BackendService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit(): void {
-    this.loadPage(1, this.selectedSortOption, this.filteredStatuses);
+    this.route.queryParams.subscribe((params) => {
+      const pageId: number = params['page'] || 1;
+      const sortOption: ImageComparationOption = params['sort'] as ImageComparationOption || ImageComparationOption.UPLOAD_LATEST_FIRST;
+      const statuses: string = params['statuses'] || '';
+      const filteredStatuses: ImageStatus[] = statuses.split(',').map(item => item.trim()).filter(item => item.length > 0).map(item => item as ImageStatus);
+      this.loadPage(pageId, sortOption, filteredStatuses)
+    });
   }
 
   refresh(): void {
-    this.loadPage(this.currentPage, this.selectedSortOption, this.filteredStatuses);
+    this.router.navigate(['/my-images'], {
+      queryParams: {
+        page: this.currentPage,
+        sort: this.selectedSortOption,
+        statuses: this.filteredStatuses.join(',')
+      }
+    });
   }
 
   loadPage(pageId: number, sortOption: ImageComparationOption, filteredStatuses: ImageStatus[]): void {
@@ -59,7 +72,7 @@ export class MyImagesComponent implements OnInit {
       this.uploadedImages = result.images;
       this.loading = false;
     }, (reason) => {
-
+      this.router.navigateByUrl('/');
     });
   }
 
@@ -71,6 +84,7 @@ export class MyImagesComponent implements OnInit {
     if (event === this.currentPage) {
       return;
     }
-    this.loadPage(event, this.selectedSortOption, this.filteredStatuses);
+    this.currentPage = event;
+    this.refresh();
   }
 }

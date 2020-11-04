@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ImageComparationOption } from 'src/app/models/image-compare-funcs';
 import ImageStatus, { getImageStatusString } from 'src/app/models/image-status';
 import UploadedImage from 'src/app/models/uploaded-image';
@@ -44,18 +44,34 @@ export class AllImageComponent implements OnInit {
   constructor(
     private auth: AuthService,
     private backend: BackendService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit(): void {
     this.auth.getAllUser().then((users) => {
       this.filterUserOptions = users.map(item => { return { label: item.displayName, value: item.username } });
     });
-    this.loadPage(1, this.selectedSortOption, this.filteredStatuses, this.filteredUsers);
+    this.route.queryParams.subscribe((params) => {
+      const pageId: number = params['page'] || 1;
+      const sortOption: ImageComparationOption = params['sort'] as ImageComparationOption || ImageComparationOption.UPLOAD_LATEST_FIRST;
+      const statuses: string = params['statuses'] || '';
+      const filteredStatuses: ImageStatus[] = statuses.split(',').map(item => item.trim()).filter(item => item.length > 0).map(item => item as ImageStatus);
+      const users: string = params['users'] || '';
+      const filteredUsers: string[] = users.split(',').map(item => item.trim()).filter(item => item.length > 0);
+      this.loadPage(pageId, sortOption, filteredStatuses, filteredUsers);
+    });
   }
 
   refresh(): void {
-    this.loadPage(this.currentPage, this.selectedSortOption, this.filteredStatuses, this.filteredUsers);
+    this.router.navigate(['/all-image'], {
+      queryParams: {
+        page: this.currentPage,
+        sort: this.selectedSortOption,
+        statuses: this.filteredStatuses.join(','),
+        users: this.filteredUsers.join(',')
+      }
+    });
   }
 
   loadPage(pageId: number, sortOption: ImageComparationOption, filteredStatuses: ImageStatus[], filteredUsers: string[]): void {
@@ -76,7 +92,7 @@ export class AllImageComponent implements OnInit {
         this.uploadedImages = result.images;
         this.loading = false;
       }, (reason) => {
-
+        this.router.navigateByUrl('/');
       });
   }
 
@@ -88,6 +104,7 @@ export class AllImageComponent implements OnInit {
     if (event === this.currentPage) {
       return;
     }
-    this.loadPage(event, this.selectedSortOption, this.filteredStatuses, this.filteredUsers);
+    this.currentPage = event;
+    this.refresh();
   }
 }
