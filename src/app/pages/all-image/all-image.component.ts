@@ -6,7 +6,7 @@ import UploadedImage from 'src/app/models/uploaded-image';
 import { AuthService } from 'src/app/services/auth.service';
 import { BackendService } from 'src/app/services/backend.service';
 
-const IMAGES_PER_PAGE: number = 10;
+const IMAGES_PER_PAGE: number = 12;
 
 @Component({
   selector: 'app-all-image',
