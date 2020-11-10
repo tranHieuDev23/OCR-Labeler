@@ -21,7 +21,7 @@ export default databaseConnection;
 
 export { pgp };
 
-const PRE_PUBLISH_VERSION: string = '2.0.0';
+const PRE_PUBLISH_VERSION: string = '2.0.1';
 const BASE_VERSION: string = '1.0.0';
 
 const LATEST_VERSION: string = PRE_PUBLISH_VERSION;

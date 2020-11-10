@@ -86,7 +86,7 @@ const BASE_VERSION_DATABASE_QUERY = `
 const PRE_PUBLISH_VERSION_DATABASE_QUERY = `
     UPDATE public."Images"
         SET status = '${ImageStatus.PrePublished}'
-        WHERE "Images"."imageId" = '${ImageStatus.Published}';
+        WHERE "Images".status = '${ImageStatus.Published}';
 `;
 
 export { AUTH_COOKIE_NAME, BASE_VERSION_DATABASE_QUERY, PRE_PUBLISH_VERSION_DATABASE_QUERY };
