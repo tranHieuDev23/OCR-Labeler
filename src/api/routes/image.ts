@@ -133,7 +133,7 @@ imageRouter.post('/publish-image', uploadJwtMiddleware, (request, response) => {
             console.log(`[/get-image] User ${user.username} is trying to publish other's images!`);
             return response.status(StatusCodes.UNAUTHORIZED).json({ error: 'Trying to publish other\'s images' });
         }
-        imageDao.setImageStatus(imageId, ImageStatus.Published).then((success) => {
+        imageDao.setImageStatus(imageId, ImageStatus.PrePublished).then((success) => {
             return response.status(success ? StatusCodes.OK : StatusCodes.UNAUTHORIZED).json({});
         }, (reason) => {
             console.log(`[/publish-image] Problem when updating image's status: ${reason}`);

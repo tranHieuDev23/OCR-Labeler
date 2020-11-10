@@ -1,6 +1,11 @@
+import ImageStatus from "src/app/models/image-status";
+
 const AUTH_COOKIE_NAME: string = 'ocr-auth';
 
-const DATABASE_INITIALIZE_QUERY = `
+const BASE_VERSION_DATABASE_QUERY = `
+    CREATE TABLE IF NOT EXISTS public."SchemaVersions" (
+        version text NOT NULL
+    );
     CREATE TABLE IF NOT EXISTS public."BlacklistedJwts" (
         jwtid text NOT NULL,
         exp bigint NOT NULL
@@ -78,4 +83,10 @@ const DATABASE_INITIALIZE_QUERY = `
         ADD CONSTRAINT "VERIFIED_BY" FOREIGN KEY ("verifiedBy") REFERENCES public."Users"(username);
 `;
 
-export { AUTH_COOKIE_NAME, DATABASE_INITIALIZE_QUERY };
+const PRE_PUBLISH_VERSION_DATABASE_QUERY = `
+    UPDATE public."Images"
+        SET status = '${ImageStatus.PrePublished}'
+        WHERE "Images"."imageId" = '${ImageStatus.Published}';
+`;
+
+export { AUTH_COOKIE_NAME, BASE_VERSION_DATABASE_QUERY, PRE_PUBLISH_VERSION_DATABASE_QUERY };

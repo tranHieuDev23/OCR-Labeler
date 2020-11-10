@@ -3,7 +3,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { RegionSelectedEvent, RegionSelectorComponent } from 'src/app/components/region-selector/region-selector.component';
-import ImageStatus from 'src/app/models/image-status';
+import ImageStatus, { isPublishedStatus } from 'src/app/models/image-status';
 import { TextRegion, Region } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
@@ -124,7 +124,7 @@ export class ManageImageComponent implements OnInit {
     this.isPublishing = true;
     this.backend.publishImage(this.imageId).then(() => {
       this.notification.success('Image published successfully', '');
-      this.status = ImageStatus.Published;
+      this.status = ImageStatus.PrePublished;
       this.isPublishing = false;
     }, (reason) => {
       this.notification.error('Failed to publish image', `Reason: ${reason}`);
@@ -139,5 +139,9 @@ export class ManageImageComponent implements OnInit {
     }, (reason) => {
       this.notification.error('Failed to delete image', `Reason: ${reason}`);
     });
+  }
+
+  isPublishedStatus(): boolean {
+    return isPublishedStatus(this.status);
   }
 }

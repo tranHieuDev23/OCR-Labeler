@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ImageComparationOption } from 'src/app/models/image-compare-funcs';
-import ImageStatus, { getImageStatusString } from 'src/app/models/image-status';
+import ImageStatus, { getAllImageStatuses, getImageStatusString } from 'src/app/models/image-status';
 import UploadedImage from 'src/app/models/uploaded-image';
 import { BackendService } from 'src/app/services/backend.service';
 
@@ -27,12 +27,9 @@ export class MyImagesComponent implements OnInit {
   ];
   public selectedSortOption: ImageComparationOption = ImageComparationOption.UPLOAD_LATEST_FIRST;
 
-  public filterStatusOptions: { label: string, value: ImageStatus }[] = [
-    { label: getImageStatusString(ImageStatus.Processing), value: ImageStatus.Processing },
-    { label: getImageStatusString(ImageStatus.Processed), value: ImageStatus.Processed },
-    { label: getImageStatusString(ImageStatus.NotProcessed), value: ImageStatus.NotProcessed },
-    { label: getImageStatusString(ImageStatus.Published), value: ImageStatus.Published }
-  ];
+  public filterStatusOptions: { label: string, value: ImageStatus }[] = getAllImageStatuses().map(item => {
+    return { label: getImageStatusString(item), value: item };
+  });
   public filteredStatuses: ImageStatus[] = [];
 
   constructor(
