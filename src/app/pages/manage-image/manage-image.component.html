@@ -27,7 +27,7 @@
         </button>
 
         <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
-            <div *ngFor="let item of croppedRegions; index as i " nz-col nzSpan="24" nzMd="12" nzLg="8"
+            <div *ngFor="let item of croppedRegions; index as i " nz-col nzSpan="12" nzLg="8" nzXl="6"
                 style="margin-top: 8px; margin-bottom: 8px;">
                 <nz-card style="width:100%;" [nzHoverable]="true" [nzCover]="coverTemplate"
                     [nzActions]="[deleteSetting]">
