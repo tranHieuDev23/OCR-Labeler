@@ -29,7 +29,8 @@
         <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
             <div *ngFor="let item of croppedRegions; index as i " nz-col nzSpan="24" nzMd="12" nzLg="8"
                 style="margin-top: 8px; margin-bottom: 8px;">
-                <nz-card style="width:100%;" [nzHoverable]="true" [nzCover]="coverTemplate" (click)="regionClicked(i)">
+                <nz-card style="width:100%;" [nzHoverable]="true" [nzCover]="coverTemplate"
+                    [nzActions]="[deleteSetting]">
                     <span *ngIf="item.status == 'NotLabeled'">
                         <nz-tag nzColor="blue">Not labeled</nz-tag>
                     </span>
@@ -54,7 +55,13 @@
                     </span>
                 </nz-card>
                 <ng-template #coverTemplate>
-                    <img class="item-thumbnail" [src]="croppedRegionImages[i]" />
+                    <img class="item-thumbnail" [src]="croppedRegionImages[i]" (click)="regionClicked(i)" />
+                </ng-template>
+                <ng-template #deleteSetting>
+                    <button nz-button nzDanger nz-popconfirm nzPopconfirmTitle="Are you sure?" nzOkText="OK"
+                        nzCancelText="Cancel" (nzOnConfirm)="deleteRegion(i)">
+                        <i nz-icon nzType="delete"></i>
+                    </button>
                 </ng-template>
             </div>
         </div>

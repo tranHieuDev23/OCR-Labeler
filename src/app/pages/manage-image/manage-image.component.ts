@@ -1,5 +1,6 @@
+import { Location } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { RegionSelectedEvent, RegionSelectorComponent } from 'src/app/components/region-selector/region-selector.component';
 import ImageStatus from 'src/app/models/image-status';
@@ -30,7 +31,7 @@ export class ManageImageComponent implements OnInit {
   constructor(
     private backend: BackendService,
     private route: ActivatedRoute,
-    private router: Router,
+    private location: Location,
     private notification: NzNotificationService,
     private thumbnail: ThumbnailService,
   ) {
@@ -68,11 +69,11 @@ export class ManageImageComponent implements OnInit {
         this.regionSelector.highlight(result.textRegions.map(item => item.region.vertices));
       }, (reason) => {
         this.notification.error('Failed to load file', `Reason: ${reason}`);
-        this.router.navigateByUrl('/');
+        this.location.back();
       });
     }, (reason) => {
       this.notification.error('Failed to load file', `Reason: ${reason}`);
-      this.router.navigateByUrl('/');
+      this.location.back();
     });
   }
 
@@ -134,7 +135,7 @@ export class ManageImageComponent implements OnInit {
   deleteImage() {
     this.backend.deleteImage(this.imageId).then(() => {
       this.notification.success('Image deleted successfully', '');
-      this.router.navigateByUrl('/');
+      this.location.back();
     }, (reason) => {
       this.notification.error('Failed to delete image', `Reason: ${reason}`);
     });
