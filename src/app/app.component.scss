@@ -30,6 +30,10 @@
   font-size: 14px;
   font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
   vertical-align: middle;
+
+  @media (max-width: 767px) {
+    display: none;
+  }
 }
 
 .header-menu {
