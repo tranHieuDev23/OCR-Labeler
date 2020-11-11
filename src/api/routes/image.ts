@@ -114,7 +114,11 @@ imageRouter.post('/add-region', uploadJwtMiddleware, (request, response) => {
             console.log(`[/add-region] User ${user.username} is trying to add region to other's images!`);
             return response.status(StatusCodes.UNAUTHORIZED).json({ error: 'Trying to add region to other\'s images!' });
         }
-        regionDao.addTextRegions([textRegion]).then(() => {
+        const actions: Promise<any>[] = [regionDao.addTextRegions([textRegion])];
+        if (image.status === ImageStatus.Published) {
+            actions.push(imageDao.setImageStatus(image.imageId, ImageStatus.PrePublished));
+        }
+        Promise.all(actions).then(() => {
             response.json(textRegion);
         }, (reason) => {
             console.log(`[/add-region] Problem when storing new image region: ${reason}`);
