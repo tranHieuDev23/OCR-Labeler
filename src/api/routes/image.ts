@@ -106,6 +106,7 @@ imageRouter.post('/add-region', uploadJwtMiddleware, (request, response) => {
         LabelStatus.NotLabeled,
         user,
         null,
+        null,
         null
     );
     imageDao.getImage(imageId).then((image) => {

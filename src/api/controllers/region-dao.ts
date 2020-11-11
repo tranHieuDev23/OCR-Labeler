@@ -30,7 +30,8 @@ class TextRegionDao {
                     result.status as LabelStatus,
                     User.newBaseUser(result.uploadedBy, result.uploadedBy),
                     result.labeledBy ? User.newBaseUser(result.labeledBy, result.labeledBy) : null,
-                    result.verifiedBy ? User.newBaseUser(result.verifiedBy, result.verifiedBy) : null
+                    result.verifiedBy ? User.newBaseUser(result.verifiedBy, result.verifiedBy) : null,
+                    result.suggestion
                 );
                 resolve(region);
             }, (reason) => {
@@ -53,7 +54,8 @@ class TextRegionDao {
                 'status',
                 'uploadedBy',
                 'labeledBy',
-                'verifiedBy'
+                'verifiedBy',
+                'suggestion'
             ], { table: 'TextRegions' });
             const query = pgp.helpers.insert(regions.map(item => {
                 return {
@@ -64,7 +66,8 @@ class TextRegionDao {
                     status: item.status,
                     uploadedBy: item.uploadedBy.username,
                     labeledBy: item.labeledBy !== null ? item.labeledBy.username : null,
-                    verifiedBy: item.verifiedBy !== null ? item.verifiedBy.username : null
+                    verifiedBy: item.verifiedBy !== null ? item.verifiedBy.username : null,
+                    suggestion: item.suggestion
                 };
             }), cs);
             databaseConnection.none(query).then(() => {
@@ -106,7 +109,8 @@ class TextRegionDao {
                             item.status as LabelStatus,
                             User.newBaseUser(item.uploaderDisplayName, item.uploaderUsername),
                             item.labelerDisplayName ? User.newBaseUser(item.labelerDisplayName, item.labelerUsername) : null,
-                            item.verifierDisplayName ? User.newBaseUser(item.verifierDisplayName, item.verifierUsername) : null
+                            item.verifierDisplayName ? User.newBaseUser(item.verifierDisplayName, item.verifierUsername) : null,
+                            item.suggestion
                         )
                     );
                 }

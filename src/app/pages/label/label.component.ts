@@ -31,7 +31,7 @@ export class LabelComponent implements OnInit {
         return;
       }
       this.imageUrl = result.imageUrl;
-      this.label = '';
+      this.label = result.region.suggestion || '';
       this.region = result.region;
     }, (reason) => {
       this.notification.error('Failed to load the text region', `Reason: ${reason}`);
