@@ -10,6 +10,7 @@ import { ImageComparationOption } from 'src/app/models/image-compare-funcs';
 import ImageStatus, { isPublishedStatus } from 'src/app/models/image-status';
 import { TextRegion, Region } from 'src/app/models/text-region';
 import UploadedImage from 'src/app/models/uploaded-image';
+import { AuthService } from 'src/app/services/auth.service';
 import { BackendService } from 'src/app/services/backend.service';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
 
@@ -40,6 +41,7 @@ export class ManageImageComponent implements OnInit {
 
   constructor(
     private backend: BackendService,
+    private auth: AuthService,
     private route: ActivatedRoute,
     private location: Location,
     private notification: NzNotificationService,
@@ -52,16 +54,18 @@ export class ManageImageComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParams.subscribe((queryParams) => {
       this.route.params.subscribe((params) => {
-        this.initialize();
-        this.imageId = params['id'];
-        this.imageComparator =
-          (queryParams['sort'] as ImageComparationOption) ||
-          ImageComparationOption.UPLOAD_LATEST_FIRST;
-        const statuses: string = queryParams['statuses'] || '';
-        this.filteredStatuses = statuses.split(',').map(item => item.trim()).filter(item => item.length > 0).map(item => item as ImageStatus);
-        const users: string = queryParams['users'] || '';
-        this.filteredUsers = users.split(',').map(item => item.trim()).filter(item => item.length > 0);
-        this.fileChangeEvent(this.imageId);
+        this.auth.getCurrentUser().then((user) => {
+          this.initialize();
+          this.imageId = params['id'];
+          this.imageComparator =
+            (queryParams['sort'] as ImageComparationOption) ||
+            ImageComparationOption.UPLOAD_LATEST_FIRST;
+          const statuses: string = queryParams['statuses'] || '';
+          this.filteredStatuses = statuses.split(',').map(item => item.trim()).filter(item => item.length > 0).map(item => item as ImageStatus);
+          const users: string = queryParams['users'] || user.username;
+          this.filteredUsers = users.split(',').map(item => item.trim()).filter(item => item.length > 0);
+          this.fileChangeEvent(this.imageId);
+        });
       });
     });
   }

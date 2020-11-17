@@ -100,9 +100,6 @@ imageRouter.post('/get-neighbor-image', uploadJwtMiddleware, (request, response)
     const sortOption: ImageComparationOption = request.body.sortOption;
     const filteredStatuses: ImageStatus[] = request.body.filteredStatuses;
     const filteredUsers: string[] = request.body.filteredUsers;
-    if (filteredUsers.length === 0) {
-        filteredUsers.push(user.username);
-    }
     const isNext: boolean = request.body.isNext;
     imageDao.getImage(imageId).then((image) => {
         if (image.uploadedBy.username !== user.username && !user.canManageAllImage) {
