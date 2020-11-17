@@ -13,9 +13,9 @@ export class BackendService {
     private http: HttpClient
   ) { }
 
-  public loadRegionForLabeling(): Promise<{ imageUrl: string, region: TextRegion }> {
+  public loadRegionForLabeling(sameUser: boolean): Promise<{ imageUrl: string, region: TextRegion }> {
     return new Promise<{ imageUrl: string, region: TextRegion }>((resolve, reject) => {
-      this.http.post<any>('/api/get-image-for-labeler', {}).toPromise().then((response) => {
+      this.http.post<any>('/api/get-image-for-labeler', { sameUser }).toPromise().then((response) => {
         if (!response) {
           return resolve(null);
         }

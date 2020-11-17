@@ -8,6 +8,7 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { FormsModule } from '@angular/forms';
 import { NzNotificationModule } from 'ng-zorro-antd/notification';
 import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { ImageRegionViewerModule } from 'src/app/components/image-region-viewer/image-region-viewer.module';
 
@@ -23,6 +24,7 @@ import { ImageRegionViewerModule } from 'src/app/components/image-region-viewer/
     NzNotificationModule,
     NzGridModule,
     NzEmptyModule,
+    NzSwitchModule,
     FormsModule,
     ImageRegionViewerModule
   ],

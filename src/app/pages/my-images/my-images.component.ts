@@ -3,6 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ImageComparationOption } from 'src/app/models/image-compare-funcs';
 import ImageStatus, { getAllImageStatuses, getImageStatusString } from 'src/app/models/image-status';
 import UploadedImage from 'src/app/models/uploaded-image';
+import User from 'src/app/models/user';
+import { AuthService } from 'src/app/services/auth.service';
 import { BackendService } from 'src/app/services/backend.service';
 
 const IMAGES_PER_PAGE: number = 12;
@@ -31,20 +33,25 @@ export class MyImagesComponent implements OnInit {
     return { label: getImageStatusString(item), value: item };
   });
   public filteredStatuses: ImageStatus[] = [];
+  private user: User;
 
   constructor(
+    private auth: AuthService,
     private backend: BackendService,
     private router: Router,
     private route: ActivatedRoute
   ) { }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe((params) => {
-      const pageId: number = params['page'] || 1;
-      const sortOption: ImageComparationOption = params['sort'] as ImageComparationOption || ImageComparationOption.UPLOAD_LATEST_FIRST;
-      const statuses: string = params['statuses'] || '';
-      const filteredStatuses: ImageStatus[] = statuses.split(',').map(item => item.trim()).filter(item => item.length > 0).map(item => item as ImageStatus);
-      this.loadPage(pageId, sortOption, filteredStatuses)
+    this.auth.getCurrentUser().then((user) => {
+      this.user = user;
+      this.route.queryParams.subscribe((params) => {
+        const pageId: number = params['page'] || 1;
+        const sortOption: ImageComparationOption = params['sort'] as ImageComparationOption || ImageComparationOption.UPLOAD_LATEST_FIRST;
+        const statuses: string = params['statuses'] || '';
+        const filteredStatuses: ImageStatus[] = statuses.split(',').map(item => item.trim()).filter(item => item.length > 0).map(item => item as ImageStatus);
+        this.loadPage(pageId, sortOption, filteredStatuses)
+      });
     });
   }
 
@@ -77,7 +84,8 @@ export class MyImagesComponent implements OnInit {
     this.router.navigate([`/manage-image/${this.uploadedImages[id].imageId}`], {
       queryParams: {
         sort: this.selectedSortOption,
-        statuses: this.filteredStatuses.join(',')
+        statuses: this.filteredStatuses.join(','),
+        users: this.user.username
       }
     });
   }

@@ -12,7 +12,8 @@ labelRouter.use(labelJwtMiddleware);
 
 labelRouter.post('/get-image-for-labeler', (request, response) => {
     const user: User = response.locals.user;
-    regionDao.getRandomTextRegion(user, LabelStatus.NotLabeled).then((region) => {
+    const sameUser: boolean = request.body.sameUser;
+    regionDao.getRandomTextRegion(user, LabelStatus.NotLabeled, sameUser).then((region) => {
         return response.json(region);
     }, (reason) => {
         console.log(`[/get-image-for-labeler] Error happened while getting text region: ${reason}`);

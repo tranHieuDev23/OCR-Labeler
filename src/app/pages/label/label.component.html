@@ -1,26 +1,57 @@
 <div>
-    <h1 nz-typography>Label images</h1>
-    <p nz-typography *ngIf="imageUrl">
-        Type in the text in this text region (with correct casing). Submit the label by pressing <b>Enter</b>, or skip
-        this text region by pressing <b>Tab</b>. If the text region doesn't contain any text, click <b>Invalid
-            region</b> to label this region as invalid.
-    </p>
+  <h1 nz-typography>Label images</h1>
+  <p nz-typography *ngIf="imageUrl">
+    Type in the text in this text region (with correct casing). Submit the label
+    by pressing <b>Enter</b>, or skip this text region by pressing <b>Tab</b>.
+    If the text region doesn't contain any text, click <b>Invalid region</b> to
+    label this region as invalid.
+  </p>
+</div>
+<div>
+  <nz-switch
+    [(ngModel)]="sameUser"
+    (ngModelChange)="changeSameUser()"
+    style="margin-bottom: 8px"
+  ></nz-switch>
+  Only my regions
 </div>
 <nz-empty *ngIf="!imageUrl" [nzNotFoundContent]="emptyContent">
-    <ng-template #emptyContent>
-        <p nz-typography>No text region needs labeling</p>
-    </ng-template>
+  <ng-template #emptyContent>
+    <p nz-typography>No text region needs labeling</p>
+  </ng-template>
 </nz-empty>
-<div *ngIf="imageUrl" nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
-    <div nz-col [nzSpan]="24" [nzMd]="12">
-        <app-image-region-viewer [imageSrc]="imageUrl" [region]="region">
-        </app-image-region-viewer>
-    </div>
-    <div nz-col [nzSpan]="24" [nzMd]="12">
-        <input id="label-input" nz-input [nzSize]="large" placeholder="Label here..." autocomplete="off"
-            [(ngModel)]="label" /> <br />
-        <button nz-button nzType="primary" [disabled]="label.length == 0" (click)="submit(false)">Submit label</button>
-        <button nz-button nzType="primary" (click)="loadRegion()">Skip region</button>
-        <button nz-button nzType="primary" nzDanger (click)="submit(true)">Invalid region</button>
-    </div>
+<div
+  *ngIf="imageUrl"
+  nz-row
+  [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }"
+>
+  <div nz-col [nzSpan]="24" [nzMd]="12">
+    <app-image-region-viewer [imageSrc]="imageUrl" [region]="region">
+    </app-image-region-viewer>
+  </div>
+  <div nz-col [nzSpan]="24" [nzMd]="12">
+    <input
+      id="label-input"
+      nz-input
+      [nzSize]="large"
+      placeholder="Label here..."
+      autocomplete="off"
+      [(ngModel)]="label"
+    />
+    <br />
+    <button
+      nz-button
+      nzType="primary"
+      [disabled]="label.length == 0"
+      (click)="submit(false)"
+    >
+      Submit label
+    </button>
+    <button nz-button nzType="primary" (click)="loadRegion()">
+      Skip region
+    </button>
+    <button nz-button nzType="primary" nzDanger (click)="submit(true)">
+      Invalid region
+    </button>
+  </div>
 </div>

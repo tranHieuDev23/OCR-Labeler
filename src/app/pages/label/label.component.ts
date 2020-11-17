@@ -11,6 +11,7 @@ import { BackendService } from 'src/app/services/backend.service';
 export class LabelComponent implements OnInit {
   public imageUrl: string = null;
   public label: string = '';
+  public sameUser: boolean = false;
   private region: TextRegion = null;
 
   constructor(
@@ -23,7 +24,7 @@ export class LabelComponent implements OnInit {
   }
 
   loadRegion(): void {
-    this.backend.loadRegionForLabeling().then((result) => {
+    this.backend.loadRegionForLabeling(this.sameUser).then((result) => {
       if (!result) {
         this.imageUrl = null;
         this.label = '';
@@ -36,6 +37,10 @@ export class LabelComponent implements OnInit {
     }, (reason) => {
       this.notification.error('Failed to load the text region', `Reason: ${reason}`);
     });
+  }
+
+  changeSameUser(): void {
+    this.loadRegion();
   }
 
   submit(cantLabel: boolean): void {

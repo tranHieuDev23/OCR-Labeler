@@ -12,7 +12,7 @@ verifyRouter.use(verifyJwtMiddleware);
 
 verifyRouter.post('/get-image-for-verifier', (request, response) => {
     const user: User = response.locals.user;
-    regionDao.getRandomTextRegion(user, LabelStatus.NotVerified).then((region) => {
+    regionDao.getRandomTextRegion(user, LabelStatus.NotVerified, false).then((region) => {
         return response.json(region);
     }, (reason) => {
         console.log(`[/get-image-for-verifier] Error happened while getting text region: ${reason}`);

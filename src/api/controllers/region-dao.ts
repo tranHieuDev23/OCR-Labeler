@@ -138,7 +138,7 @@ class TextRegionDao {
         });
     }
 
-    public getRandomTextRegion(user: User, status: LabelStatus): Promise<{ imageUrl: string, region: TextRegion }> {
+    public getRandomTextRegion(user: User, status: LabelStatus, sameUser: boolean): Promise<{ imageUrl: string, region: TextRegion }> {
         return new Promise<{ imageUrl: string, region: TextRegion }>((resolve, reject) => {
             databaseConnection.oneOrNone(
                 `
@@ -150,6 +150,7 @@ class TextRegionDao {
                             AND "TextRegions"."verifiedBy" IS DISTINCT FROM $1
                             AND "TextRegions".status = $2
                             AND "Images".status = 'Published'
+                            ${sameUser ? `AND "TextRegions"."uploadedBy" = $1` : ''}
                             LIMIT 1000
                     ) SELECT * FROM ValidItems OFFSET floor(random() * (SELECT COUNT(*) FROM validItems))
                         LIMIT 1;
