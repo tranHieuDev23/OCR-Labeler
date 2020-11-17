@@ -94,7 +94,13 @@ export class AllImageComponent implements OnInit {
   }
 
   onImageClicked(id: number): void {
-    this.router.navigateByUrl(`/manage-image/${this.uploadedImages[id].imageId}`);
+    this.router.navigate([`/manage-image/${this.uploadedImages[id].imageId}`], {
+      queryParams: {
+        sort: this.selectedSortOption,
+        statuses: this.filteredStatuses.join(','),
+        users: this.filteredUsers.join(',')
+      }
+    });
   }
 
   changePage(event: number): void {

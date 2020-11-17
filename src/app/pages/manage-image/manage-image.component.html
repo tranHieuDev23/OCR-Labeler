@@ -1,119 +1,207 @@
 <div>
-    <h1 nz-typography>Manage image</h1>
-    <p nz-typography>You can select a text region on this image by two way:</p>
-    <ul>
-        <li>Rectangular selection: Left-click and drag your mouse on the image</li>
-        <li>Free polygonial selection: Right-click 4 points on the image</li>
-    </ul>
-    <p nz-typography>Once selected, click <b>Add selected</b> to add the new text region.</p>
-    <p nz-typography>Double click on a region to see its status.</p>
+  <h1 nz-typography>Manage image</h1>
+  <p nz-typography>You can select a text region on this image by two way:</p>
+  <ul>
+    <li>Rectangular selection: Left-click and drag your mouse on the image</li>
+    <li>Free polygonal selection: Right-click 4 points on the image</li>
+  </ul>
+  <p nz-typography>
+    Once selected, click <b>Add selected</b> or press <b>Enter</b> to add the
+    new text region.
+  </p>
+  <p nz-typography>Double click on a region to see its status.</p>
+  <p nz-typography>Press left and right arrow to move to another image.</p>
 </div>
 
-<app-region-selector *ngIf="imageUrl" [imageSrc]="imageUrl" (imageCropped)="cropped($event)"
-    (regionSelected)="regionClicked($event)">
+<app-region-selector
+  [imageSrc]="imageUrl"
+  (imageCropped)="cropped($event)"
+  (regionSelected)="regionClicked($event)"
+>
 </app-region-selector>
 
-<div *ngIf="imageUrl" nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
-    <div nz-col nzSpan="24" nzMd="8">
-        <img *ngIf="selectedRegionImage" class="uploaded-image" [src]="selectedRegionImage" />
-        <nz-empty *ngIf="!selectedRegionImage" [nzNotFoundContent]="contentTpl"></nz-empty>
-        <ng-template #contentTpl>
-            <span>Nothing was selected</span>
+<div
+  *ngIf="imageUrl"
+  nz-row
+  [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }"
+>
+  <div nz-col nzSpan="24" nzMd="8">
+    <img
+      *ngIf="selectedRegionImage"
+      class="uploaded-image"
+      [src]="selectedRegionImage"
+    />
+    <nz-empty
+      *ngIf="!selectedRegionImage"
+      [nzNotFoundContent]="contentTpl"
+    ></nz-empty>
+    <ng-template #contentTpl>
+      <span>Nothing was selected</span>
+    </ng-template>
+  </div>
+  <div nz-col nzSpan="24" nzMd="16">
+    <button
+      class="button-tool"
+      nz-button
+      nzType="primary"
+      [disabled]="!selectedRegion"
+      (click)="addSelected()"
+    >
+      <i nz-icon nzType="plus"></i>Add selected
+    </button>
+
+    <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
+      <div
+        *ngFor="let item of croppedRegions; index as i"
+        nz-col
+        nzSpan="12"
+        nzLg="8"
+        nzXl="6"
+        style="margin-top: 8px; margin-bottom: 8px"
+      >
+        <nz-card
+          style="width: 100%"
+          [nzHoverable]="true"
+          [nzCover]="coverTemplate"
+          [nzActions]="[deleteSetting]"
+        >
+          <span *ngIf="item.status == 'NotLabeled'">
+            <nz-tag nzColor="blue">Not labeled</nz-tag>
+          </span>
+          <span *ngIf="item.status == 'CantLabel'">
+            <nz-tag nzColor="red">Can't be labeled</nz-tag>
+          </span>
+          <span *ngIf="item.status == 'NotVerified'">
+            <nz-tag nzColor="yellow">Labeled</nz-tag>
+          </span>
+          <span *ngIf="item.status == 'Verified'">
+            <nz-tag nzColor="green">Verified</nz-tag>
+          </span>
+          <br />
+          <span
+            *ngIf="item.status == 'NotVerified' || item.status == 'Verified'"
+            nz-typography
+          >
+            Labeled by <b>{{ item.labeledBy.displayName }}</b> as
+            <b>{{ item.label }}</b
+            ><br />
+          </span>
+          <span *ngIf="item.status == 'CantLabel'" nz-typography>
+            Reported by <b>{{ item.labeledBy.displayName }}</b
+            ><br />
+          </span>
+          <span *ngIf="item.status == 'Verified'" nz-typography>
+            Verified by <b>{{ item.verifiedBy.displayName }}</b
+            ><br />
+          </span>
+        </nz-card>
+        <ng-template #coverTemplate>
+          <img
+            class="item-thumbnail"
+            [src]="croppedRegionImages[i]"
+            (click)="regionClicked(i)"
+          />
         </ng-template>
+        <ng-template #deleteSetting>
+          <button nz-button nzDanger (click)="deleteRegion(i)">
+            <i nz-icon nzType="delete"></i>
+          </button>
+        </ng-template>
+      </div>
     </div>
-    <div nz-col nzSpan="24" nzMd="16">
-        <button class="button-tool" nz-button nzType="primary" [disabled]="!selectedRegion" (click)="addSelected()">
-            <i nz-icon nzType="plus"></i>Add selected
-        </button>
 
-        <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
-            <div *ngFor="let item of croppedRegions; index as i " nz-col nzSpan="12" nzLg="8" nzXl="6"
-                style="margin-top: 8px; margin-bottom: 8px;">
-                <nz-card style="width:100%;" [nzHoverable]="true" [nzCover]="coverTemplate"
-                    [nzActions]="[deleteSetting]">
-                    <span *ngIf="item.status == 'NotLabeled'">
-                        <nz-tag nzColor="blue">Not labeled</nz-tag>
-                    </span>
-                    <span *ngIf="item.status == 'CantLabel'">
-                        <nz-tag nzColor="red">Can't be labeled</nz-tag>
-                    </span>
-                    <span *ngIf="item.status == 'NotVerified'">
-                        <nz-tag nzColor="yellow">Labeled</nz-tag>
-                    </span>
-                    <span *ngIf="item.status == 'Verified'">
-                        <nz-tag nzColor="green">Verified</nz-tag>
-                    </span>
-                    <br />
-                    <span *ngIf="item.status == 'NotVerified' || item.status == 'Verified'" nz-typography>
-                        Labeled by <b>{{ item.labeledBy.displayName }}</b> as <b>{{ item.label }}</b><br />
-                    </span>
-                    <span *ngIf="item.status == 'CantLabel'" nz-typography>
-                        Reported by <b>{{ item.labeledBy.displayName }}</b><br />
-                    </span>
-                    <span *ngIf="item.status == 'Verified'" nz-typography>
-                        Verified by <b>{{ item.verifiedBy.displayName }}</b><br />
-                    </span>
-                </nz-card>
-                <ng-template #coverTemplate>
-                    <img class="item-thumbnail" [src]="croppedRegionImages[i]" (click)="regionClicked(i)" />
-                </ng-template>
-                <ng-template #deleteSetting>
-                    <button nz-button nzDanger nz-popconfirm nzPopconfirmTitle="Are you sure?" nzOkText="OK"
-                        nzCancelText="Cancel" (nzOnConfirm)="deleteRegion(i)">
-                        <i nz-icon nzType="delete"></i>
-                    </button>
-                </ng-template>
-            </div>
-        </div>
-
-        <button class="button-tool" nz-button nzType="primary" style="margin-top: 8px;"
-            [disabled]="croppedRegions.length == 0 || isPublishedStatus()" nz-popconfirm
-            nzPopconfirmTitle="Publishing this image will allow other people to label and verify its text regions."
-            nzOkText="OK" nzCancelText="Cancel" (nzOnConfirm)="publishImage()" [nzLoading]="isPublishing">
-            <i nz-icon nzType="check-circle"></i>
-            <span *ngIf="!isPublishedStatus()">
-                Publish this image
-            </span>
-            <span *ngIf="isPublishedStatus()">
-                Published
-            </span>
-        </button>
-        <button class="button-tool" nz-button nzType="primary" nzDanger style="margin-top: 8px;" nz-popconfirm
-            nzPopconfirmTitle="Are you sure? Deleting this image will also delete all region extracted from it."
-            nzOkText="OK" nzCancelText="Cancel" (nzOnConfirm)="deleteImage()">
-            <i nz-icon nzType="delete"></i>Delete this image
-        </button>
-    </div>
+    <button
+      class="button-tool"
+      nz-button
+      nzType="primary"
+      style="margin-top: 8px"
+      [disabled]="croppedRegions.length == 0 || isPublishedStatus()"
+      nz-popconfirm
+      nzPopconfirmTitle="Publishing this image will allow other people to label and verify its text regions."
+      nzOkText="OK"
+      nzCancelText="Cancel"
+      (nzOnConfirm)="publishImage()"
+      [nzLoading]="isPublishing"
+    >
+      <i nz-icon nzType="check-circle"></i>
+      <span *ngIf="!isPublishedStatus()"> Publish this image </span>
+      <span *ngIf="isPublishedStatus()"> Published </span>
+    </button>
+    <button
+      class="button-tool"
+      nz-button
+      nzType="primary"
+      nzDanger
+      style="margin-top: 8px"
+      nz-popconfirm
+      nzPopconfirmTitle="Are you sure? Deleting this image will also delete all region extracted from it."
+      nzOkText="OK"
+      nzCancelText="Cancel"
+      (nzOnConfirm)="deleteImage()"
+    >
+      <i nz-icon nzType="delete"></i>Delete this image
+    </button>
+  </div>
 </div>
 
-<nz-modal *ngIf="modalRegion" nzTitle="Region status" [nzVisible]="modalRegion" [nzClosable]="false"
-    [nzCancelText]="Close" (nzOnCancel)="closeModal()" [nzOkText]="null">
-    <img class="modal-image" [src]="modalRegionImage" />
-    <span *ngIf="modalRegion.status == 'NotLabeled'">
-        <nz-tag nzColor="blue">Not labeled</nz-tag>
-    </span>
-    <span *ngIf="modalRegion.status == 'CantLabel'">
-        <nz-tag nzColor="red">Can't be labeled</nz-tag>
-    </span>
-    <span *ngIf="modalRegion.status == 'NotVerified'">
-        <nz-tag nzColor="yellow">Labeled</nz-tag>
-    </span>
-    <span *ngIf="modalRegion.status == 'Verified'">
-        <nz-tag nzColor="green">Verified</nz-tag>
-    </span>
-    <br />
-    <span *ngIf="modalRegion.status == 'NotVerified' || modalRegion.status == 'Verified'" nz-typography>
-        Labeled by <b>{{ modalRegion.labeledBy.displayName }}</b> as <b>{{ modalRegion.label }}</b><br />
-    </span>
-    <span *ngIf="modalRegion.status == 'CantLabel'" nz-typography>
-        Reported by <b>{{ modalRegion.labeledBy.displayName }}</b><br />
-    </span>
-    <span *ngIf="modalRegion.status == 'Verified'" nz-typography>
-        Verified by <b>{{ modalRegion.verifiedBy.displayName }}</b><br />
-    </span>
+<div nz-row nzJustify="space-between" style="margin-top: 16px">
+  <button nz-col nz-button (click)="nextImage()">
+    <i nz-icon nzType="left"></i>Next
+  </button>
+  <button nz-col nz-button (click)="prevImage()">
+    Previous<i nz-icon nzType="right"></i>
+  </button>
+</div>
 
-    <button nz-button nzDanger nzType="primary" nz-popconfirm nzPopconfirmTitle="Are you sure?" nzOkText="OK"
-        nzCancelText="Cancel" (nzOnConfirm)="deleteRegion(modalRegionId)" style="margin-top: 8px;">
-        <i nz-icon nzType="delete"></i> Delete this region
-    </button>
+<nz-modal
+  *ngIf="modalRegion"
+  nzTitle="Region status"
+  [nzVisible]="modalRegion"
+  [nzClosable]="false"
+  [nzCancelText]="Close"
+  (nzOnCancel)="closeModal()"
+  [nzOkText]="null"
+>
+  <img class="modal-image" [src]="modalRegionImage" />
+  <span *ngIf="modalRegion.status == 'NotLabeled'">
+    <nz-tag nzColor="blue">Not labeled</nz-tag>
+  </span>
+  <span *ngIf="modalRegion.status == 'CantLabel'">
+    <nz-tag nzColor="red">Can't be labeled</nz-tag>
+  </span>
+  <span *ngIf="modalRegion.status == 'NotVerified'">
+    <nz-tag nzColor="yellow">Labeled</nz-tag>
+  </span>
+  <span *ngIf="modalRegion.status == 'Verified'">
+    <nz-tag nzColor="green">Verified</nz-tag>
+  </span>
+  <br />
+  <span
+    *ngIf="
+      modalRegion.status == 'NotVerified' || modalRegion.status == 'Verified'
+    "
+    nz-typography
+  >
+    Labeled by <b>{{ modalRegion.labeledBy.displayName }}</b> as
+    <b>{{ modalRegion.label }}</b
+    ><br />
+  </span>
+  <span *ngIf="modalRegion.status == 'CantLabel'" nz-typography>
+    Reported by <b>{{ modalRegion.labeledBy.displayName }}</b
+    ><br />
+  </span>
+  <span *ngIf="modalRegion.status == 'Verified'" nz-typography>
+    Verified by <b>{{ modalRegion.verifiedBy.displayName }}</b
+    ><br />
+  </span>
+
+  <button
+    nz-button
+    nzDanger
+    nzType="primary"
+    (click)="deleteRegion(modalRegionId)"
+    style="margin-top: 8px"
+  >
+    <i nz-icon nzType="delete"></i> Delete this region
+  </button>
 </nz-modal>

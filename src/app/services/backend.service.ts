@@ -112,6 +112,38 @@ export class BackendService {
     });
   }
 
+  public loadNextImage(imageId: string, sortOption: ImageComparationOption, filteredStatuses: ImageStatus[], filteredUsers: string[]): Promise<UploadedImage> {
+    return new Promise<UploadedImage>((resolve, reject) => {
+      this.http.post('/api/get-neighbor-image', {
+        imageId,
+        sortOption,
+        filteredStatuses,
+        filteredUsers,
+        isNext: true
+      }).toPromise().then((response) => {
+        resolve(UploadedImage.parseFromJson(response));
+      }, (error) => {
+        reject(error.error.error);
+      });
+    });
+  }
+
+  public loadPrevImage(imageId: string, sortOption: ImageComparationOption, filteredStatuses: ImageStatus[], filteredUsers: string[]): Promise<UploadedImage> {
+    return new Promise<UploadedImage>((resolve, reject) => {
+      this.http.post('/api/get-neighbor-image', {
+        imageId,
+        sortOption,
+        filteredStatuses,
+        filteredUsers,
+        isNext: false
+      }).toPromise().then((response) => {
+        resolve(UploadedImage.parseFromJson(response));
+      }, (error) => {
+        reject(error.error.error);
+      });
+    });
+  }
+
   public addTextRegion(imageId: string, region: Region): Promise<TextRegion> {
     return new Promise<TextRegion>((resolve, reject) => {
       this.http.post('/api/add-region', { imageId, region }).toPromise().then((response) => {

@@ -94,6 +94,40 @@ imageRouter.post('/get-image', uploadJwtMiddleware, (request, response) => {
     });
 });
 
+imageRouter.post('/get-neighbor-image', uploadJwtMiddleware, (request, response) => {
+    const user: User = response.locals.user;
+    const imageId: string = request.body.imageId;
+    const sortOption: ImageComparationOption = request.body.sortOption;
+    const filteredStatuses: ImageStatus[] = request.body.filteredStatuses;
+    const filteredUsers: string[] = request.body.filteredUsers;
+    if (filteredUsers.length === 0) {
+        filteredUsers.push(user.username);
+    }
+    const isNext: boolean = request.body.isNext;
+    imageDao.getImage(imageId).then((image) => {
+        if (image.uploadedBy.username !== user.username && !user.canManageAllImage) {
+            console.log(`[/get-neighbor-image] User ${user.username} is trying to access other's images!`);
+            return response.status(StatusCodes.UNAUTHORIZED).json({ error: 'Trying to access other\'s images' });
+        }
+        imageDao.getNeighborImage(image, sortOption, filteredStatuses, filteredUsers, isNext).then((nextImage) => {
+            if (!nextImage) {
+                return response.status(StatusCodes.BAD_REQUEST).json({ error: 'No next image' });
+            }
+            if (nextImage.uploadedBy.username !== user.username && !user.canManageAllImage) {
+                console.log(`[/get-neighbor-image] User ${user.username} is trying to access other's images!`);
+                return response.status(StatusCodes.UNAUTHORIZED).json({ error: 'Trying to access other\'s images' });
+            }
+            return response.json(nextImage);
+        }, (reason) => {
+            console.log(`[/get-neighbor-image] Problem when retrieving image: ${reason}`);
+            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
+        });
+    }, (reason) => {
+        console.log(`[/get-neighbor-image] Problem when retrieving image: ${reason}`);
+        return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
+    });
+});
+
 imageRouter.post('/add-region', uploadJwtMiddleware, (request, response) => {
     const user: User = response.locals.user;
     const imageId: string = request.body.imageId;

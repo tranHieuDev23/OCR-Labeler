@@ -66,7 +66,6 @@ class State {
 })
 export class RegionSelectorComponent implements OnInit {
   @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
-  @Input('imageSrc') imageSrc: string;
   @Output('imageCropped') public imageCropped: EventEmitter<RegionSelectedEvent> = new EventEmitter<RegionSelectedEvent>();
   @Output('regionSelected') public regionSelected: EventEmitter<number> = new EventEmitter<number>();
 
@@ -74,6 +73,13 @@ export class RegionSelectorComponent implements OnInit {
   private isImageLoaded: boolean = false;
   private dragStart: Coordinate = null;
   private polygonToCheckInside: any[] = [];
+
+  private imgSrc: string = '';
+  @Input('imageSrc')
+  public set imageSrc(v: string) {
+    this.imgSrc = v;
+    this.initialize();
+  }
 
   constructor(
     private canvasService: CanvasService,
@@ -83,12 +89,6 @@ export class RegionSelectorComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const imageElement = new Image();
-    imageElement.onload = () => {
-      this.isImageLoaded = true;
-      this.setState(this.state.cloneWithImageElement(imageElement));
-    }
-    imageElement.src = this.imageSrc;
     if (window) {
       window.onresize = () => {
         this.drawCanvasState(this.state);
@@ -114,6 +114,16 @@ export class RegionSelectorComponent implements OnInit {
     this.canvas.nativeElement.addEventListener('mouseup', (event) => {
       this.handleMouseUp(this.getCanvasPosition(event.clientX, event.clientY));
     });
+    this.initialize();
+  }
+
+  initialize(): void {
+    const imageElement = new Image();
+    imageElement.onload = () => {
+      this.isImageLoaded = true;
+      this.setState(this.state.cloneWithImageElement(imageElement));
+    }
+    imageElement.src = this.imgSrc;
   }
 
   private isEventLeftMouse(event: MouseEvent): boolean {

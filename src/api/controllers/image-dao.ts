@@ -1,4 +1,4 @@
-import { getOrderByClause, ImageComparationOption } from 'src/app/models/image-compare-funcs';
+import { getOppositeOption, getOrderByClause, ImageComparationOption } from 'src/app/models/image-compare-funcs';
 import ImageStatus, { getImageStatusFilterClause } from 'src/app/models/image-status';
 import UploadedImage from "src/app/models/uploaded-image";
 import User from 'src/app/models/user';
@@ -13,7 +13,7 @@ function getFilterClause(filteredStatuses: ImageStatus[], filteredUsers: string[
     const emptyFilterStatuses: boolean = (!filteredStatuses || filteredStatuses.length === 0);
     const emptyFilterUsers: boolean = (!filteredUsers || filteredUsers.length === 0);
     if (emptyFilterStatuses && emptyFilterUsers) {
-        return '';
+        return 'true';
     }
     const statusClause: string = emptyFilterStatuses
         ? ''
@@ -21,7 +21,63 @@ function getFilterClause(filteredStatuses: ImageStatus[], filteredUsers: string[
     const userClause: string = emptyFilterUsers
         ? ''
         : `"Images"."uploadedBy" IN (${filteredUsers.map(item => `'${item}'`).join(',')})`;
-    return `WHERE ${statusClause} ${(!emptyFilterStatuses && !emptyFilterUsers) ? 'AND' : ''} ${userClause}`;
+    return `${statusClause} ${(!emptyFilterStatuses && !emptyFilterUsers) ? 'AND' : ''} ${userClause}`;
+}
+
+
+function getCompareWithImageClause(
+    option: ImageComparationOption,
+    image: UploadedImage,
+    filteredStatuses: ImageStatus[],
+    filteredUsers: string[],
+    isNext: boolean
+): string {
+    if (isNext) {
+        option = getOppositeOption(option);
+    }
+    let bigger: string;
+    let smaller: string;
+    let idComparator: string;
+    switch (option) {
+        case ImageComparationOption.UPLOAD_LATEST_FIRST:
+            bigger = `'${image.uploadedDate.getTime()}'`;
+            smaller = `"Images"."uploadedDate"`;
+            idComparator = '<';
+            break;
+        case ImageComparationOption.UPLOAD_OLDEST_FIRST:
+            bigger = `"Images"."uploadedDate"`;
+            smaller = `'${image.uploadedDate.getTime()}'`;
+            idComparator = '>';
+            break;
+        case ImageComparationOption.STATUS_ASC:
+            bigger = `'${image.status}'`;
+            smaller = `"Images".status`;
+            idComparator = '<';
+            break;
+        case ImageComparationOption.STATUS_DESC:
+            bigger = `"Images".status`;
+            smaller = `'${image.status}'`;
+            idComparator = '>';
+            break;
+        case ImageComparationOption.USER_ASC:
+            bigger = `'${image.uploadedBy.username}'`;
+            smaller = `"Images"."uploadedBy"`;
+            idComparator = '<';
+            break;
+        case ImageComparationOption.USER_DESC:
+            bigger = `"Images"."uploadedBy"`;
+            smaller = `'${image.uploadedBy.username}'`;
+            idComparator = '>';
+            break;
+        default:
+            return '';
+    }
+    return `
+        WHERE (${bigger} > ${smaller}
+        OR (${bigger} = ${smaller} AND '${image.imageId}' ${idComparator} "Images"."imageId"))
+        AND ${getFilterClause(filteredStatuses, filteredUsers)}
+        ${getOrderByClause(option)}
+    `;
 }
 
 class ImageDao {
@@ -36,7 +92,7 @@ class ImageDao {
             databaseConnection.one(
                 `
                     SELECT COUNT(*) FROM public."Images"
-                        ${getFilterClause(filteredStatuses, filteredUsers)};
+                        WHERE ${getFilterClause(filteredStatuses, filteredUsers)};
                 `,
             ).then((result) => {
                 resolve(+result.count);
@@ -51,7 +107,7 @@ class ImageDao {
             databaseConnection.any(
                 `
                     SELECT * FROM public."Images" JOIN public."Users" ON "Images"."uploadedBy" = "Users".username
-                        ${getFilterClause(filteredStatuses, filteredUsers)}
+                        WHERE ${getFilterClause(filteredStatuses, filteredUsers)}
                         ${getOrderByClause(sortOption)}
                         OFFSET $1 LIMIT $2;
                 `,
@@ -177,6 +233,66 @@ class ImageDao {
             }, (reason) => {
                 reject(`[getImage()] Error happened while reading image from database: ${reason}`);
             });
+        });
+    }
+
+    public getNeighborImage(
+        image: UploadedImage,
+        sortOption: ImageComparationOption,
+        filteredStatuses: ImageStatus[],
+        filteredUsers: string[],
+        isNext: boolean
+    ): Promise<UploadedImage> {
+        return new Promise<UploadedImage>((resolve, reject) => {
+            databaseConnection
+                .oneOrNone(
+                    `
+                    SELECT * FROM public."Images"
+                        ${getCompareWithImageClause(sortOption, image, filteredStatuses, filteredUsers, isNext)}
+                        LIMIT 1;
+                `)
+                .then(
+                    (image) => {
+                        if (!image) {
+                            return resolve(null);
+                        }
+                        const imageId = image.imageId;
+                        userDao.findUser(image.uploadedBy).then(
+                            (user) => {
+                                regionDao.getTextRegionsOfImage(imageId).then(
+                                    (regions) => {
+                                        resolve(
+                                            new UploadedImage(
+                                                imageId,
+                                                image.imageUrl,
+                                                image.thumbnailUrl,
+                                                regions,
+                                                user,
+                                                new Date(+image.uploadedDate),
+                                                image.status as ImageStatus
+                                            )
+                                        );
+                                    },
+                                    (reason) => {
+                                        reject(
+                                            `[getNextImage()] Error happened while reading regions from database: ${reason}`
+                                        );
+                                    }
+                                );
+                            },
+                            (reason) => {
+                                reject(
+                                    `[getNextImage()] Error happened while finding user from database: ${reason}`
+                                );
+                            }
+                        );
+                    },
+                    (reason) => {
+                        reject(
+                            `[getNextImage()] Error happened while reading image from database: ${reason}`
+                        );
+                    }
+                );
         });
     }
 
