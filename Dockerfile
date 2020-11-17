@@ -1,7 +1,7 @@
 # Build stage
 FROM node:12-buster AS build
 # Native dependencies
-RUN apt-get update && apt install -y \
+RUN apt update && apt install -y \
    python3 \
    make \
    g++ \
