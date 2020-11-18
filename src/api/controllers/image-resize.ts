@@ -10,7 +10,7 @@ function resizeImage(imageSrc: any, minWidth: number, minHeight: number): Promis
             const resizedImage = needResizing
                 ? image.resize(minWidth, minHeight, { fit: 'outside' })
                 : image;
-            resizedImage.toBuffer().then(resolve, reject);
+            resizedImage.rotate().toBuffer().then(resolve, reject);
         }, reject);
     });
 }
