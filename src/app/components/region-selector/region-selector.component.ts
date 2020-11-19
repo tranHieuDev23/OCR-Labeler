@@ -21,10 +21,21 @@ export class RegionCroppedEvent {
 }
 
 export class RegionClickedEvent {
+  public static readonly SELECTION_ID: number = -1;
+
   constructor(
     public readonly id: number,
     public readonly event: MouseEvent
   ) { }
+}
+
+function coordinatesToPolygon(coordinates: Coordinate[]): any {
+  const ply = [];
+  for (let v of coordinates) {
+    ply.push([v.x, v.y]);
+  }
+  ply.push([coordinates[0].x, coordinates[0].y]);
+  return polygon([ply]);
 }
 
 @Component({
@@ -47,7 +58,8 @@ export class RegionSelectorComponent implements OnInit {
   private state: RegionSelectorState;
   private isImageLoaded: boolean = false;
   private dragStart: Coordinate = null;
-  private polygonToCheckInside: any[] = [];
+  private selectionPolygon: any = null;
+  private highlightPolygons: any[] = [];
 
   private imgSrc: string = '';
   @Input('imageSrc')
@@ -106,6 +118,24 @@ export class RegionSelectorComponent implements OnInit {
     imageElement.src = this.imgSrc;
   }
 
+  public changeCroppingOption(): void {
+    if (this.selectedCropOption == CropOption.RECTANGULAR) {
+      this.selectedCropOption = CropOption.POLYGONAL;
+    } else {
+      this.selectedCropOption = CropOption.RECTANGULAR;
+    }
+    this.clearSelected();
+  }
+
+  public clearSelected(): void {
+    this.setRegionSelectorState(this.state.cloneWithSelectedCoordinates(null).cloneWithDragCoordinates(null));
+  }
+
+  public highlight(coordinates: Coordinate[][]): void {
+    this.highlightPolygons = coordinates.map(item => coordinatesToPolygon(item));
+    this.setRegionSelectorState(this.state.cloneWithHighlightCoordinates(coordinates));
+  }
+
   private isEventLeftMouse(event: MouseEvent): boolean {
     return event.button === 0;
   }
@@ -125,37 +155,10 @@ export class RegionSelectorComponent implements OnInit {
     return new Coordinate(x, y);
   }
 
-  public changeCroppingOption(): void {
-    if (this.selectedCropOption == CropOption.RECTANGULAR) {
-      this.selectedCropOption = CropOption.POLYGONAL;
-    } else {
-      this.selectedCropOption = CropOption.RECTANGULAR;
-    }
-    this.clearSelected();
-  }
-
-  public clearSelected(): void {
-    this.setRegionSelectorState(this.state.cloneWithSelectedCoordinates(null).cloneWithDragCoordinates(null));
-  }
-
-  public highlight(coordinates: Coordinate[][]): void {
-    this.polygonToCheckInside = coordinates.map(item => {
-      const ply = [];
-      for (let v of item) {
-        ply.push([v.x, v.y]);
-      }
-      ply.push([item[0].x, item[0].y]);
-      return polygon([ply]);
-    });
-    this.setRegionSelectorState(this.state.cloneWithHighlightCoordinates(coordinates));
-  }
-
   private handleDbClick(event: MouseEvent, coordinate: Coordinate): void {
     this.clearSelected();
-    const insideId: number = this.isInHighlighted(coordinate);
-    if (insideId !== -1) {
-      this.regionDbClicked.emit(new RegionClickedEvent(insideId, event));
-    }
+    const insideId: number = this.getInsideId(coordinate);
+    this.regionDbClicked.emit(new RegionClickedEvent(insideId, event));
   }
 
   private handleLeftMouseDown(coordinate: Coordinate): void {
@@ -170,7 +173,8 @@ export class RegionSelectorComponent implements OnInit {
   }
 
   private handleContextMenu(event: MouseEvent, coordinate: Coordinate): void {
-    const insideId: number = this.isInHighlighted(coordinate);
+    const insideId: number = this.getInsideId(coordinate);
+    console.log(insideId);
     this.regionRightClicked.emit(new RegionClickedEvent(insideId, event));
   }
 
@@ -192,13 +196,7 @@ export class RegionSelectorComponent implements OnInit {
         .cloneWithSelectedCoordinates(selected)
     );
     if (selected.length == 4) {
-      this.thumbnail.generatePolygonImage(this.imgSrc, selected)
-        .then((result) => {
-          this.regionCropped.emit(new RegionCroppedEvent(
-            new Region(selected),
-            result
-          ));
-        });
+      this.generateCropped(selected);
     }
   }
 
@@ -236,13 +234,18 @@ export class RegionSelectorComponent implements OnInit {
       coordinate,
       new Coordinate(coordinate.x, this.dragStart.y)
     ];
+    this.generateCropped(vertices);
+    this.dragStart = null;
+  }
+
+  private generateCropped(vertices: Coordinate[]): void {
+    this.selectionPolygon = coordinatesToPolygon(vertices);
     this.thumbnail.generatePolygonImage(this.imgSrc, vertices).then((result) => {
       this.regionCropped.emit(new RegionCroppedEvent(
         new Region(vertices),
         result
       ));
     });
-    this.dragStart = null;
   }
 
   private dragTooShort(start: Coordinate, end: Coordinate): boolean {
@@ -255,11 +258,20 @@ export class RegionSelectorComponent implements OnInit {
     return false;
   }
 
-  private isInHighlighted(coordinate: Coordinate): number {
+  private getInsideId(coordinate: Coordinate): number {
     const pt = point([coordinate.x, coordinate.y]);
-    return this.polygonToCheckInside.findIndex(item => {
+    if (this.selectionPolygon) {
+      if (booleanPointInPolygon(pt, this.selectionPolygon)) {
+        return RegionClickedEvent.SELECTION_ID;
+      }
+    }
+    const highlightId = this.highlightPolygons.findIndex(item => {
       return booleanPointInPolygon(pt, item);
     });
+    if (highlightId >= 0) {
+      return highlightId;
+    }
+    return null;
   }
 
   private drawCanvasRegionSelectorState(state: RegionSelectorState): void {

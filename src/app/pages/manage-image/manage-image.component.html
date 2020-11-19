@@ -203,6 +203,9 @@
 
 <nz-dropdown-menu #regionContextMenu>
   <ul nz-menu oncontextmenu="return false;">
+    <li *ngIf="contextMenuShowAdd" nz-menu-item (click)="addSelected()">
+      Add selected
+    </li>
     <li nz-menu-item (click)="changeCroppingOption()">
       Change cropping option
     </li>

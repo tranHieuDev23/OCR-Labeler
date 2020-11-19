@@ -38,6 +38,7 @@ export class ManageImageComponent implements OnInit {
   public modalRegionImage: string = null;
 
   public contextMenuRegionId: number = -1;
+  public contextMenuShowAdd: boolean = false;
 
   private imageId: string;
   private imageComparator: ImageComparationOption;
@@ -174,11 +175,22 @@ export class ManageImageComponent implements OnInit {
   }
 
   onRegionDbClicked(event: RegionClickedEvent): void {
-    this.showModal(event.id);
+    if (event.id !== null && event.id !== RegionClickedEvent.SELECTION_ID) {
+      this.showModal(event.id);
+    }
   }
 
   onRegionRightClicked(event: RegionClickedEvent): void {
-    this.contextMenuRegionId = event.id;
+    if (event.id === null) {
+      this.contextService.close(true);
+    }
+    if (event.id !== RegionClickedEvent.SELECTION_ID) {
+      this.contextMenuRegionId = event.id;
+      this.contextMenuShowAdd = false;
+    } else {
+      this.contextMenuRegionId = null;
+      this.contextMenuShowAdd = true;
+    }
     this.contextService.create(event.event, this.regionContextMenu);
   }
 
