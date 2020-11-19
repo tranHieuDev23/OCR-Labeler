@@ -56,7 +56,10 @@
     [nzPageSize]="imagesPerPage"
     [nzTotal]="imagesCount"
     nzShowQuickJumper
+    nzShowSizeChanger
+    [nzPageSizeOptions]="[12, 24, 60, 120, 240]"
     (nzPageIndexChange)="changePage($event)"
+    (nzPageSizeChange)="changePageSize($event)"
   >
   </nz-pagination>
 </div>

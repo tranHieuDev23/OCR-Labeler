@@ -9,7 +9,8 @@ import User from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { BackendService } from 'src/app/services/backend.service';
 
-const IMAGES_PER_PAGE: number = 12;
+const DEFAULT_SORT_OPTION = ImageComparationOption.UPLOAD_LATEST_FIRST;
+const DEFAULT_IMAGES_PER_PAGE: number = 12;
 
 @Component({
   selector: 'app-my-images',
@@ -20,7 +21,7 @@ export class MyImagesComponent implements OnInit {
   @ViewChild("contextMenu") contextMenu: NzDropdownMenuComponent;
 
   public currentPage: number = null;
-  public imagesPerPage: number = IMAGES_PER_PAGE;
+  public imagesPerPage: number = DEFAULT_IMAGES_PER_PAGE;
   public imagesCount: number = null;
   public uploadedImages: UploadedImage[] = [];
   public loading: boolean = true;
@@ -31,7 +32,7 @@ export class MyImagesComponent implements OnInit {
     { label: 'Status (Asc.)', value: ImageComparationOption.STATUS_ASC },
     { label: 'Status (Desc.)', value: ImageComparationOption.STATUS_DESC }
   ];
-  public selectedSortOption: ImageComparationOption = ImageComparationOption.UPLOAD_LATEST_FIRST;
+  public selectedSortOption: ImageComparationOption = DEFAULT_SORT_OPTION;
 
   public filterStatusOptions: { label: string, value: ImageStatus }[] = getAllImageStatuses().map(item => {
     return { label: getImageStatusString(item), value: item };
@@ -59,27 +60,36 @@ export class MyImagesComponent implements OnInit {
         const sortOption: ImageComparationOption = params['sort'] as ImageComparationOption || ImageComparationOption.UPLOAD_LATEST_FIRST;
         const statuses: string = params['statuses'] || '';
         const filteredStatuses: ImageStatus[] = statuses.split(',').map(item => item.trim()).filter(item => item.length > 0).map(item => item as ImageStatus);
-        this.loadPage(pageId, sortOption, filteredStatuses)
+        const imagePerPage: number = params['pageSize'] || DEFAULT_IMAGES_PER_PAGE;
+        this.loadPage(pageId, sortOption, filteredStatuses, imagePerPage)
       });
     });
   }
 
   refresh(): void {
-    this.router.navigate(['/my-images'], {
-      queryParams: {
-        page: this.currentPage,
-        sort: this.selectedSortOption,
-        statuses: this.filteredStatuses.join(',')
-      }
-    });
+    const queryParams = {};
+    if (this.currentPage > 1) {
+      queryParams['page'] = this.currentPage;
+    }
+    if (this.selectedSortOption !== DEFAULT_SORT_OPTION) {
+      queryParams['page'] = this.selectedSortOption;
+    }
+    if (this.filteredStatuses.length > 0) {
+      queryParams['statuses'] = this.filteredStatuses;
+    }
+    if (this.imagesPerPage !== DEFAULT_IMAGES_PER_PAGE) {
+      queryParams['pageSize'] = this.imagesPerPage;
+    }
+    this.router.navigate(['/my-images'], { queryParams });
   }
 
-  loadPage(pageId: number, sortOption: ImageComparationOption, filteredStatuses: ImageStatus[]): void {
+  loadPage(pageId: number, sortOption: ImageComparationOption, filteredStatuses: ImageStatus[], imagePerPage: number): void {
     this.loading = true;
     this.currentPage = pageId;
     this.selectedSortOption = sortOption;
     this.filteredStatuses = filteredStatuses;
-    this.backend.loadUserImages(IMAGES_PER_PAGE * (pageId - 1), IMAGES_PER_PAGE, sortOption, filteredStatuses).then((result) => {
+    this.imagesPerPage = imagePerPage;
+    this.backend.loadUserImages(imagePerPage * (pageId - 1), imagePerPage, sortOption, filteredStatuses).then((result) => {
       this.currentPage = result.pageId;
       this.imagesCount = result.imagesCount;
       this.uploadedImages = result.images;
@@ -111,7 +121,7 @@ export class MyImagesComponent implements OnInit {
   onDeleteModalOk(): void {
     this.backend.deleteImageList(this.selectedImages.map(item => item.imageId)).then(() => {
       this.isDeleteModalVisible = false;
-      this.loadPage(this.currentPage, this.selectedSortOption, this.filteredStatuses);
+      this.loadPage(this.currentPage, this.selectedSortOption, this.filteredStatuses, this.imagesPerPage);
     }, (reason) => {
       this.notificationService.error('Failed to delete images', `Reason: ${reason}`);
     });
@@ -134,6 +144,14 @@ export class MyImagesComponent implements OnInit {
       return;
     }
     this.currentPage = event;
+    this.refresh();
+  }
+
+  changePageSize(event: number): void {
+    if (event === this.imagesPerPage) {
+      return;
+    }
+    this.imagesPerPage = event;
     this.refresh();
   }
 }

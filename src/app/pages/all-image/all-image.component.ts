@@ -8,7 +8,8 @@ import UploadedImage from 'src/app/models/uploaded-image';
 import { AuthService } from 'src/app/services/auth.service';
 import { BackendService } from 'src/app/services/backend.service';
 
-const IMAGES_PER_PAGE: number = 12;
+const DEFAULT_SORT_OPTION = ImageComparationOption.UPLOAD_LATEST_FIRST;
+const DEFAULT_IMAGES_PER_PAGE: number = 12;
 
 @Component({
   selector: 'app-all-image',
@@ -19,7 +20,7 @@ export class AllImageComponent implements OnInit {
   @ViewChild("contextMenu") contextMenu: NzDropdownMenuComponent;
 
   public currentPage: number = null;
-  public imagesPerPage: number = IMAGES_PER_PAGE;
+  public imagesPerPage: number = DEFAULT_IMAGES_PER_PAGE;
   public imagesCount: number = null;
   public uploadedImages: UploadedImage[] = [];
   public loading: boolean = true;
@@ -32,7 +33,7 @@ export class AllImageComponent implements OnInit {
     { label: 'User (Asc.)', value: ImageComparationOption.USER_ASC },
     { label: 'User (Desc.)', value: ImageComparationOption.USER_DESC }
   ];
-  public selectedSortOption: ImageComparationOption = ImageComparationOption.UPLOAD_LATEST_FIRST;
+  public selectedSortOption: ImageComparationOption = DEFAULT_SORT_OPTION;
 
   public filterStatusOptions: { label: string, value: ImageStatus }[] = getAllImageStatuses().map(item => {
     return { label: getImageStatusString(item), value: item };
@@ -65,30 +66,41 @@ export class AllImageComponent implements OnInit {
       const filteredStatuses: ImageStatus[] = statuses.split(',').map(item => item.trim()).filter(item => item.length > 0).map(item => item as ImageStatus);
       const users: string = params['users'] || '';
       const filteredUsers: string[] = users.split(',').map(item => item.trim()).filter(item => item.length > 0);
-      this.loadPage(pageId, sortOption, filteredStatuses, filteredUsers);
+      const imagePerPage: number = params['pageSize'] || DEFAULT_IMAGES_PER_PAGE;
+      this.loadPage(pageId, sortOption, filteredStatuses, filteredUsers, imagePerPage);
     });
   }
 
   refresh(): void {
-    this.router.navigate(['/all-image'], {
-      queryParams: {
-        page: this.currentPage,
-        sort: this.selectedSortOption,
-        statuses: this.filteredStatuses.join(','),
-        users: this.filteredUsers.join(',')
-      }
-    });
+    const queryParams = {};
+    if (this.currentPage > 1) {
+      queryParams['page'] = this.currentPage;
+    }
+    if (this.selectedSortOption !== DEFAULT_SORT_OPTION) {
+      queryParams['page'] = this.selectedSortOption;
+    }
+    if (this.filteredStatuses.length > 0) {
+      queryParams['statuses'] = this.filteredStatuses;
+    }
+    if (this.filteredUsers.length > 0) {
+      queryParams['users'] = this.filteredUsers;
+    }
+    if (this.imagesPerPage !== DEFAULT_IMAGES_PER_PAGE) {
+      queryParams['pageSize'] = this.imagesPerPage;
+    }
+    this.router.navigate(['/my-images'], { queryParams });
   }
 
-  loadPage(pageId: number, sortOption: ImageComparationOption, filteredStatuses: ImageStatus[], filteredUsers: string[]): void {
+  loadPage(pageId: number, sortOption: ImageComparationOption, filteredStatuses: ImageStatus[], filteredUsers: string[], imagesPerPage: number): void {
     this.loading = true;
     this.currentPage = pageId;
     this.selectedSortOption = sortOption;
     this.filteredStatuses = filteredStatuses;
     this.filteredUsers = filteredUsers;
+    this.imagesPerPage = imagesPerPage;
     this.backend.loadAllUserImages(
-      IMAGES_PER_PAGE * (pageId - 1),
-      IMAGES_PER_PAGE,
+      imagesPerPage * (pageId - 1),
+      imagesPerPage,
       sortOption,
       filteredStatuses,
       filteredUsers)
@@ -124,7 +136,7 @@ export class AllImageComponent implements OnInit {
   onDeleteModalOk(): void {
     this.backend.deleteImageList(this.selectedImages.map(item => item.imageId)).then(() => {
       this.isDeleteModalVisible = false;
-      this.loadPage(this.currentPage, this.selectedSortOption, this.filteredStatuses, this.filteredUsers);
+      this.loadPage(this.currentPage, this.selectedSortOption, this.filteredStatuses, this.filteredUsers, this.imagesPerPage);
     }, (reason) => {
       this.notificationService.error('Failed to delete images', `Reason: ${reason}`);
     });
