@@ -36,6 +36,7 @@ export class ThumbnailService {
   }
 
   public generatePolygonImage(imageSrc: string, vertices: Coordinate[]): Promise<string> {
+    console.log(imageSrc, vertices);
     return new Promise<string>((resolve) => {
       const xs: number[] = vertices.map(item => item.x);
       const ys: number[] = vertices.map(item => item.y);

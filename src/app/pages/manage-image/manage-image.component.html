@@ -15,8 +15,8 @@
 
 <app-region-selector
   [imageSrc]="imageUrl"
-  (imageCropped)="cropped($event)"
-  (regionSelected)="regionClicked($event)"
+  (regionCropped)="onRegionCropped($event)"
+  (regionSelected)="onRegionSelected($event)"
 >
 </app-region-selector>
 

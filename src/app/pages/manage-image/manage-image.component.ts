@@ -3,7 +3,7 @@ import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import {
-  RegionSelectedEvent,
+  RegionCroppedEvent,
   RegionSelectorComponent,
 } from 'src/app/components/region-selector/region-selector.component';
 import { ImageComparationOption } from 'src/app/models/image-compare-funcs';
@@ -110,7 +110,7 @@ export class ManageImageComponent implements OnInit {
     );
   }
 
-  cropped(event: RegionSelectedEvent): void {
+  onRegionCropped(event: RegionCroppedEvent): void {
     this.selectedRegion = event.region;
     this.selectedRegionImage = event.imageBase64;
   }
@@ -165,7 +165,7 @@ export class ManageImageComponent implements OnInit {
       });
   }
 
-  regionClicked(id: number): void {
+  onRegionSelected(id: number): void {
     this.modalRegionId = id;
     this.modalRegion = this.croppedRegions[id];
     this.modalRegionImage = this.croppedRegionImages[id];

@@ -4,59 +4,15 @@ import { ThumbnailService } from 'src/app/services/thumbnail.service';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import { point, polygon } from '@turf/helpers';
 import { CanvasService } from 'src/app/services/canvas.service';
+import { RegionSelectorState } from './region-selector-state';
 
 const EPSILON = Math.exp(-5);
 
-export class RegionSelectedEvent {
+export class RegionCroppedEvent {
   constructor(
     public readonly region: Region,
     public readonly imageBase64: string
   ) { }
-}
-
-class State {
-  constructor(
-    public readonly imageElement: HTMLImageElement,
-    public readonly selectedCoordinates: Coordinate[],
-    public readonly dragCoordinates: { start: Coordinate, end: Coordinate },
-    public readonly highlightedCoordinates: Coordinate[][],
-  ) { }
-
-  public cloneWithImageElement(imageElement: HTMLImageElement): State {
-    return new State(
-      imageElement,
-      this.selectedCoordinates,
-      this.dragCoordinates,
-      this.highlightedCoordinates
-    );
-  }
-
-  public cloneWithSelectedCoordinates(selectedCoordinates: Coordinate[]): State {
-    return new State(
-      this.imageElement,
-      selectedCoordinates,
-      this.dragCoordinates,
-      this.highlightedCoordinates
-    );
-  }
-
-  public cloneWithDragCoordinates(dragCoordinates: { start: Coordinate, end: Coordinate }): State {
-    return new State(
-      this.imageElement,
-      this.selectedCoordinates,
-      dragCoordinates,
-      this.highlightedCoordinates
-    );
-  }
-
-  public cloneWithHighlightCoordinates(highlightedCoordinates: Coordinate[][]): State {
-    return new State(
-      this.imageElement,
-      this.selectedCoordinates,
-      this.dragCoordinates,
-      highlightedCoordinates
-    );
-  }
 }
 
 @Component({
@@ -66,10 +22,10 @@ class State {
 })
 export class RegionSelectorComponent implements OnInit {
   @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
-  @Output('imageCropped') public imageCropped: EventEmitter<RegionSelectedEvent> = new EventEmitter<RegionSelectedEvent>();
+  @Output('regionCropped') public regionCropped: EventEmitter<RegionCroppedEvent> = new EventEmitter<RegionCroppedEvent>();
   @Output('regionSelected') public regionSelected: EventEmitter<number> = new EventEmitter<number>();
 
-  private state: State;
+  private state: RegionSelectorState;
   private isImageLoaded: boolean = false;
   private dragStart: Coordinate = null;
   private polygonToCheckInside: any[] = [];
@@ -85,13 +41,13 @@ export class RegionSelectorComponent implements OnInit {
     private canvasService: CanvasService,
     private thumbnail: ThumbnailService
   ) {
-    this.state = new State(null, null, null, []);
+    this.state = new RegionSelectorState(null, null, null, []);
   }
 
   ngOnInit(): void {
     if (window) {
       window.onresize = () => {
-        this.drawCanvasState(this.state);
+        this.drawCanvasRegionSelectorState(this.state);
       };
     }
     this.canvas.nativeElement.addEventListener('dblclick', (event) => {
@@ -121,7 +77,7 @@ export class RegionSelectorComponent implements OnInit {
     const imageElement = new Image();
     imageElement.onload = () => {
       this.isImageLoaded = true;
-      this.setState(this.state.cloneWithImageElement(imageElement));
+      this.setRegionSelectorState(this.state.cloneWithImageElement(imageElement));
     }
     imageElement.src = this.imgSrc;
   }
@@ -134,12 +90,12 @@ export class RegionSelectorComponent implements OnInit {
     return event.button === 2;
   }
 
-  private setState(state: State): void {
+  private setRegionSelectorState(state: RegionSelectorState): void {
     if (state === this.state) {
       return;
     }
     this.state = state;
-    this.drawCanvasState(state);
+    this.drawCanvasRegionSelectorState(state);
   }
 
   private getCanvasPosition(clientX: number, clientY: number): Coordinate {
@@ -150,7 +106,7 @@ export class RegionSelectorComponent implements OnInit {
   }
 
   public clearSelected(): void {
-    this.setState(this.state.cloneWithSelectedCoordinates(null).cloneWithDragCoordinates(null));
+    this.setRegionSelectorState(this.state.cloneWithSelectedCoordinates(null).cloneWithDragCoordinates(null));
   }
 
   public highlight(coordinates: Coordinate[][]): void {
@@ -162,7 +118,7 @@ export class RegionSelectorComponent implements OnInit {
       ply.push([item[0].x, item[0].y]);
       return polygon([ply]);
     });
-    this.setState(this.state.cloneWithHighlightCoordinates(coordinates));
+    this.setRegionSelectorState(this.state.cloneWithHighlightCoordinates(coordinates));
   }
 
   private handleDbClick(coordinate: Coordinate): void {
@@ -180,15 +136,15 @@ export class RegionSelectorComponent implements OnInit {
       selected = [];
     }
     selected.push(coordinate);
-    this.setState(
+    this.setRegionSelectorState(
       this.state
         .cloneWithDragCoordinates(null)
         .cloneWithSelectedCoordinates(selected)
     );
     if (selected.length == 4) {
-      this.thumbnail.generatePolygonImage(this.imageSrc, selected)
+      this.thumbnail.generatePolygonImage(this.imgSrc, selected)
         .then((result) => {
-          this.imageCropped.emit(new RegionSelectedEvent(
+          this.regionCropped.emit(new RegionCroppedEvent(
             new Region(selected),
             result
           ));
@@ -198,14 +154,14 @@ export class RegionSelectorComponent implements OnInit {
 
   private handleLeftMouseDown(coordinate: Coordinate): void {
     this.dragStart = coordinate;
-    this.setState(this.state.cloneWithDragCoordinates(null));
+    this.setRegionSelectorState(this.state.cloneWithDragCoordinates(null));
   }
 
   private handleMouseMove(coordinate: Coordinate): void {
     if (!this.dragStart) {
       return;
     }
-    this.setState(this.state
+    this.setRegionSelectorState(this.state
       .cloneWithSelectedCoordinates(null)
       .cloneWithDragCoordinates({
         start: this.dragStart,
@@ -219,11 +175,11 @@ export class RegionSelectorComponent implements OnInit {
       return;
     }
     if (this.dragTooShort(this.dragStart, coordinate)) {
-      this.setState(this.state.cloneWithDragCoordinates(null));
+      this.setRegionSelectorState(this.state.cloneWithDragCoordinates(null));
       this.dragStart = null;
       return;
     }
-    this.setState(this.state
+    this.setRegionSelectorState(this.state
       .cloneWithDragCoordinates({
         start: this.dragStart,
         end: coordinate
@@ -235,8 +191,8 @@ export class RegionSelectorComponent implements OnInit {
       coordinate,
       new Coordinate(coordinate.x, this.dragStart.y)
     ];
-    this.thumbnail.generatePolygonImage(this.imageSrc, vertices).then((result) => {
-      this.imageCropped.emit(new RegionSelectedEvent(
+    this.thumbnail.generatePolygonImage(this.imgSrc, vertices).then((result) => {
+      this.regionCropped.emit(new RegionCroppedEvent(
         new Region(vertices),
         result
       ));
@@ -261,7 +217,7 @@ export class RegionSelectorComponent implements OnInit {
     });
   }
 
-  private drawCanvasState(state: State): void {
+  private drawCanvasRegionSelectorState(state: RegionSelectorState): void {
     const ctx = this.canvas.nativeElement.getContext('2d');
     const canvasWidth = this.canvas.nativeElement.width;
     const canvasHeight = this.canvas.nativeElement.height;
@@ -281,7 +237,7 @@ export class RegionSelectorComponent implements OnInit {
     this.drawSelected(newCanvasWidth, newCanvasHeight, ctx, state);
   }
 
-  private drawSelected(width: number, height: number, ctx: CanvasRenderingContext2D, state: State): void {
+  private drawSelected(width: number, height: number, ctx: CanvasRenderingContext2D, state: RegionSelectorState): void {
     if (state.selectedCoordinates !== null && state.selectedCoordinates.length > 0) {
       let lastItem: Coordinate = state.selectedCoordinates[state.selectedCoordinates.length - 1];
       for (let item of state.selectedCoordinates) {
@@ -295,7 +251,7 @@ export class RegionSelectorComponent implements OnInit {
     }
   }
 
-  private drawHighlight(width: number, height: number, ctx: CanvasRenderingContext2D, state: State): void {
+  private drawHighlight(width: number, height: number, ctx: CanvasRenderingContext2D, state: RegionSelectorState): void {
     if (state.highlightedCoordinates === null || state.highlightedCoordinates.length === 0) {
       return;
     }
