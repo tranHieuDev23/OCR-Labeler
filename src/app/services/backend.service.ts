@@ -184,6 +184,16 @@ export class BackendService {
     });
   }
 
+  public deleteImageList(imageIdList: string[]): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.http.post('/api/delete-image-list', { imageIdList }).toPromise().then(() => {
+        resolve();
+      }, (error) => {
+        reject(error.error.error);
+      });
+    });
+  }
+
   public getExportStatus(): Promise<{ exported: boolean, state: string, timestamp: number }> {
     return new Promise<{ exported: boolean, state: string, timestamp: number }>((resolve, reject) => {
       this.http.post<any>('/api/export-status', {}).toPromise().then((resp) => {

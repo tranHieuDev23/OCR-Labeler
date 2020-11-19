@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import ImageStatus from 'src/app/models/image-status';
 import LabelStatus from 'src/app/models/label-status';
@@ -213,35 +213,70 @@ function deleteImage(filename: string): Promise<void> {
     });
 }
 
+function handleImageDeletion(user: User, imageId: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+        imageDao.getImage(imageId).then((image: UploadedImage) => {
+            if (image.uploadedBy.username !== user.username && !user.canManageAllImage) {
+                return reject({
+                    log: `[/delete-image] User ${user.username} is trying to delete unauthorized image!`,
+                    error: 'Trying to delete unauthorized image',
+                    status: StatusCodes.UNAUTHORIZED
+                });
+            }
+            imageDao.deleteImage(imageId).then((success) => {
+                if (!success) {
+                    return resolve(false);
+                }
+                Promise.all([
+                    deleteImage(join(uploadedFolder, image.imageUrl)),
+                    deleteImage(join(thumbnailFolder, image.thumbnailUrl))
+                ]).then(() => {
+                    return resolve(true);
+                }, (reason) => {
+                    return reject({
+                        log: `[/delete-image] Problem when deleting image file: ${reason}`,
+                        error: 'Internal server error',
+                        status: StatusCodes.INTERNAL_SERVER_ERROR
+                    });
+                })
+            }, (reason) => {
+                return reject({
+                    log: `[/delete-image] Problem when deleting image from database: ${reason}`,
+                    error: 'Internal server error',
+                    status: StatusCodes.INTERNAL_SERVER_ERROR
+                });
+            });
+        }, (reason) => {
+
+            return reject({
+                log: `[/delete-image] Problem when retrieving image: ${reason}`,
+                error: 'Can\'t find the required image',
+                status: StatusCodes.BAD_REQUEST
+            });
+        });
+    });
+}
+
 imageRouter.post('/delete-image', uploadJwtMiddleware, (request, response) => {
     const user: User = response.locals.user;
     const imageId: string = request.body.imageId;
-    imageDao.getImage(imageId).then((image: UploadedImage) => {
-        if (image.uploadedBy.username !== user.username && !user.canManageAllImage) {
-            console.log(`[/delete-image] User ${user.username} is trying to delete unauthorized image!`);
-            return response.status(StatusCodes.UNAUTHORIZED).json({ error: 'Trying to delete unauthorized image' });
-        }
-        imageDao.deleteImage(imageId).then((success) => {
-            if (!success) {
-                console.log(`[/delete-image] Image ${image.imageId} has already been deleted`);
-                return response.status(StatusCodes.BAD_REQUEST).json({ error: 'Image has already been deleted' });
-            }
-            Promise.all([
-                deleteImage(join(uploadedFolder, image.imageUrl)),
-                deleteImage(join(thumbnailFolder, image.thumbnailUrl))
-            ]).then(() => {
-                return response.status(StatusCodes.OK).json({});
-            }, (reason) => {
-                console.log(`[/delete-image] Problem when deleting image file: ${reason}`);
-                return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
-            })
-        }, (reason) => {
-            console.log(`[/delete-image] Problem when deleting image from database: ${reason}`);
-            return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
-        });
+    handleImageDeletion(user, imageId).then(() => {
+        response.status(StatusCodes.OK).json({});
     }, (reason) => {
-        console.log(`[/delete-image] Problem when retrieving image: ${reason}`);
-        return response.status(StatusCodes.BAD_REQUEST).json({ error: 'Can find the required image' });
+        console.log(reason.log);
+        response.status(reason.status).json({ error: reason.error });
+    });
+});
+
+imageRouter.post('/delete-image-list', uploadJwtMiddleware, (request, response) => {
+    const user: User = response.locals.user;
+    const imageIdList: string[] = request.body.imageIdList;
+    const deletionPromises: Promise<boolean>[] = imageIdList.map((item) => handleImageDeletion(user, item));
+    Promise.all(deletionPromises).then(() => {
+        response.status(StatusCodes.OK).json({});
+    }, (reason) => {
+        console.log(reason.log);
+        response.status(reason.status).json({ error: reason.error });
     });
 });
 

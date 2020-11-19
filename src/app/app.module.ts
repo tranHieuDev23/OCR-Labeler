@@ -16,6 +16,7 @@ import UserLoggedOutGuard from './services/logged-out-guard';
 import { NzIconModule, NZ_ICONS } from 'ng-zorro-antd/icon';
 import { IconDefinition } from '@ant-design/icons-angular';
 import { UserOutline, EditOutline } from '@ant-design/icons-angular/icons';
+import { DragToSelectModule } from 'ngx-drag-to-select';
 
 const icons: IconDefinition[] = [UserOutline, EditOutline];
 
@@ -35,6 +36,7 @@ registerLocaleData(vi);
     FormsModule,
     HttpClientModule,
     BrowserAnimationsModule,
+    DragToSelectModule.forRoot()
   ],
   providers: [
     { provide: NZ_I18N, useValue: en_US },

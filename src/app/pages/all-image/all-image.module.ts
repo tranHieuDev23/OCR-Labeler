@@ -11,6 +11,8 @@ import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { FormsModule } from '@angular/forms';
 import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+import { NzNotificationModule } from 'ng-zorro-antd/notification';
 
 
 @NgModule({
@@ -26,7 +28,10 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
     NzSelectModule,
     NzGridModule,
     FormsModule,
-    ImageGridModule
+    ImageGridModule,
+    NzDropDownModule,
+    NzNotificationModule,
+    NzModalModule
   ]
 })
 export class AllImageModule { }

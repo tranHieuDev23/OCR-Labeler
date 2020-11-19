@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NzContextMenuService, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
+import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { ImageComparationOption } from 'src/app/models/image-compare-funcs';
 import ImageStatus, { getAllImageStatuses, getImageStatusString } from 'src/app/models/image-status';
 import UploadedImage from 'src/app/models/uploaded-image';
@@ -14,6 +16,8 @@ const IMAGES_PER_PAGE: number = 12;
   styleUrls: ['./all-image.component.scss']
 })
 export class AllImageComponent implements OnInit {
+  @ViewChild("contextMenu") contextMenu: NzDropdownMenuComponent;
+
   public currentPage: number = null;
   public imagesPerPage: number = IMAGES_PER_PAGE;
   public imagesCount: number = null;
@@ -38,11 +42,16 @@ export class AllImageComponent implements OnInit {
   public filterUserOptions: { label: string, value: string }[] = [];
   public filteredUsers: string[] = [];
 
+  public isDeleteModalVisible: boolean = false;
+  private selectedImages: UploadedImage[] = [];
+
   constructor(
     private auth: AuthService,
     private backend: BackendService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private contextService: NzContextMenuService,
+    private notificationService: NzNotificationService
   ) { }
 
   ngOnInit(): void {
@@ -89,6 +98,7 @@ export class AllImageComponent implements OnInit {
         this.uploadedImages = result.images;
         this.loading = false;
       }, (reason) => {
+        this.notificationService.error('An error happened while loading page', `Reason: ${reason}`);
         this.router.navigateByUrl('/');
       });
   }
@@ -101,6 +111,35 @@ export class AllImageComponent implements OnInit {
         users: this.filteredUsers.join(',')
       }
     });
+  }
+
+  onImagesSelected(images: UploadedImage[]): void {
+    this.selectedImages = images;
+  }
+
+  showDeleteModal(): void {
+    this.isDeleteModalVisible = true;
+  }
+
+  onDeleteModalOk(): void {
+    this.backend.deleteImageList(this.selectedImages.map(item => item.imageId)).then(() => {
+      this.isDeleteModalVisible = false;
+      this.loadPage(this.currentPage, this.selectedSortOption, this.filteredStatuses, this.filteredUsers);
+    }, (reason) => {
+      this.notificationService.error('Failed to delete images', `Reason: ${reason}`);
+    });
+  }
+
+  onDeleteModalCancel(): void {
+    this.isDeleteModalVisible = false;
+  }
+
+  onContextMenu(event: MouseEvent): boolean {
+    if (this.selectedImages.length === 0) {
+      return false;
+    }
+    this.contextService.create(event, this.contextMenu);
+    return false;
   }
 
   changePage(event: number): void {

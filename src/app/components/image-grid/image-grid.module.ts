@@ -7,6 +7,7 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { DragToSelectModule } from 'ngx-drag-to-select';
 
 @NgModule({
   declarations: [ImageGridComponent],
@@ -17,7 +18,8 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
     NzCardModule,
     NzTagModule,
     NzSkeletonModule,
-    NzEmptyModule
+    NzEmptyModule,
+    DragToSelectModule
   ],
   exports: [
     ImageGridComponent

@@ -1,23 +1,47 @@
 <div *ngIf="loading">
-    <nz-skeleton [nzActive]="true"></nz-skeleton>
+  <nz-skeleton [nzActive]="true"></nz-skeleton>
 </div>
 <div *ngIf="!loading">
-    <div *ngIf="images.length > 0" nz-row [nzGutter]="{ xs: 8, md: 16, xl: 24, xxl: 32 }">
-        <div nz-col [nzSpan]="24" [nzMd]="12" [nzLg]="8" [nzXl]="6" *ngFor="let item of images; index as i">
-            <nz-card nzSize="small" nzHoverable
-                style="margin-left: auto; margin-right: auto; margin-bottom: 16px; width: 240px;"
-                [nzCover]="coverTemplate" (click)="onClick(i)">
-                <nz-tag [nzColor]="statusColor(item.status)">
-                    {{ statusString(item.status) }}
-                </nz-tag>
-                <p nz-typography>
-                    Uploaded on {{ dateTimeString(item.uploadedDate) }} by <b>{{ item.uploadedBy.displayName }}</b>
-                </p>
-            </nz-card>
-            <ng-template #coverTemplate>
-                <img style="width: 240px; height: 135px; object-fit: cover;" [src]="item.thumbnailUrl" />
-            </ng-template>
-        </div>
+  <dts-select-container
+    [(selectedItems)]="selectedImages"
+    (select)="onSelected()"
+  >
+    <div
+      *ngIf="images.length > 0"
+      nz-row
+      [nzGutter]="{ xs: 8, md: 16, xl: 24, xxl: 32 }"
+    >
+      <div
+        nz-col
+        [nzSpan]="24"
+        [nzMd]="12"
+        [nzLg]="8"
+        [nzXl]="6"
+        *ngFor="let item of images; index as i"
+      >
+        <nz-card
+          nzSize="small"
+          [nzCover]="coverTemplate"
+          (dblclick)="onDbClick(i)"
+          (contextmenu)="onContextSelect(item)"
+          [dtsSelectItem]="item"
+        >
+          <nz-tag [nzColor]="statusColor(item.status)">
+            {{ statusString(item.status) }}
+          </nz-tag>
+          <p nz-typography>
+            Uploaded on {{ dateTimeString(item.uploadedDate) }} by
+            <b>{{ item.uploadedBy.displayName }}</b>
+          </p>
+        </nz-card>
+        <ng-template #coverTemplate>
+          <img
+            style="width: 240px; height: 135px; object-fit: cover"
+            [src]="item.thumbnailUrl"
+          />
+        </ng-template>
+      </div>
     </div>
-    <nz-empty *ngIf="images.length == 0"></nz-empty>
+  </dts-select-container>
+  <nz-empty *ngIf="images.length == 0"></nz-empty>
 </div>
