@@ -3,14 +3,11 @@
 </div>
 <div *ngIf="!loading">
   <dts-select-container
+    *ngIf="images.length > 0"
     [(selectedItems)]="selectedImages"
     (select)="onSelected()"
   >
-    <div
-      *ngIf="images.length > 0"
-      nz-row
-      [nzGutter]="{ xs: 8, md: 16, xl: 24, xxl: 32 }"
-    >
+    <div nz-row [nzGutter]="{ xs: 8, md: 16, xl: 24, xxl: 32 }">
       <div
         nz-col
         [nzSpan]="24"
