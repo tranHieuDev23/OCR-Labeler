@@ -8,10 +8,22 @@ import { RegionSelectorState } from './region-selector-state';
 
 const EPSILON = Math.exp(-5);
 
+enum CropOption {
+  RECTANGULAR,
+  POLYGONAL
+}
+
 export class RegionCroppedEvent {
   constructor(
     public readonly region: Region,
     public readonly imageBase64: string
+  ) { }
+}
+
+export class RegionClickedEvent {
+  constructor(
+    public readonly id: number,
+    public readonly event: MouseEvent
   ) { }
 }
 
@@ -23,7 +35,14 @@ export class RegionCroppedEvent {
 export class RegionSelectorComponent implements OnInit {
   @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
   @Output('regionCropped') public regionCropped: EventEmitter<RegionCroppedEvent> = new EventEmitter<RegionCroppedEvent>();
-  @Output('regionSelected') public regionSelected: EventEmitter<number> = new EventEmitter<number>();
+  @Output('regionDbClicked') public regionDbClicked: EventEmitter<RegionClickedEvent> = new EventEmitter<RegionClickedEvent>();
+  @Output('regionRightClicked') public regionRightClicked: EventEmitter<RegionClickedEvent> = new EventEmitter<RegionClickedEvent>();
+
+  public cropOptions: { label: string, value: CropOption }[] = [
+    { label: "Rectangular region", value: CropOption.RECTANGULAR },
+    { label: "Polygonal region", value: CropOption.POLYGONAL }
+  ];
+  public selectedCropOption: CropOption = CropOption.RECTANGULAR;
 
   private state: RegionSelectorState;
   private isImageLoaded: boolean = false;
@@ -51,24 +70,29 @@ export class RegionSelectorComponent implements OnInit {
       };
     }
     this.canvas.nativeElement.addEventListener('dblclick', (event) => {
-      if (this.isEventLeftMouse(event)) {
-        this.handleDbClick(this.getCanvasPosition(event.clientX, event.clientY));
+      if (!this.isEventLeftMouse(event)) {
+        return;
       }
+      event.preventDefault();
+      this.handleDbClick(event, this.getCanvasPosition(event.clientX, event.clientY));
     });
     this.canvas.nativeElement.addEventListener('mousedown', (event) => {
+      if (!this.isEventLeftMouse(event)) {
+        return;
+      }
       event.preventDefault();
-      if (this.isEventLeftMouse(event)) {
-        this.handleLeftMouseDown(this.getCanvasPosition(event.clientX, event.clientY));
-      }
-      if (this.isEventRightMouse(event)) {
-        this.handleRightMouseDown(this.getCanvasPosition(event.clientX, event.clientY));
-      }
+      this.handleLeftMouseDown(this.getCanvasPosition(event.clientX, event.clientY));
     });
     this.canvas.nativeElement.addEventListener('mousemove', (event) => {
       this.handleMouseMove(this.getCanvasPosition(event.clientX, event.clientY));
     });
     this.canvas.nativeElement.addEventListener('mouseup', (event) => {
       this.handleMouseUp(this.getCanvasPosition(event.clientX, event.clientY));
+    });
+    this.canvas.nativeElement.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+      this.handleContextMenu(event, this.getCanvasPosition(event.clientX, event.clientY));
+      return false;
     });
     this.initialize();
   }
@@ -86,10 +110,6 @@ export class RegionSelectorComponent implements OnInit {
     return event.button === 0;
   }
 
-  private isEventRightMouse(event: MouseEvent): boolean {
-    return event.button === 2;
-  }
-
   private setRegionSelectorState(state: RegionSelectorState): void {
     if (state === this.state) {
       return;
@@ -103,6 +123,15 @@ export class RegionSelectorComponent implements OnInit {
     const x = (clientX - rect.left) / this.canvas.nativeElement.offsetWidth;
     const y = (clientY - rect.top) / this.canvas.nativeElement.offsetHeight;
     return new Coordinate(x, y);
+  }
+
+  public changeCroppingOption(): void {
+    if (this.selectedCropOption == CropOption.RECTANGULAR) {
+      this.selectedCropOption = CropOption.POLYGONAL;
+    } else {
+      this.selectedCropOption = CropOption.RECTANGULAR;
+    }
+    this.clearSelected();
   }
 
   public clearSelected(): void {
@@ -121,15 +150,36 @@ export class RegionSelectorComponent implements OnInit {
     this.setRegionSelectorState(this.state.cloneWithHighlightCoordinates(coordinates));
   }
 
-  private handleDbClick(coordinate: Coordinate): void {
+  private handleDbClick(event: MouseEvent, coordinate: Coordinate): void {
+    this.clearSelected();
     const insideId: number = this.isInHighlighted(coordinate);
     if (insideId !== -1) {
-      this.regionSelected.emit(insideId);
-      return;
+      this.regionDbClicked.emit(new RegionClickedEvent(insideId, event));
     }
   }
 
-  private handleRightMouseDown(coordinate: Coordinate): void {
+  private handleLeftMouseDown(coordinate: Coordinate): void {
+    switch (this.selectedCropOption) {
+      case CropOption.RECTANGULAR:
+        this.rectangularCropStart(coordinate);
+        break;
+      case CropOption.POLYGONAL:
+        this.handlePolygonalCrop(coordinate);
+        break;
+    }
+  }
+
+  private handleContextMenu(event: MouseEvent, coordinate: Coordinate): void {
+    const insideId: number = this.isInHighlighted(coordinate);
+    this.regionRightClicked.emit(new RegionClickedEvent(insideId, event));
+  }
+
+  private rectangularCropStart(coordinate: Coordinate): void {
+    this.dragStart = coordinate;
+    this.setRegionSelectorState(this.state.cloneWithDragCoordinates(null));
+  }
+
+  private handlePolygonalCrop(coordinate: Coordinate): void {
     this.dragStart = null;
     let selected: Coordinate[] = this.state.selectedCoordinates || [];
     if (selected.length == 4) {
@@ -150,11 +200,6 @@ export class RegionSelectorComponent implements OnInit {
           ));
         });
     }
-  }
-
-  private handleLeftMouseDown(coordinate: Coordinate): void {
-    this.dragStart = coordinate;
-    this.setRegionSelectorState(this.state.cloneWithDragCoordinates(null));
   }
 
   private handleMouseMove(coordinate: Coordinate): void {

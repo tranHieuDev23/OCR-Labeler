@@ -1,2 +1,11 @@
-<canvas #canvas oncontextmenu="return false;">
-</canvas>
+<nz-radio-group
+  id="crop-option"
+  [(ngModel)]="selectedCropOption"
+  nzButtonStyle="solid"
+  (ngModelChange)="clearSelected()"
+>
+  <label *ngFor="let item of cropOptions" nz-radio-button [nzValue]="item.value"
+    >{{ item.label }}
+  </label>
+</nz-radio-group>
+<canvas #canvas oncontextmenu="return false;"> </canvas>

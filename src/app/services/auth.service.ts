@@ -153,7 +153,6 @@ export class AuthService {
         if (!user.canManageUsers) {
           return reject('User is not authorized to manage users');
         }
-        console.log(updatedUser);
         this.http.post('/api/update-user', updatedUser).toPromise().then(() => {
           resolve();
         }, (error) => {

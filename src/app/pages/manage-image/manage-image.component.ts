@@ -1,8 +1,10 @@
 import { Location } from '@angular/common';
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NzContextMenuService, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import {
+  RegionClickedEvent,
   RegionCroppedEvent,
   RegionSelectorComponent,
 } from 'src/app/components/region-selector/region-selector.component';
@@ -20,17 +22,22 @@ import { ThumbnailService } from 'src/app/services/thumbnail.service';
 })
 export class ManageImageComponent implements OnInit {
   @ViewChild(RegionSelectorComponent, { static: false }) regionSelector: RegionSelectorComponent;
+  @ViewChild('regionContextMenu', { static: false }) regionContextMenu: NzDropdownMenuComponent;
 
   public imageUrl: string;
   public croppedRegions: TextRegion[];
   public croppedRegionImages: string[];
   public status: ImageStatus;
   public isPublishing: boolean;
+
   public selectedRegion: Region;
   public selectedRegionImage: string;
+
   public modalRegionId: number = null;
   public modalRegion: TextRegion = null;
   public modalRegionImage: string = null;
+
+  public contextMenuRegionId: number = -1;
 
   private imageId: string;
   private imageComparator: ImageComparationOption;
@@ -44,7 +51,8 @@ export class ManageImageComponent implements OnInit {
     private location: Location,
     private notification: NzNotificationService,
     private thumbnail: ThumbnailService,
-    private router: Router
+    private router: Router,
+    private contextService: NzContextMenuService
   ) {
     this.initialize();
   }
@@ -165,10 +173,23 @@ export class ManageImageComponent implements OnInit {
       });
   }
 
-  onRegionSelected(id: number): void {
-    this.modalRegionId = id;
-    this.modalRegion = this.croppedRegions[id];
-    this.modalRegionImage = this.croppedRegionImages[id];
+  onRegionDbClicked(event: RegionClickedEvent): void {
+    this.showModal(event.id);
+  }
+
+  onRegionRightClicked(event: RegionClickedEvent): void {
+    this.contextMenuRegionId = event.id;
+    this.contextService.create(event.event, this.regionContextMenu);
+  }
+
+  changeCroppingOption(): void {
+    this.regionSelector.changeCroppingOption();
+  }
+
+  showModal(regionId: number): void {
+    this.modalRegionId = regionId;
+    this.modalRegion = this.croppedRegions[regionId];
+    this.modalRegionImage = this.croppedRegionImages[regionId];
   }
 
   closeModal(): void {

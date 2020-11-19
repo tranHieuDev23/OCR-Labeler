@@ -17,6 +17,7 @@ import { IconDefinition } from '@ant-design/icons-angular';
 import { PlusOutline, DeleteOutline, UploadOutline } from '@ant-design/icons-angular/icons';
 import { RegionSelectorModule } from 'src/app/components/region-selector/region-selector.module';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 
 const icons: IconDefinition[] = [PlusOutline, DeleteOutline, UploadOutline];
 
@@ -37,7 +38,8 @@ const icons: IconDefinition[] = [PlusOutline, DeleteOutline, UploadOutline];
     NzTagModule,
     FormsModule,
     RegionSelectorModule,
-    NzModalModule
+    NzModalModule,
+    NzDropDownModule
   ],
   exports: [
     ManageImageComponent
