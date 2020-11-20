@@ -88,7 +88,7 @@ export class AllImageComponent implements OnInit {
     if (this.imagesPerPage !== DEFAULT_IMAGES_PER_PAGE) {
       queryParams['pageSize'] = this.imagesPerPage;
     }
-    this.router.navigate(['/my-images'], { queryParams });
+    this.router.navigate(['/all-image'], { queryParams });
   }
 
   loadPage(pageId: number, sortOption: ImageComparationOption, filteredStatuses: ImageStatus[], filteredUsers: string[], imagesPerPage: number): void {
@@ -116,7 +116,7 @@ export class AllImageComponent implements OnInit {
   }
 
   onImageClicked(id: number): void {
-    this.router.navigate([`/all-image/${this.uploadedImages[id].imageId}`], {
+    this.router.navigate([`/manage-image/${this.uploadedImages[id].imageId}`], {
       queryParams: {
         sort: this.selectedSortOption,
         statuses: this.filteredStatuses.join(','),
