@@ -116,7 +116,7 @@ export class AllImageComponent implements OnInit {
   }
 
   onImageClicked(id: number): void {
-    this.router.navigate([`/manage-image/${this.uploadedImages[id].imageId}`], {
+    this.router.navigate([`/all-image/${this.uploadedImages[id].imageId}`], {
       queryParams: {
         sort: this.selectedSortOption,
         statuses: this.filteredStatuses.join(','),
