@@ -75,7 +75,7 @@ export class MyImagesComponent implements OnInit {
       queryParams['page'] = this.selectedSortOption;
     }
     if (this.filteredStatuses.length > 0) {
-      queryParams['statuses'] = this.filteredStatuses;
+      queryParams['statuses'] = this.filteredStatuses.join(',');
     }
     if (this.imagesPerPage !== DEFAULT_IMAGES_PER_PAGE) {
       queryParams['pageSize'] = this.imagesPerPage;

@@ -80,10 +80,10 @@ export class AllImageComponent implements OnInit {
       queryParams['page'] = this.selectedSortOption;
     }
     if (this.filteredStatuses.length > 0) {
-      queryParams['statuses'] = this.filteredStatuses;
+      queryParams['statuses'] = this.filteredStatuses.join(',');
     }
     if (this.filteredUsers.length > 0) {
-      queryParams['users'] = this.filteredUsers;
+      queryParams['users'] = this.filteredUsers.join(',');
     }
     if (this.imagesPerPage !== DEFAULT_IMAGES_PER_PAGE) {
       queryParams['pageSize'] = this.imagesPerPage;
