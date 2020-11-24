@@ -1,0 +1,12 @@
+<canvas #canvas id="canvas"></canvas>
+<nz-button-group id="zoom-button-group">
+  <button nz-button (click)="zoomIn()">
+    <i nz-icon nzType="zoom-in"></i>
+  </button>
+  <button nz-button (click)="zoomOut()">
+    <i nz-icon nzType="zoom-out"></i>
+  </button>
+  <button nz-button (click)="resetZoom()">
+    <i nz-icon nzType="undo"></i>
+  </button>
+</nz-button-group>

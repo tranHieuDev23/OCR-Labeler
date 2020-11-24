@@ -174,7 +174,6 @@ export class RegionSelectorComponent implements OnInit {
 
   private handleContextMenu(event: MouseEvent, coordinate: Coordinate): void {
     const insideId: number = this.getInsideId(coordinate);
-    console.log(insideId);
     this.regionRightClicked.emit(new RegionClickedEvent(insideId, event));
   }
 
@@ -282,12 +281,10 @@ export class RegionSelectorComponent implements OnInit {
     if (!this.isImageLoaded) {
       return;
     }
-    this.canvas.nativeElement.style.width = '100%';
-    const newCanvasWidth = this.canvas.nativeElement.offsetWidth;
-    const newCanvasHeight = Math.ceil(state.imageElement.height * newCanvasWidth / state.imageElement.width);
-    this.canvas.nativeElement.style.height = newCanvasHeight.toString() + 'px';
-    this.canvas.nativeElement.width = newCanvasWidth;
-    this.canvas.nativeElement.height = newCanvasHeight;
+    const imageRatio = state.imageElement.height / state.imageElement.width;
+    this.canvasService.resizeMaintainAspectRatio(this.canvas.nativeElement, imageRatio);
+    const newCanvasWidth = this.canvas.nativeElement.width;
+    const newCanvasHeight = this.canvas.nativeElement.height;
 
     ctx.drawImage(state.imageElement, 0, 0, newCanvasWidth, newCanvasHeight);
     this.drawHighlight(newCanvasWidth, newCanvasHeight, ctx, state);

@@ -10,7 +10,7 @@ import { NzNotificationModule } from 'ng-zorro-antd/notification';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
-import { ImageRegionViewerModule } from 'src/app/components/image-region-viewer/image-region-viewer.module';
+import { ZoomableImageModule } from 'src/app/components/zoomable-image/zoomable-image.module';
 
 
 @NgModule({
@@ -26,7 +26,7 @@ import { ImageRegionViewerModule } from 'src/app/components/image-region-viewer/
     NzEmptyModule,
     NzSwitchModule,
     FormsModule,
-    ImageRegionViewerModule
+    ZoomableImageModule
   ],
   exports: [
     LabelComponent

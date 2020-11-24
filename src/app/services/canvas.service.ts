@@ -36,11 +36,37 @@ export class CanvasService {
     this.drawLine(width, height, ctx, p2, start, color);
   }
 
-  public drawPolygon(width: number, height: number, ctx: CanvasRenderingContext2D, cooridnates: Coordinate[], color: string): void {
-    let lastVert: Coordinate = cooridnates[cooridnates.length - 1];
-    for (let vert of cooridnates) {
+  public drawPolygon(width: number, height: number, ctx: CanvasRenderingContext2D, coordinates: Coordinate[], color: string): void {
+    let lastVert: Coordinate = coordinates[coordinates.length - 1];
+    for (let vert of coordinates) {
       this.drawLine(width, height, ctx, lastVert, vert, color);
       lastVert = vert;
     }
+  }
+
+  public drawCheckerboard(width: number, height: number, ctx: CanvasRenderingContext2D, size: number, whiteColor: string, blackColor: string): void {
+    const numCol = Math.ceil(width / size);
+    const numRow = Math.ceil(height / size);
+    for (let i = 0; i < numRow; i++) {
+      for (let j = 0; j < numCol; j++) {
+        const x = j * size;
+        const y = i * size;
+        if ((i + j) % 2 === 0) {
+          ctx.fillStyle = whiteColor;
+        } else {
+          ctx.fillStyle = blackColor;
+        }
+        ctx.fillRect(x, y, size, size);
+      }
+    }
+  }
+
+  public resizeMaintainAspectRatio(canvas: HTMLCanvasElement, aspectRatio: number): void {
+    canvas.style.width = '100%';
+    const newCanvasWidth = canvas.offsetWidth;
+    const newCanvasHeight = Math.ceil(aspectRatio * newCanvasWidth);
+    canvas.style.height = newCanvasHeight.toString() + 'px';
+    canvas.width = newCanvasWidth;
+    canvas.height = newCanvasHeight;
   }
 }

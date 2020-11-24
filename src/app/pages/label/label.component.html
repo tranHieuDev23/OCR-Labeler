@@ -1,6 +1,6 @@
 <div>
   <h1 nz-typography>Label images</h1>
-  <p nz-typography *ngIf="imageUrl">
+  <p nz-typography *ngIf="region">
     Type in the text in this text region (with correct casing). Submit the label
     by pressing <b>Enter</b>, or skip this text region by pressing <b>Tab</b>.
     If the text region doesn't contain any text, click <b>Invalid region</b> to
@@ -15,19 +15,23 @@
   ></nz-switch>
   Only my regions
 </div>
-<nz-empty *ngIf="!imageUrl" [nzNotFoundContent]="emptyContent">
+<nz-empty *ngIf="!region" [nzNotFoundContent]="emptyContent">
   <ng-template #emptyContent>
     <p nz-typography>No text region needs labeling</p>
   </ng-template>
 </nz-empty>
 <div
-  *ngIf="imageUrl"
+  *ngIf="region"
   nz-row
   [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }"
 >
   <div nz-col [nzSpan]="24" [nzMd]="12">
-    <app-image-region-viewer [imageSrc]="imageUrl" [region]="region">
-    </app-image-region-viewer>
+    <app-zoomable-image
+      #zoomableImage
+      [imageSrc]="highlightImage"
+      [region]="highlightRegion"
+    >
+    </app-zoomable-image>
   </div>
   <div nz-col [nzSpan]="24" [nzMd]="12">
     <input

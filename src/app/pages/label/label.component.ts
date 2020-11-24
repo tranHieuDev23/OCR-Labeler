@@ -1,7 +1,10 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
-import { TextRegion } from 'src/app/models/text-region';
+import { ZoomableImageComponent } from 'src/app/components/zoomable-image/zoomable-image.component';
+import { Coordinate, TextRegion } from 'src/app/models/text-region';
+import { AuthService } from 'src/app/services/auth.service';
 import { BackendService } from 'src/app/services/backend.service';
+import { ThumbnailService } from 'src/app/services/thumbnail.service';
 
 @Component({
   selector: 'app-label',
@@ -9,15 +12,28 @@ import { BackendService } from 'src/app/services/backend.service';
   styleUrls: ['./label.component.scss']
 })
 export class LabelComponent implements OnInit {
-  public imageUrl: string = null;
-  public label: string = '';
+  @ViewChild('zoomableImage') zoomableImage: ZoomableImageComponent;
+  public highlightImage: string;
+  public highlightRegion: Coordinate[];
+  public label: string;
   public sameUser: boolean = false;
-  private region: TextRegion = null;
+  public region: TextRegion;
 
   constructor(
+    private auth: AuthService,
     private backend: BackendService,
+    private thumbnail: ThumbnailService,
     private notification: NzNotificationService
-  ) { }
+  ) {
+    this.initializeEmpty();
+  }
+
+  initializeEmpty(): void {
+    this.highlightImage = null;
+    this.highlightRegion = null;
+    this.label = '';
+    this.region = null;
+  }
 
   ngOnInit(): void {
     this.loadRegion();
@@ -26,21 +42,29 @@ export class LabelComponent implements OnInit {
   loadRegion(): void {
     this.backend.loadRegionForLabeling(this.sameUser).then((result) => {
       if (!result) {
-        this.imageUrl = null;
-        this.label = '';
-        this.region = null;
+        this.initializeEmpty();
         return;
       }
-      this.imageUrl = result.imageUrl;
       this.label = result.region.suggestion || '';
       this.region = result.region;
+      this.thumbnail.generateHighlightedImage(result.imageUrl, result.region.region.vertices).then((highlightImage) => {
+        this.highlightImage = highlightImage;
+        this.highlightRegion = result.region.region.vertices;
+        this.zoomableImage.resetZoom();
+      });
     }, (reason) => {
       this.notification.error('Failed to load the text region', `Reason: ${reason}`);
     });
   }
 
   changeSameUser(): void {
-    this.loadRegion();
+    if (this.sameUser) {
+      this.auth.getCurrentUser().then((user) => {
+        if (this.region.uploadedBy.username !== user.username) {
+          this.loadRegion();
+        }
+      });
+    }
   }
 
   submit(cantLabel: boolean): void {
