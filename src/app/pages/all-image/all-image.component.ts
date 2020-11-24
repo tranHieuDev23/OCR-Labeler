@@ -61,7 +61,7 @@ export class AllImageComponent implements OnInit {
     });
     this.route.queryParams.subscribe((params) => {
       const pageId: number = params['page'] || 1;
-      const sortOption: ImageComparationOption = params['sort'] as ImageComparationOption || ImageComparationOption.UPLOAD_LATEST_FIRST;
+      const sortOption: ImageComparationOption = params['sort'] as ImageComparationOption || DEFAULT_SORT_OPTION;
       const statuses: string = params['statuses'] || '';
       const filteredStatuses: ImageStatus[] = statuses.split(',').map(item => item.trim()).filter(item => item.length > 0).map(item => item as ImageStatus);
       const users: string = params['users'] || '';
@@ -77,7 +77,7 @@ export class AllImageComponent implements OnInit {
       queryParams['page'] = this.currentPage;
     }
     if (this.selectedSortOption !== DEFAULT_SORT_OPTION) {
-      queryParams['page'] = this.selectedSortOption;
+      queryParams['sort'] = this.selectedSortOption;
     }
     if (this.filteredStatuses.length > 0) {
       queryParams['statuses'] = this.filteredStatuses.join(',');
