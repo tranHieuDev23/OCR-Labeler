@@ -274,21 +274,23 @@ export class RegionSelectorComponent implements OnInit {
   }
 
   private drawCanvasRegionSelectorState(state: RegionSelectorState): void {
-    const ctx = this.canvas.nativeElement.getContext('2d');
-    const canvasWidth = this.canvas.nativeElement.width;
-    const canvasHeight = this.canvas.nativeElement.height;
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    if (!this.isImageLoaded) {
-      return;
-    }
-    const imageRatio = state.imageElement.height / state.imageElement.width;
-    this.canvasService.resizeMaintainAspectRatio(this.canvas.nativeElement, imageRatio);
-    const newCanvasWidth = this.canvas.nativeElement.width;
-    const newCanvasHeight = this.canvas.nativeElement.height;
+    requestAnimationFrame(() => {
+      const ctx = this.canvas.nativeElement.getContext('2d');
+      const canvasWidth = this.canvas.nativeElement.width;
+      const canvasHeight = this.canvas.nativeElement.height;
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      if (!this.isImageLoaded) {
+        return;
+      }
+      const imageRatio = state.imageElement.height / state.imageElement.width;
+      this.canvasService.resizeMaintainAspectRatio(this.canvas.nativeElement, imageRatio);
+      const newCanvasWidth = this.canvas.nativeElement.width;
+      const newCanvasHeight = this.canvas.nativeElement.height;
 
-    ctx.drawImage(state.imageElement, 0, 0, newCanvasWidth, newCanvasHeight);
-    this.drawHighlight(newCanvasWidth, newCanvasHeight, ctx, state);
-    this.drawSelected(newCanvasWidth, newCanvasHeight, ctx, state);
+      ctx.drawImage(state.imageElement, 0, 0, newCanvasWidth, newCanvasHeight);
+      this.drawHighlight(newCanvasWidth, newCanvasHeight, ctx, state);
+      this.drawSelected(newCanvasWidth, newCanvasHeight, ctx, state);
+    });
   }
 
   private drawSelected(width: number, height: number, ctx: CanvasRenderingContext2D, state: RegionSelectorState): void {

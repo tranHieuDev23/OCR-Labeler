@@ -5,6 +5,7 @@ import { CanvasService } from 'src/app/services/canvas.service';
 const MAX_ZOOM_LEVEL = 100;
 const MIN_ZOOM_LEVEL = 0.01;
 const ZOOM_LEVEL_CHANGE = 1.189207115;
+const SCROLL_ZOOM_RATE = 0.01;
 
 @Component({
   selector: 'app-zoomable-image',
@@ -47,6 +48,13 @@ export class ZoomableImageComponent implements OnInit {
         this.drawState();
       };
     }
+    this.canvas.nativeElement.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      let newZoom = this._zoom * (1.0 + event.deltaY * SCROLL_ZOOM_RATE);
+      newZoom = Math.min(newZoom, MAX_ZOOM_LEVEL);
+      newZoom = Math.max(newZoom, MIN_ZOOM_LEVEL);
+      this.zoom = newZoom;
+    });
   }
 
   public zoomIn(): void {
@@ -73,20 +81,22 @@ export class ZoomableImageComponent implements OnInit {
   }
 
   private drawState(): void {
-    const ctx = this.canvas.nativeElement.getContext('2d');
-    const canvasWidth = this.canvas.nativeElement.width;
-    const canvasHeight = this.canvas.nativeElement.height;
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    if (!this.isImageLoaded()) {
-      return;
-    }
-    const imageRatio = this._imageElement.height / this._imageElement.width;
-    this.canvasService.resizeMaintainAspectRatio(this.canvas.nativeElement, imageRatio);
-    const newCanvasWidth = this.canvas.nativeElement.width;
-    const newCanvasHeight = this.canvas.nativeElement.height;
-    this.canvasService.drawCheckerboard(newCanvasWidth, newCanvasHeight, ctx, 32, '#fff', '#ccc');
-    const drawRegion = this.calculateImageDrawRegion();
-    ctx.drawImage(this._imageElement, drawRegion.dx, drawRegion.dy, drawRegion.dw, drawRegion.dh);
+    requestAnimationFrame(() => {
+      const ctx = this.canvas.nativeElement.getContext('2d');
+      const canvasWidth = this.canvas.nativeElement.width;
+      const canvasHeight = this.canvas.nativeElement.height;
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      if (!this.isImageLoaded()) {
+        return;
+      }
+      const imageRatio = this._imageElement.height / this._imageElement.width;
+      this.canvasService.resizeMaintainAspectRatio(this.canvas.nativeElement, imageRatio);
+      const newCanvasWidth = this.canvas.nativeElement.width;
+      const newCanvasHeight = this.canvas.nativeElement.height;
+      this.canvasService.drawCheckerboard(newCanvasWidth, newCanvasHeight, ctx, 32, '#fff', '#ccc');
+      const drawRegion = this.calculateImageDrawRegion();
+      ctx.drawImage(this._imageElement, drawRegion.dx, drawRegion.dy, drawRegion.dw, drawRegion.dh);
+    });
   }
 
   private isImageLoaded(): boolean {
