@@ -2,7 +2,6 @@ import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { ZoomableImageComponent } from 'src/app/components/zoomable-image/zoomable-image.component';
 import { Coordinate, TextRegion } from 'src/app/models/text-region';
-import { AuthService } from 'src/app/services/auth.service';
 import { BackendService } from 'src/app/services/backend.service';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
 
@@ -20,7 +19,6 @@ export class LabelComponent implements OnInit {
   public region: TextRegion;
 
   constructor(
-    private auth: AuthService,
     private backend: BackendService,
     private thumbnail: ThumbnailService,
     private notification: NzNotificationService
@@ -58,13 +56,7 @@ export class LabelComponent implements OnInit {
   }
 
   changeSameUser(): void {
-    if (this.sameUser) {
-      this.auth.getCurrentUser().then((user) => {
-        if (this.region.uploadedBy.username !== user.username) {
-          this.loadRegion();
-        }
-      });
-    }
+    this.loadRegion();
   }
 
   submit(cantLabel: boolean): void {
