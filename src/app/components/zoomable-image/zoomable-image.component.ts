@@ -5,7 +5,7 @@ import { CanvasService } from 'src/app/services/canvas.service';
 const MAX_ZOOM_LEVEL = 100;
 const MIN_ZOOM_LEVEL = 0.01;
 const ZOOM_LEVEL_CHANGE = 1.189207115;
-const SCROLL_ZOOM_RATE = 0.01;
+const SCROLL_ZOOM_RATE = 0.025;
 
 @Component({
   selector: 'app-zoomable-image',
@@ -50,7 +50,7 @@ export class ZoomableImageComponent implements OnInit {
     }
     this.canvas.nativeElement.addEventListener('wheel', (event) => {
       event.preventDefault();
-      let newZoom = this._zoom * (1.0 + event.deltaY * SCROLL_ZOOM_RATE);
+      let newZoom = this._zoom * Math.pow(ZOOM_LEVEL_CHANGE, event.deltaY * SCROLL_ZOOM_RATE);
       newZoom = Math.min(newZoom, MAX_ZOOM_LEVEL);
       newZoom = Math.max(newZoom, MIN_ZOOM_LEVEL);
       this.zoom = newZoom;
