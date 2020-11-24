@@ -9,7 +9,7 @@ import { ImageGridModule } from 'src/app/components/image-grid/image-grid.module
 import { NzNotificationModule } from 'ng-zorro-antd/notification';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzGridModule } from 'ng-zorro-antd/grid';
-import { ImageRegionViewerModule } from 'src/app/components/image-region-viewer/image-region-viewer.module';
+import { ZoomableImageModule } from 'src/app/components/zoomable-image/zoomable-image.module';
 
 
 @NgModule({
@@ -24,7 +24,7 @@ import { ImageRegionViewerModule } from 'src/app/components/image-region-viewer/
     NzGridModule,
     FormsModule,
     ImageGridModule,
-    ImageRegionViewerModule
+    ZoomableImageModule
   ],
   exports: [
     VerifyComponent

@@ -41,8 +41,8 @@ export class LabelComponent implements OnInit {
 
   loadRegion(): void {
     this.backend.loadRegionForLabeling(this.sameUser).then((result) => {
+      this.initializeEmpty();
       if (!result) {
-        this.initializeEmpty();
         return;
       }
       this.label = result.region.suggestion || '';
