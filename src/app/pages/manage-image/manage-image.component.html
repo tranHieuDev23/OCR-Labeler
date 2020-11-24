@@ -210,14 +210,14 @@
       Change cropping option
     </li>
     <li
-      *ngIf="contextMenuRegionId !== -1"
+      *ngIf="contextMenuRegionId !== -1 && contextMenuRegionId !== null"
       nz-menu-item
       (click)="showModal(contextMenuRegionId)"
     >
       Show region info
     </li>
     <li
-      *ngIf="contextMenuRegionId !== -1"
+      *ngIf="contextMenuRegionId !== -1 && contextMenuRegionId !== null"
       nz-menu-item
       nzDanger
       (click)="deleteRegion(contextMenuRegionId)"
