@@ -26,11 +26,7 @@
   [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }"
 >
   <div nz-col [nzSpan]="24" [nzMd]="12">
-    <app-zoomable-image
-      #zoomableImage
-      [imageSrc]="highlightImage"
-      [region]="highlightRegion"
-    >
+    <app-zoomable-image [imageSrc]="highlightImage" [region]="highlightRegion">
     </app-zoomable-image>
   </div>
   <div nz-col [nzSpan]="24" [nzMd]="12">

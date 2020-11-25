@@ -1,10 +1,8 @@
-import { HostListener, ViewChild } from '@angular/core';
+import { HostListener } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
-import { ZoomableImageComponent } from 'src/app/components/zoomable-image/zoomable-image.component';
 import { Coordinate, TextRegion } from 'src/app/models/text-region';
 import { BackendService } from 'src/app/services/backend.service';
-import { ThumbnailService } from 'src/app/services/thumbnail.service';
 
 @Component({
   selector: 'app-label',
@@ -12,14 +10,12 @@ import { ThumbnailService } from 'src/app/services/thumbnail.service';
   styleUrls: ['./verify.component.scss']
 })
 export class VerifyComponent implements OnInit {
-  @ViewChild('zoomableImage', { static: false }) zoomableImage: ZoomableImageComponent;
   public region: TextRegion = null;
   public highlightImage: string = null;
   public highlightRegion: Coordinate[] = null;
 
   constructor(
     private backend: BackendService,
-    private thumbnail: ThumbnailService,
     private notification: NzNotificationService
   ) { }
 
@@ -36,13 +32,8 @@ export class VerifyComponent implements OnInit {
         return;
       }
       this.region = result.region;
-      this.highlightImage = null;
-      this.highlightRegion = null;
-      this.thumbnail.generateHighlightedImage(result.imageUrl, result.region.region.vertices).then((highlightImage) => {
-        this.highlightImage = highlightImage;
-        this.highlightRegion = result.region.region.vertices;
-        this.zoomableImage.resetZoom();
-      });
+      this.highlightImage = result.imageUrl;
+      this.highlightRegion = result.region.region.vertices;
     }, (reason) => {
       this.notification.error('Failed to load the text region', `Reason: ${reason}`);
     });

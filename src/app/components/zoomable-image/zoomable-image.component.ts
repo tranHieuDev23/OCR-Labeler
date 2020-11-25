@@ -4,6 +4,7 @@ import { CanvasService } from 'src/app/services/canvas.service';
 
 const MAX_ZOOM_LEVEL = 100;
 const MIN_ZOOM_LEVEL = 0.01;
+const BASE_REGION_CANVAS_RATIO = 0.8;
 const ZOOM_LEVEL_CHANGE = 1.189207115;
 const SCROLL_ZOOM_RATE = 0.025;
 
@@ -22,6 +23,7 @@ export class ZoomableImageComponent implements OnInit {
   @Input('imageSrc')
   public set imageSrc(v: string) {
     this._imageElement = new Image();
+    this._zoom = 1;
     this._imageElement.onload = () => {
       this.drawState();
     };
@@ -31,6 +33,7 @@ export class ZoomableImageComponent implements OnInit {
   @Input('region')
   public set region(v: Coordinate[]) {
     this._region = v;
+    this._zoom = 1;
     this.drawState();
   }
 
@@ -91,11 +94,16 @@ export class ZoomableImageComponent implements OnInit {
       }
       const imageRatio = this._imageElement.height / this._imageElement.width;
       this.canvasService.resizeMaintainAspectRatio(this.canvas.nativeElement, imageRatio);
+
       const newCanvasWidth = this.canvas.nativeElement.width;
       const newCanvasHeight = this.canvas.nativeElement.height;
       this.canvasService.drawCheckerboard(newCanvasWidth, newCanvasHeight, ctx, 32, '#fff', '#ccc');
+
       const drawRegion = this.calculateImageDrawRegion();
       ctx.drawImage(this._imageElement, drawRegion.dx, drawRegion.dy, drawRegion.dw, drawRegion.dh);
+
+      const highlightRegion = this.calculateHighlightRegion(newCanvasWidth, newCanvasHeight, drawRegion);
+      this.canvasService.drawPolygon(newCanvasWidth, newCanvasHeight, ctx, highlightRegion, '#52c41a');
     });
   }
 
@@ -113,7 +121,7 @@ export class ZoomableImageComponent implements OnInit {
     const canvasRegionRatio = Math.min(
       canvasWidth / regionBound.w,
       canvasHeight / regionBound.h
-    ) * this._zoom;
+    ) * this._zoom * BASE_REGION_CANVAS_RATIO;
     const dw = imageWidth * canvasRegionRatio;
     const dh = imageHeight * canvasRegionRatio;
 
@@ -137,5 +145,15 @@ export class ZoomableImageComponent implements OnInit {
       w: maxX - minX,
       h: maxY - minY
     };
+  }
+
+  private calculateHighlightRegion(width: number, height: number, drawRegion: { dx: number, dy: number, dw: number, dh: number }): Coordinate[] {
+    const zoomRatio = drawRegion.dw / width;
+    return this._region.map((item) => {
+      return new Coordinate(
+        drawRegion.dx / width + item.x * zoomRatio,
+        drawRegion.dy / height + item.y * zoomRatio
+      );
+    });
   }
 }
