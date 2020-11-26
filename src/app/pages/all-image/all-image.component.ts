@@ -161,4 +161,12 @@ export class AllImageComponent implements OnInit {
     this.currentPage = event;
     this.refresh();
   }
+
+  changePageSize(event: number): void {
+    if (event === this.imagesPerPage) {
+      return;
+    }
+    this.imagesPerPage = event;
+    this.refresh();
+  }
 }
