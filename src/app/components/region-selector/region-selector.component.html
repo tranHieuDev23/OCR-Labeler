@@ -1,11 +1,26 @@
-<nz-radio-group
-  id="crop-option"
-  [(ngModel)]="selectedCropOption"
-  nzButtonStyle="solid"
-  (ngModelChange)="clearSelected()"
->
-  <label *ngFor="let item of cropOptions" nz-radio-button [nzValue]="item.value"
-    >{{ item.label }}
-  </label>
-</nz-radio-group>
+<div id="crop-option">
+  <nz-radio-group
+    [(ngModel)]="selectedCropOption"
+    nzButtonStyle="solid"
+    (ngModelChange)="clearSelected()"
+  >
+    <label
+      *ngFor="let item of cropOptions"
+      nz-radio-button
+      [nzValue]="item.value"
+      >{{ item.label }}
+    </label>
+  </nz-radio-group>
+  <nz-button-group id="zoom-button-group">
+    <button nz-button (click)="zoomIn()">
+      <i nz-icon nzType="zoom-in"></i>
+    </button>
+    <button nz-button (click)="zoomOut()">
+      <i nz-icon nzType="zoom-out"></i>
+    </button>
+    <button nz-button (click)="resetZoom()">
+      <i nz-icon nzType="undo"></i>
+    </button>
+  </nz-button-group>
+</div>
 <canvas #canvas oncontextmenu="return false;"> </canvas>

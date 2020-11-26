@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RegionSelectorComponent } from './region-selector.component';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { FormsModule } from '@angular/forms';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 
 
 @NgModule({
@@ -10,7 +12,9 @@ import { FormsModule } from '@angular/forms';
   imports: [
     CommonModule,
     FormsModule,
-    NzRadioModule
+    NzRadioModule,
+    NzButtonModule,
+    NzIconModule
   ],
   exports: [
     RegionSelectorComponent

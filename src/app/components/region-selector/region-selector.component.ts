@@ -184,6 +184,40 @@ export class RegionSelectorComponent implements OnInit {
     this.selectionPolygon = null;
   }
 
+  public zoomIn(): void {
+    const newZoom = this.zoom * ZOOM_LEVEL_CHANGE;
+    if (newZoom > MAX_ZOOM_LEVEL) {
+      return;
+    }
+    this.setZoomLevel(newZoom, new Coordinate(0.5, 0.5));
+  }
+
+  public zoomOut(): void {
+    const newZoom = this.zoom / ZOOM_LEVEL_CHANGE;
+    if (newZoom < MIN_ZOOM_LEVEL) {
+      return;
+    }
+    this.setZoomLevel(newZoom, new Coordinate(0.5, 0.5));
+  }
+
+  public resetZoom(): void {
+    if (this.zoom === 1.0) {
+      return;
+    }
+    this.zoom = 1;
+    this.origin = new Coordinate(0, 0);
+    this.drawState();
+  }
+
+  public setZoomLevel(zoom: number, imagePos: Coordinate): void {
+    const canvasPos = this.imageToCanvasPosition(imagePos);
+    const originX = canvasPos.x / zoom - imagePos.x;
+    const originY = canvasPos.y / zoom - imagePos.y;
+    this.zoom = zoom;
+    this.origin = new Coordinate(originX, originY);
+    this.drawState();
+  }
+
   private handleDbClick(event: MouseEvent, imagePos: Coordinate): void {
     this.clearSelected();
     const insideId: number = this.getInsideId(imagePos);
@@ -279,16 +313,8 @@ export class RegionSelectorComponent implements OnInit {
     let newZoom = this.zoom * Math.pow(ZOOM_LEVEL_CHANGE, event.deltaY * SCROLL_ZOOM_RATE);
     newZoom = Math.min(newZoom, MAX_ZOOM_LEVEL);
     newZoom = Math.max(newZoom, MIN_ZOOM_LEVEL);
-
-    const canvasPosition = this.mouseToCanvasPosition(event.clientX, event.clientY);
     const imagePosition = this.mouseToImagePosition(event.clientX, event.clientY);
-    const originX = canvasPosition.x / newZoom - imagePosition.x;
-    const originY = canvasPosition.y / newZoom - imagePosition.y;
-
-    this.zoom = newZoom;
-    this.origin = new Coordinate(originX, originY);
-
-    this.drawState();
+    this.setZoomLevel(newZoom, imagePosition);
   }
 
   private emitSelectEvent(vertices: Coordinate[]): void {
