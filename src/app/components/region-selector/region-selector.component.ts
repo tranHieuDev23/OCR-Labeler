@@ -1,23 +1,14 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { Coordinate, Region } from 'src/app/models/text-region';
-import { ThumbnailService } from 'src/app/services/thumbnail.service';
+import { Coordinate } from 'src/app/models/text-region';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import { point, polygon } from '@turf/helpers';
 import { CanvasService } from 'src/app/services/canvas.service';
-import { RegionSelectorState } from './region-selector-state';
 
 const EPSILON = Math.exp(-5);
 
 enum CropOption {
   RECTANGULAR,
   POLYGONAL
-}
-
-export class RegionCroppedEvent {
-  constructor(
-    public readonly region: Region,
-    public readonly imageBase64: string
-  ) { }
 }
 
 export class RegionClickedEvent {
@@ -30,6 +21,9 @@ export class RegionClickedEvent {
 }
 
 function coordinatesToPolygon(coordinates: Coordinate[]): any {
+  if (!coordinates) {
+    return null;
+  }
   const ply = [];
   for (let v of coordinates) {
     ply.push([v.x, v.y]);
@@ -45,40 +39,59 @@ function coordinatesToPolygon(coordinates: Coordinate[]): any {
 })
 export class RegionSelectorComponent implements OnInit {
   @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
-  @Output('regionCropped') public regionCropped: EventEmitter<RegionCroppedEvent> = new EventEmitter<RegionCroppedEvent>();
+
+  @Output('regionCropped') public regionCropped: EventEmitter<Coordinate[]> = new EventEmitter<Coordinate[]>();
   @Output('regionDbClicked') public regionDbClicked: EventEmitter<RegionClickedEvent> = new EventEmitter<RegionClickedEvent>();
   @Output('regionRightClicked') public regionRightClicked: EventEmitter<RegionClickedEvent> = new EventEmitter<RegionClickedEvent>();
 
-  public cropOptions: { label: string, value: CropOption }[] = [
+  cropOptions: { label: string, value: CropOption }[] = [
     { label: "Rectangular region", value: CropOption.RECTANGULAR },
     { label: "Polygonal region", value: CropOption.POLYGONAL }
   ];
-  public selectedCropOption: CropOption = CropOption.RECTANGULAR;
+  selectedCropOption: CropOption = CropOption.RECTANGULAR;
 
-  private state: RegionSelectorState;
+  private image: HTMLImageElement = null;
   private isImageLoaded: boolean = false;
-  private dragStart: Coordinate = null;
-  private selectionPolygon: any = null;
-  private highlightPolygons: any[] = [];
-
-  private imgSrc: string = '';
-  @Input('imageSrc')
-  public set imageSrc(v: string) {
-    this.imgSrc = v;
-    this.initialize();
+  @Input('imageSrc') set imageSrc(v: string) {
+    if (!v) {
+      this.image = null;
+      return;
+    }
+    this.isImageLoaded = false;
+    this.image = new Image();
+    this.image.onload = () => {
+      this.isImageLoaded = true;
+      this.drawState();
+    }
+    this.image.src = v;
+    this.drawState();
   }
+
+  private highlightedCoordinates: Coordinate[][];
+  private highlightPolygons: any[] = [];
+  @Input('regions') set regions(v: Coordinate[][]) {
+    this.highlightedCoordinates = v;
+    this.highlightPolygons = v.map(item => coordinatesToPolygon(item));
+    this.drawState();
+  }
+
+  private selectedCoordinates: Coordinate[];
+  private selectionPolygon: any = null;
+  private set selected(v: Coordinate[]) {
+    this.selectedCoordinates = v;
+    this.drawState();
+  }
+
+  private dragStart: Coordinate = null;
 
   constructor(
-    private canvasService: CanvasService,
-    private thumbnail: ThumbnailService
-  ) {
-    this.state = new RegionSelectorState(null, null, null, []);
-  }
+    private canvasService: CanvasService
+  ) { }
 
   ngOnInit(): void {
     if (window) {
       window.onresize = () => {
-        this.drawCanvasRegionSelectorState(this.state);
+        this.drawState();
       };
     }
     this.canvas.nativeElement.addEventListener('dblclick', (event) => {
@@ -106,16 +119,6 @@ export class RegionSelectorComponent implements OnInit {
       this.handleContextMenu(event, this.getCanvasPosition(event.clientX, event.clientY));
       return false;
     });
-    this.initialize();
-  }
-
-  initialize(): void {
-    const imageElement = new Image();
-    imageElement.onload = () => {
-      this.isImageLoaded = true;
-      this.setRegionSelectorState(this.state.cloneWithImageElement(imageElement));
-    }
-    imageElement.src = this.imgSrc;
   }
 
   public changeCroppingOption(): void {
@@ -128,24 +131,12 @@ export class RegionSelectorComponent implements OnInit {
   }
 
   public clearSelected(): void {
-    this.setRegionSelectorState(this.state.cloneWithSelectedCoordinates(null).cloneWithDragCoordinates(null));
-  }
-
-  public highlight(coordinates: Coordinate[][]): void {
-    this.highlightPolygons = coordinates.map(item => coordinatesToPolygon(item));
-    this.setRegionSelectorState(this.state.cloneWithHighlightCoordinates(coordinates));
+    this.selected = null;
+    this.selectionPolygon = null;
   }
 
   private isEventLeftMouse(event: MouseEvent): boolean {
     return event.button === 0;
-  }
-
-  private setRegionSelectorState(state: RegionSelectorState): void {
-    if (state === this.state) {
-      return;
-    }
-    this.state = state;
-    this.drawCanvasRegionSelectorState(state);
   }
 
   private getCanvasPosition(clientX: number, clientY: number): Coordinate {
@@ -179,23 +170,19 @@ export class RegionSelectorComponent implements OnInit {
 
   private rectangularCropStart(coordinate: Coordinate): void {
     this.dragStart = coordinate;
-    this.setRegionSelectorState(this.state.cloneWithDragCoordinates(null));
+    this.selected = null;
   }
 
   private handlePolygonalCrop(coordinate: Coordinate): void {
     this.dragStart = null;
-    let selected: Coordinate[] = this.state.selectedCoordinates || [];
+    let selected: Coordinate[] = this.selectedCoordinates || [];
     if (selected.length == 4) {
       selected = [];
     }
     selected.push(coordinate);
-    this.setRegionSelectorState(
-      this.state
-        .cloneWithDragCoordinates(null)
-        .cloneWithSelectedCoordinates(selected)
-    );
+    this.selected = selected;
     if (selected.length == 4) {
-      this.generateCropped(selected);
+      this.emitSelectEvent(selected);
     }
   }
 
@@ -203,13 +190,12 @@ export class RegionSelectorComponent implements OnInit {
     if (!this.dragStart) {
       return;
     }
-    this.setRegionSelectorState(this.state
-      .cloneWithSelectedCoordinates(null)
-      .cloneWithDragCoordinates({
-        start: this.dragStart,
-        end: coordinate
-      })
-    );
+    this.selected = [
+      this.dragStart,
+      new Coordinate(this.dragStart.x, coordinate.y),
+      coordinate,
+      new Coordinate(coordinate.x, this.dragStart.y)
+    ];
   }
 
   private handleMouseUp(coordinate: Coordinate): void {
@@ -217,34 +203,24 @@ export class RegionSelectorComponent implements OnInit {
       return;
     }
     if (this.dragTooShort(this.dragStart, coordinate)) {
-      this.setRegionSelectorState(this.state.cloneWithDragCoordinates(null));
       this.dragStart = null;
+      this.selected = null;
       return;
     }
-    this.setRegionSelectorState(this.state
-      .cloneWithDragCoordinates({
-        start: this.dragStart,
-        end: coordinate
-      })
-    );
-    const vertices: Coordinate[] = [
+    const selected: Coordinate[] = [
       this.dragStart,
       new Coordinate(this.dragStart.x, coordinate.y),
       coordinate,
       new Coordinate(coordinate.x, this.dragStart.y)
     ];
-    this.generateCropped(vertices);
+    this.emitSelectEvent(selected);
     this.dragStart = null;
+    this.selected = selected;
   }
 
-  private generateCropped(vertices: Coordinate[]): void {
+  private emitSelectEvent(vertices: Coordinate[]): void {
     this.selectionPolygon = coordinatesToPolygon(vertices);
-    this.thumbnail.generatePolygonImage(this.imgSrc, vertices).then((result) => {
-      this.regionCropped.emit(new RegionCroppedEvent(
-        new Region(vertices),
-        result
-      ));
-    });
+    this.regionCropped.emit(vertices);
   }
 
   private dragTooShort(start: Coordinate, end: Coordinate): boolean {
@@ -273,7 +249,7 @@ export class RegionSelectorComponent implements OnInit {
     return null;
   }
 
-  private drawCanvasRegionSelectorState(state: RegionSelectorState): void {
+  private drawState(): void {
     requestAnimationFrame(() => {
       const ctx = this.canvas.nativeElement.getContext('2d');
       const canvasWidth = this.canvas.nativeElement.width;
@@ -282,40 +258,38 @@ export class RegionSelectorComponent implements OnInit {
       if (!this.isImageLoaded) {
         return;
       }
-      const imageRatio = state.imageElement.height / state.imageElement.width;
+      const imageRatio = this.image.height / this.image.width;
       this.canvasService.resizeMaintainAspectRatio(this.canvas.nativeElement, imageRatio);
       const newCanvasWidth = this.canvas.nativeElement.width;
       const newCanvasHeight = this.canvas.nativeElement.height;
 
-      ctx.drawImage(state.imageElement, 0, 0, newCanvasWidth, newCanvasHeight);
-      this.drawHighlight(newCanvasWidth, newCanvasHeight, ctx, state);
-      this.drawSelected(newCanvasWidth, newCanvasHeight, ctx, state);
+      ctx.drawImage(this.image, 0, 0, newCanvasWidth, newCanvasHeight);
+      this.drawHighlight(newCanvasWidth, newCanvasHeight, ctx);
+      this.drawSelected(newCanvasWidth, newCanvasHeight, ctx);
     });
   }
 
-  private drawSelected(width: number, height: number, ctx: CanvasRenderingContext2D, state: RegionSelectorState): void {
-    if (state.selectedCoordinates !== null && state.selectedCoordinates.length > 0) {
-      let lastItem: Coordinate = state.selectedCoordinates[state.selectedCoordinates.length - 1];
-      for (let item of state.selectedCoordinates) {
-        this.canvasService.drawCircle(width, height, ctx, item, 1, '#f5222d');
-        this.canvasService.drawLine(width, height, ctx, lastItem, item, '#f5222d');
-        lastItem = item;
-      }
-    }
-    if (state.dragCoordinates !== null) {
-      this.canvasService.drawRect(width, height, ctx, state.dragCoordinates.start, state.dragCoordinates.end, '#f5222d');
-    }
-  }
-
-  private drawHighlight(width: number, height: number, ctx: CanvasRenderingContext2D, state: RegionSelectorState): void {
-    if (state.highlightedCoordinates === null || state.highlightedCoordinates.length === 0) {
+  private drawHighlight(width: number, height: number, ctx: CanvasRenderingContext2D): void {
+    if (this.highlightedCoordinates === null || this.highlightedCoordinates.length === 0) {
       return;
     }
-    for (let item of state.highlightedCoordinates) {
+    for (let item of this.highlightedCoordinates) {
       if (item === null || item.length === 0) {
         continue;
       }
       this.canvasService.drawPolygon(width, height, ctx, item, '#52c41a');
+    }
+  }
+
+  private drawSelected(width: number, height: number, ctx: CanvasRenderingContext2D): void {
+    if (!this.selectedCoordinates || this.selectedCoordinates.length === 0) {
+      return null;
+    }
+    let lastItem: Coordinate = this.selectedCoordinates[this.selectedCoordinates.length - 1];
+    for (let item of this.selectedCoordinates) {
+      this.canvasService.drawCircle(width, height, ctx, item, 1, '#f5222d');
+      this.canvasService.drawLine(width, height, ctx, lastItem, item, '#f5222d');
+      lastItem = item;
     }
   }
 }

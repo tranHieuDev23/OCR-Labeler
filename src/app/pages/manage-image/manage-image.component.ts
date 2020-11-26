@@ -5,12 +5,11 @@ import { NzContextMenuService, NzDropdownMenuComponent } from 'ng-zorro-antd/dro
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import {
   RegionClickedEvent,
-  RegionCroppedEvent,
-  RegionSelectorComponent,
+  RegionSelectorComponent
 } from 'src/app/components/region-selector/region-selector.component';
 import { ImageComparationOption } from 'src/app/models/image-compare-funcs';
 import ImageStatus, { isPublishedStatus } from 'src/app/models/image-status';
-import { TextRegion, Region } from 'src/app/models/text-region';
+import { TextRegion, Region, Coordinate } from 'src/app/models/text-region';
 import UploadedImage from 'src/app/models/uploaded-image';
 import { BackendService } from 'src/app/services/backend.service';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
@@ -27,6 +26,7 @@ export class ManageImageComponent implements OnInit {
   public imageUrl: string;
   public croppedRegions: TextRegion[];
   public croppedRegionImages: string[];
+  public croppedRegionRegions: Coordinate[][];
   public status: ImageStatus;
   public isPublishing: boolean;
 
@@ -79,6 +79,7 @@ export class ManageImageComponent implements OnInit {
     this.imageUrl = '';
     this.croppedRegions = [];
     this.croppedRegionImages = [];
+    this.croppedRegionRegions = [];
     this.status = null;
     this.isPublishing = false;
     this.selectedRegion = null;
@@ -102,9 +103,7 @@ export class ManageImageComponent implements OnInit {
           (regionImages) => {
             this.croppedRegions = result.textRegions;
             this.croppedRegionImages = regionImages;
-            this.regionSelector.highlight(
-              result.textRegions.map((item) => item.region.vertices)
-            );
+            this.croppedRegionRegions = this.croppedRegions.map(item => item.region.vertices);
           },
           (reason) => {
             this.notification.error('Failed to load file', `Reason: ${reason}`);
@@ -119,9 +118,11 @@ export class ManageImageComponent implements OnInit {
     );
   }
 
-  onRegionCropped(event: RegionCroppedEvent): void {
-    this.selectedRegion = event.region;
-    this.selectedRegionImage = event.imageBase64;
+  onRegionCropped(event: Coordinate[]): void {
+    this.thumbnail.generatePolygonImage(this.imageUrl, event).then((image) => {
+      this.selectedRegion = new Region(event);
+      this.selectedRegionImage = image;
+    });
   }
 
   @HostListener('document: keydown', ['$event'])
@@ -164,10 +165,8 @@ export class ManageImageComponent implements OnInit {
           .then((regionImage) => {
             this.croppedRegions.push(newTextRegion);
             this.croppedRegionImages.push(regionImage);
+            this.croppedRegionRegions = this.croppedRegions.map(item => item.region.vertices);
             this.regionSelector.clearSelected();
-            this.regionSelector.highlight(
-              this.croppedRegions.map((item) => item.region.vertices)
-            );
             this.selectedRegion = null;
             this.selectedRegionImage = null;
           });
@@ -216,9 +215,7 @@ export class ManageImageComponent implements OnInit {
         this.notification.success('Text region deleted successfully', '');
         this.croppedRegions.splice(id, 1);
         this.croppedRegionImages.splice(id, 1);
-        this.regionSelector.highlight(
-          this.croppedRegions.map((item) => item.region.vertices)
-        );
+        this.croppedRegionRegions = this.croppedRegions.map(item => item.region.vertices);
         this.closeModal();
       },
       (reason) => {
