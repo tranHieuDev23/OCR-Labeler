@@ -241,6 +241,9 @@ export class RegionSelectorComponent implements OnInit {
   }
 
   private handlePolygonalCrop(imagePos: Coordinate): void {
+    if (imagePos.x < 0 || imagePos.x > 1 || imagePos.y < 0 || imagePos.y > 1) {
+      return;
+    }
     this.selectDragStart = null;
     let selected: Coordinate[] = this.selectedCoordinates || [];
     if (selected.length == 4) {
@@ -284,7 +287,7 @@ export class RegionSelectorComponent implements OnInit {
     if (!this.selectDragStart) {
       return;
     }
-    if (this.dragTooShort(this.selectDragStart, imagePos)) {
+    if (this.dragOutside(this.selectDragStart, imagePos) || this.dragTooShort(this.selectDragStart, imagePos)) {
       this.selectDragStart = null;
       this.selected = null;
       return;
@@ -320,6 +323,13 @@ export class RegionSelectorComponent implements OnInit {
   private emitSelectEvent(vertices: Coordinate[]): void {
     this.selectionPolygon = coordinatesToPolygon(vertices);
     this.regionCropped.emit(vertices);
+  }
+
+  private dragOutside(start: Coordinate, end: Coordinate): boolean {
+    function invalidValue(v: number): boolean {
+      return v < 0 || v > 1;
+    }
+    return invalidValue(start.x) || invalidValue(start.y) || invalidValue(end.x) || invalidValue(end.y);
   }
 
   private dragTooShort(start: Coordinate, end: Coordinate): boolean {
