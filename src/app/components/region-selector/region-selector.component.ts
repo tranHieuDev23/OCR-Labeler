@@ -4,7 +4,15 @@ import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import { point, polygon } from '@turf/helpers';
 import { CanvasService } from 'src/app/services/canvas.service';
 
+const MOUSE_LEFT_BUTTON = 0;
+const MOUSE_MIDDLE_BUTTON = 1;
+
 const EPSILON = Math.exp(-5);
+
+const MAX_ZOOM_LEVEL = 100;
+const MIN_ZOOM_LEVEL = 0.01;
+const ZOOM_LEVEL_CHANGE = 1.189207115;
+const SCROLL_ZOOM_RATE = 0.025;
 
 enum CropOption {
   RECTANGULAR,
@@ -61,6 +69,8 @@ export class RegionSelectorComponent implements OnInit {
     this.image = new Image();
     this.image.onload = () => {
       this.isImageLoaded = true;
+      this.origin = new Coordinate(0, 0);
+      this.zoom = 1;
       this.drawState();
     }
     this.image.src = v;
@@ -75,49 +85,88 @@ export class RegionSelectorComponent implements OnInit {
     this.drawState();
   }
 
+  private origin: Coordinate = new Coordinate(0, 0);
+  private zoom: number = 1;
+
   private selectedCoordinates: Coordinate[];
   private selectionPolygon: any = null;
   private set selected(v: Coordinate[]) {
     this.selectedCoordinates = v;
     this.drawState();
   }
+  private selectDragStart: Coordinate = null;
 
-  private dragStart: Coordinate = null;
+  private mouseDownButton: number = null;
+  private lastTransformPoint: Coordinate = null;
 
   constructor(
     private canvasService: CanvasService
   ) { }
 
   ngOnInit(): void {
-    if (window) {
-      window.onresize = () => {
-        this.drawState();
-      };
+    if (!window) {
+      return;
     }
+    window.onresize = () => {
+      this.drawState();
+    };
     this.canvas.nativeElement.addEventListener('dblclick', (event) => {
-      if (!this.isEventLeftMouse(event)) {
+      if (event.button !== MOUSE_LEFT_BUTTON) {
         return;
       }
       event.preventDefault();
-      this.handleDbClick(event, this.getCanvasPosition(event.clientX, event.clientY));
+      this.handleDbClick(event, this.mouseToImagePosition(event.clientX, event.clientY));
     });
     this.canvas.nativeElement.addEventListener('mousedown', (event) => {
-      if (!this.isEventLeftMouse(event)) {
+      if (event.button !== MOUSE_LEFT_BUTTON && event.button !== MOUSE_MIDDLE_BUTTON) {
         return;
       }
       event.preventDefault();
-      this.handleLeftMouseDown(this.getCanvasPosition(event.clientX, event.clientY));
+      this.mouseDownButton = event.button;
+      switch (this.mouseDownButton) {
+        case MOUSE_LEFT_BUTTON:
+          this.handleLeftMouseDown(this.mouseToImagePosition(event.clientX, event.clientY));
+          break;
+        case MOUSE_MIDDLE_BUTTON:
+          this.handleMiddleMouseDown(this.mouseToCanvasPosition(event.clientX, event.clientY));
+          break;
+      }
     });
-    this.canvas.nativeElement.addEventListener('mousemove', (event) => {
-      this.handleMouseMove(this.getCanvasPosition(event.clientX, event.clientY));
-    });
-    this.canvas.nativeElement.addEventListener('mouseup', (event) => {
-      this.handleMouseUp(this.getCanvasPosition(event.clientX, event.clientY));
-    });
+    window.onmousemove = (event: MouseEvent) => {
+      if (this.mouseDownButton === null) {
+        return;
+      }
+      switch (this.mouseDownButton) {
+        case MOUSE_LEFT_BUTTON:
+          this.handleLeftMouseMove(this.mouseToImagePosition(event.clientX, event.clientY));
+          break;
+        case MOUSE_MIDDLE_BUTTON:
+          this.handleMiddleMouseMove(this.mouseToCanvasPosition(event.clientX, event.clientY));
+          break;
+      }
+    };
+    window.onmouseup = (event: MouseEvent) => {
+      if (this.mouseDownButton === null) {
+        return;
+      }
+      switch (this.mouseDownButton) {
+        case MOUSE_LEFT_BUTTON:
+          this.handleLeftMouseUp(this.mouseToImagePosition(event.clientX, event.clientY));
+          break;
+        case MOUSE_MIDDLE_BUTTON:
+          this.handleMiddleMouseUp();
+          break;
+      }
+      this.mouseDownButton = null;
+    };
     this.canvas.nativeElement.addEventListener('contextmenu', (event) => {
       event.preventDefault();
-      this.handleContextMenu(event, this.getCanvasPosition(event.clientX, event.clientY));
+      this.handleContextMenu(event, this.mouseToImagePosition(event.clientX, event.clientY));
       return false;
+    });
+    this.canvas.nativeElement.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      this.handleWheel(event);
     });
   }
 
@@ -135,87 +184,111 @@ export class RegionSelectorComponent implements OnInit {
     this.selectionPolygon = null;
   }
 
-  private isEventLeftMouse(event: MouseEvent): boolean {
-    return event.button === 0;
-  }
-
-  private getCanvasPosition(clientX: number, clientY: number): Coordinate {
-    const rect = this.canvas.nativeElement.getBoundingClientRect();
-    const x = (clientX - rect.left) / this.canvas.nativeElement.offsetWidth;
-    const y = (clientY - rect.top) / this.canvas.nativeElement.offsetHeight;
-    return new Coordinate(x, y);
-  }
-
-  private handleDbClick(event: MouseEvent, coordinate: Coordinate): void {
+  private handleDbClick(event: MouseEvent, imagePos: Coordinate): void {
     this.clearSelected();
-    const insideId: number = this.getInsideId(coordinate);
+    const insideId: number = this.getInsideId(imagePos);
     this.regionDbClicked.emit(new RegionClickedEvent(insideId, event));
   }
 
-  private handleLeftMouseDown(coordinate: Coordinate): void {
+  private handleLeftMouseDown(imagePos: Coordinate): void {
     switch (this.selectedCropOption) {
       case CropOption.RECTANGULAR:
-        this.rectangularCropStart(coordinate);
+        this.rectangularCropStart(imagePos);
         break;
       case CropOption.POLYGONAL:
-        this.handlePolygonalCrop(coordinate);
+        this.handlePolygonalCrop(imagePos);
         break;
     }
   }
 
-  private handleContextMenu(event: MouseEvent, coordinate: Coordinate): void {
-    const insideId: number = this.getInsideId(coordinate);
-    this.regionRightClicked.emit(new RegionClickedEvent(insideId, event));
-  }
-
-  private rectangularCropStart(coordinate: Coordinate): void {
-    this.dragStart = coordinate;
+  private rectangularCropStart(imagePos: Coordinate): void {
+    this.selectDragStart = imagePos;
     this.selected = null;
   }
 
-  private handlePolygonalCrop(coordinate: Coordinate): void {
-    this.dragStart = null;
+  private handlePolygonalCrop(imagePos: Coordinate): void {
+    this.selectDragStart = null;
     let selected: Coordinate[] = this.selectedCoordinates || [];
     if (selected.length == 4) {
       selected = [];
     }
-    selected.push(coordinate);
+    selected.push(imagePos);
     this.selected = selected;
     if (selected.length == 4) {
       this.emitSelectEvent(selected);
     }
   }
 
-  private handleMouseMove(coordinate: Coordinate): void {
-    if (!this.dragStart) {
+  private handleMiddleMouseDown(canvasPos: Coordinate): void {
+    this.lastTransformPoint = canvasPos;
+  }
+
+  private handleLeftMouseMove(imagePos: Coordinate): void {
+    if (!this.selectDragStart) {
       return;
     }
     this.selected = [
-      this.dragStart,
-      new Coordinate(this.dragStart.x, coordinate.y),
-      coordinate,
-      new Coordinate(coordinate.x, this.dragStart.y)
+      this.selectDragStart,
+      new Coordinate(this.selectDragStart.x, imagePos.y),
+      imagePos,
+      new Coordinate(imagePos.x, this.selectDragStart.y)
     ];
   }
 
-  private handleMouseUp(coordinate: Coordinate): void {
-    if (!this.dragStart) {
+  private handleMiddleMouseMove(canvasPos: Coordinate): void {
+    if (!this.lastTransformPoint) {
       return;
     }
-    if (this.dragTooShort(this.dragStart, coordinate)) {
-      this.dragStart = null;
+    const newOriginX = this.origin.x + (canvasPos.x - this.lastTransformPoint.x) / this.zoom;
+    const newOriginY = this.origin.y + (canvasPos.y - this.lastTransformPoint.y) / this.zoom;
+    this.origin = new Coordinate(newOriginX, newOriginY);
+    this.lastTransformPoint = canvasPos;
+    this.drawState();
+  }
+
+  private handleLeftMouseUp(imagePos: Coordinate): void {
+    if (!this.selectDragStart) {
+      return;
+    }
+    if (this.dragTooShort(this.selectDragStart, imagePos)) {
+      this.selectDragStart = null;
       this.selected = null;
       return;
     }
     const selected: Coordinate[] = [
-      this.dragStart,
-      new Coordinate(this.dragStart.x, coordinate.y),
-      coordinate,
-      new Coordinate(coordinate.x, this.dragStart.y)
+      this.selectDragStart,
+      new Coordinate(this.selectDragStart.x, imagePos.y),
+      imagePos,
+      new Coordinate(imagePos.x, this.selectDragStart.y)
     ];
     this.emitSelectEvent(selected);
-    this.dragStart = null;
+    this.selectDragStart = null;
     this.selected = selected;
+  }
+
+  private handleMiddleMouseUp(): void {
+    this.lastTransformPoint = null;
+  }
+
+  private handleContextMenu(event: MouseEvent, imagePos: Coordinate): void {
+    const insideId: number = this.getInsideId(imagePos);
+    this.regionRightClicked.emit(new RegionClickedEvent(insideId, event));
+  }
+
+  private handleWheel(event: WheelEvent): void {
+    let newZoom = this.zoom * Math.pow(ZOOM_LEVEL_CHANGE, event.deltaY * SCROLL_ZOOM_RATE);
+    newZoom = Math.min(newZoom, MAX_ZOOM_LEVEL);
+    newZoom = Math.max(newZoom, MIN_ZOOM_LEVEL);
+
+    const canvasPosition = this.mouseToCanvasPosition(event.clientX, event.clientY);
+    const imagePosition = this.mouseToImagePosition(event.clientX, event.clientY);
+    const originX = canvasPosition.x / newZoom - imagePosition.x;
+    const originY = canvasPosition.y / newZoom - imagePosition.y;
+
+    this.zoom = newZoom;
+    this.origin = new Coordinate(originX, originY);
+
+    this.drawState();
   }
 
   private emitSelectEvent(vertices: Coordinate[]): void {
@@ -263,10 +336,24 @@ export class RegionSelectorComponent implements OnInit {
       const newCanvasWidth = this.canvas.nativeElement.width;
       const newCanvasHeight = this.canvas.nativeElement.height;
 
-      ctx.drawImage(this.image, 0, 0, newCanvasWidth, newCanvasHeight);
+      this.canvasService.drawCheckerboard(newCanvasWidth, newCanvasHeight, ctx, 32, '#fff', '#ccc');
+
+      const drawRegion = this.calculateImageDrawRegion();
+      ctx.drawImage(this.image, drawRegion.dx, drawRegion.dy, drawRegion.dw, drawRegion.dh);
       this.drawHighlight(newCanvasWidth, newCanvasHeight, ctx);
       this.drawSelected(newCanvasWidth, newCanvasHeight, ctx);
     });
+  }
+
+  private calculateImageDrawRegion(): { dx: number, dy: number, dw: number, dh: number } {
+    const canvasWidth = this.canvas.nativeElement.width;
+    const canvasHeight = this.canvas.nativeElement.height;
+    return {
+      dx: this.origin.x * canvasWidth * this.zoom,
+      dy: this.origin.y * canvasHeight * this.zoom,
+      dw: canvasWidth * this.zoom,
+      dh: canvasHeight * this.zoom
+    };
   }
 
   private drawHighlight(width: number, height: number, ctx: CanvasRenderingContext2D): void {
@@ -274,10 +361,11 @@ export class RegionSelectorComponent implements OnInit {
       return;
     }
     for (let item of this.highlightedCoordinates) {
-      if (item === null || item.length === 0) {
+      if (!item || item.length === 0) {
         continue;
       }
-      this.canvasService.drawPolygon(width, height, ctx, item, '#52c41a');
+      const translatedItem = item.map(v => this.imageToCanvasPosition(v));
+      this.canvasService.drawPolygon(width, height, ctx, translatedItem, '#52c41a');
     }
   }
 
@@ -285,11 +373,31 @@ export class RegionSelectorComponent implements OnInit {
     if (!this.selectedCoordinates || this.selectedCoordinates.length === 0) {
       return null;
     }
-    let lastItem: Coordinate = this.selectedCoordinates[this.selectedCoordinates.length - 1];
+    const translatedSelected = this.selectedCoordinates.map(v => this.imageToCanvasPosition(v));
+    this.canvasService.drawPolygon(width, height, ctx, translatedSelected, '#f5222d');
     for (let item of this.selectedCoordinates) {
-      this.canvasService.drawCircle(width, height, ctx, item, 1, '#f5222d');
-      this.canvasService.drawLine(width, height, ctx, lastItem, item, '#f5222d');
-      lastItem = item;
+      this.canvasService.drawCircle(width, height, ctx, this.imageToCanvasPosition(item), 1, '#f5222d');
     }
+  }
+
+  private mouseToCanvasPosition(clientX: number, clientY: number): Coordinate {
+    const rect = this.canvas.nativeElement.getBoundingClientRect();
+    const x = (clientX - rect.left) / this.canvas.nativeElement.offsetWidth;
+    const y = (clientY - rect.top) / this.canvas.nativeElement.offsetHeight;
+    return new Coordinate(x, y);
+  }
+
+  private mouseToImagePosition(clientX: number, clientY: number): Coordinate {
+    const canvasPos = this.mouseToCanvasPosition(clientX, clientY);
+    const imageX = canvasPos.x / this.zoom - this.origin.x;
+    const imageY = canvasPos.y / this.zoom - this.origin.y;
+    return new Coordinate(imageX, imageY);
+  }
+
+  private imageToCanvasPosition(coordinate: Coordinate): Coordinate {
+    return new Coordinate(
+      (this.origin.x + coordinate.x) * this.zoom,
+      (this.origin.y + coordinate.y) * this.zoom
+    );
   }
 }
