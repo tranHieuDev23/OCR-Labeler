@@ -1,8 +1,9 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Inject, Input, OnInit, Output, PLATFORM_ID, ViewChild } from '@angular/core';
 import { Coordinate } from 'src/app/models/text-region';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import { point, polygon } from '@turf/helpers';
 import { CanvasService } from 'src/app/services/canvas.service';
+import { isPlatformBrowser } from '@angular/common';
 
 const MOUSE_LEFT_BUTTON = 0;
 const MOUSE_MIDDLE_BUTTON = 1;
@@ -58,10 +59,12 @@ export class RegionSelectorComponent implements OnInit {
   ];
   selectedCropOption: CropOption = CropOption.RECTANGULAR;
 
+  private readonly isBrowser: boolean;
+
   private image: HTMLImageElement = null;
   private isImageLoaded: boolean = false;
   @Input('imageSrc') set imageSrc(v: string) {
-    if (!v) {
+    if (!v || !this.isBrowser) {
       this.image = null;
       return;
     }
@@ -100,11 +103,14 @@ export class RegionSelectorComponent implements OnInit {
   private lastTransformPoint: Coordinate = null;
 
   constructor(
+    @Inject(PLATFORM_ID) platformId: any,
     private canvasService: CanvasService
-  ) { }
+  ) {
+    this.isBrowser = isPlatformBrowser(platformId);
+  }
 
   ngOnInit(): void {
-    if (!window) {
+    if (!this.isBrowser) {
       return;
     }
     window.onresize = () => {
@@ -359,6 +365,9 @@ export class RegionSelectorComponent implements OnInit {
   }
 
   private drawState(): void {
+    if (!this.isBrowser) {
+      return;
+    }
     requestAnimationFrame(() => {
       const ctx = this.canvas.nativeElement.getContext('2d');
       const canvasWidth = this.canvas.nativeElement.width;

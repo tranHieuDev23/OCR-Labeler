@@ -15,11 +15,37 @@ import UserLoggedInGuard from './services/logged-in-guard';
 import UserLoggedOutGuard from './services/logged-out-guard';
 import { NzIconModule, NZ_ICONS } from 'ng-zorro-antd/icon';
 import { IconDefinition } from '@ant-design/icons-angular';
-import { UserOutline, EditOutline } from '@ant-design/icons-angular/icons';
+import {
+  UserOutline,
+  EditOutline,
+  ZoomInOutline,
+  ZoomOutOutline,
+  UndoOutline,
+  ExportOutline,
+  PlusOutline,
+  DeleteOutline,
+  CheckCircleOutline,
+  LeftOutline,
+  RightOutline,
+  InboxOutline,
+  AppstoreOutline
+} from '@ant-design/icons-angular/icons';
 import { DragToSelectModule } from 'ngx-drag-to-select';
-import { AuthInterceptorService } from './services/auth-interceptor.service';
 
-const icons: IconDefinition[] = [UserOutline, EditOutline];
+const icons: IconDefinition[] = [UserOutline,
+  EditOutline,
+  ZoomInOutline,
+  ZoomOutOutline,
+  UndoOutline,
+  ExportOutline,
+  PlusOutline,
+  DeleteOutline,
+  CheckCircleOutline,
+  LeftOutline,
+  RightOutline,
+  InboxOutline,
+  AppstoreOutline,
+];
 
 registerLocaleData(vi);
 

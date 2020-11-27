@@ -1,18 +1,29 @@
-import { Injectable } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Coordinate } from '../models/text-region';
 import { CanvasService } from './canvas.service';
+
+const BASE64_PLACEHOLDER = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ThumbnailService {
+  private readonly isBrowser: boolean;
 
   constructor(
-    private canvasService: CanvasService
-  ) { }
+    private canvasService: CanvasService,
+    @Inject(PLATFORM_ID) platformId: any
+  ) {
+    this.isBrowser = isPlatformBrowser(platformId);
+  }
 
   public generateThumbnail(imageSrc: string, maxWidth: number, maxHeight: number): Promise<string> {
-    return new Promise<string>((resolve) => {
+    return new Promise<string>((resolve, reject) => {
+      if (!this.isBrowser) {
+        resolve(BASE64_PLACEHOLDER);
+        return;
+      }
       const img = new Image();
       img.onload = () => {
         const width = img.width;
@@ -37,6 +48,10 @@ export class ThumbnailService {
 
   public generatePolygonImage(imageSrc: string, vertices: Coordinate[]): Promise<string> {
     return new Promise<string>((resolve) => {
+      if (!this.isBrowser) {
+        resolve(BASE64_PLACEHOLDER);
+        return;
+      }
       const xs: number[] = vertices.map(item => item.x);
       const ys: number[] = vertices.map(item => item.y);
       const left: number = Math.min(...xs);
@@ -79,6 +94,10 @@ export class ThumbnailService {
 
   public generateHighlightedImage(imageSrc: string, vertices: Coordinate[]): Promise<string> {
     return new Promise<string>((resolve) => {
+      if (this.isBrowser) {
+        resolve(imageSrc);
+        return;
+      }
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => {

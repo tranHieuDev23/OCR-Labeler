@@ -1,4 +1,5 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Component, ElementRef, Inject, Input, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
 import { Coordinate } from 'src/app/models/text-region';
 import { CanvasService } from 'src/app/services/canvas.service';
 
@@ -16,12 +17,16 @@ const SCROLL_ZOOM_RATE = 0.025;
 export class ZoomableImageComponent implements OnInit {
   @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
 
+  private readonly isBrowser: boolean;
   private _imageElement: HTMLImageElement = null;
   private _region: Coordinate[] = null;
   private _zoom: number = 1;
 
   @Input('imageSrc')
   public set imageSrc(v: string) {
+    if (!this.isBrowser) {
+      return;
+    }
     this._imageElement = new Image();
     this._zoom = 1;
     this._imageElement.onload = () => {
@@ -43,14 +48,20 @@ export class ZoomableImageComponent implements OnInit {
     this.drawState();
   }
 
-  constructor(private canvasService: CanvasService) { }
+  constructor(
+    @Inject(PLATFORM_ID) platformId: any,
+    private canvasService: CanvasService
+  ) {
+    this.isBrowser = isPlatformBrowser(platformId);
+  }
 
   ngOnInit(): void {
-    if (window) {
-      window.onresize = () => {
-        this.drawState();
-      };
+    if (!this.isBrowser) {
+      return;
     }
+    window.onresize = () => {
+      this.drawState();
+    };
     this.canvas.nativeElement.addEventListener('wheel', (event) => {
       event.preventDefault();
       let newZoom = this._zoom * Math.pow(ZOOM_LEVEL_CHANGE, event.deltaY * SCROLL_ZOOM_RATE);
@@ -84,6 +95,9 @@ export class ZoomableImageComponent implements OnInit {
   }
 
   private drawState(): void {
+    if (!this.isBrowser) {
+      return;
+    }
     requestAnimationFrame(() => {
       const ctx = this.canvas.nativeElement.getContext('2d');
       const canvasWidth = this.canvas.nativeElement.width;
