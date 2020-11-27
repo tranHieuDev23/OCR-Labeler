@@ -5,8 +5,9 @@ import { AppModule } from './app.module';
 import { AppComponent } from './app.component';
 
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { en_US, NZ_I18N, NzI18nModule } from 'ng-zorro-antd/i18n';
+import { AuthInterceptorService } from './services/auth-interceptor.service';
 
 @NgModule({
   imports: [
@@ -18,7 +19,8 @@ import { en_US, NZ_I18N, NzI18nModule } from 'ng-zorro-antd/i18n';
   ],
   bootstrap: [AppComponent],
   providers: [
-    { provide: NZ_I18N, useValue: en_US }
+    { provide: NZ_I18N, useValue: en_US },
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptorService, multi: true }
   ]
 })
 export class AppServerModule { }
