@@ -94,9 +94,21 @@ const SUGGESTION_VERSION_DATABASE_QUERY = `
         suggestion text;
 `;
 
+const FIX_SUGGESTION_VERSION_DATABASE_QUERY = `
+    WITH ImagesWithoutSuggestion AS (
+        SELECT DISTINCT "imageId" FROM public."TextRegions"
+        WHERE "TextRegions".suggestion is null
+    ) UPDATE public."Images"
+        SET status = '${ImageStatus.PrePublished}'
+        FROM ImagesWithoutSuggestion
+        WHERE ImagesWithoutSuggestion."imageId" = "Images"."imageId"
+        AND "Images".status = '${ImageStatus.Published}';
+`;
+
 export {
     AUTH_COOKIE_NAME,
     BASE_VERSION_DATABASE_QUERY,
     PRE_PUBLISH_VERSION_DATABASE_QUERY,
-    SUGGESTION_VERSION_DATABASE_QUERY
+    SUGGESTION_VERSION_DATABASE_QUERY,
+    FIX_SUGGESTION_VERSION_DATABASE_QUERY
 };
