@@ -32,16 +32,21 @@ export function app(): express.Express {
   const distFolder = join(process.cwd(), 'dist/ocr-labeler/browser');
   const uploadedFolder = process.env.UPLOADED_DIRECTORY;
   const thumbnailFolder = process.env.THUMBNAIL_DIRECTORY;
-  const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
+  const indexHtml = existsSync(join(distFolder, 'index.original.html'))
+    ? 'index.original.html'
+    : 'index';
 
   server.use(bodyParser.json());
   server.use(cookieParser());
   server.use(compression());
 
   // Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
-  server.engine('html', ngExpressEngine({
-    bootstrap: AppServerModule,
-  }));
+  server.engine(
+    'html',
+    ngExpressEngine({
+      bootstrap: AppServerModule,
+    })
+  );
 
   server.set('view engine', 'html');
   server.set('views', distFolder);
@@ -55,24 +60,35 @@ export function app(): express.Express {
   server.use('/api', exportRouter);
 
   // Server uploaded images from /uploaded
-  server.get(`*.*`, express.static(uploadedFolder, {
-    maxAge: '1y'
-  }));
-
+  server.get(
+    `*.*`,
+    express.static(uploadedFolder, {
+      maxAge: '1y',
+    })
+  );
 
   // Server uploaded images from /uploaded
-  server.get(`*.*`, express.static(thumbnailFolder, {
-    maxAge: '1y'
-  }));
+  server.get(
+    `*.*`,
+    express.static(thumbnailFolder, {
+      maxAge: '1y',
+    })
+  );
 
   // Serve static files from /browser
-  server.get('*.*', express.static(distFolder, {
-    maxAge: '1y'
-  }));
+  server.get(
+    '*.*',
+    express.static(distFolder, {
+      maxAge: '1y',
+    })
+  );
 
   // All regular routes use the Universal engine
   server.get('*', (req, res) => {
-    res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] });
+    res.render(indexHtml, {
+      req,
+      providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }],
+    });
   });
 
   return server;
@@ -93,11 +109,15 @@ function createFirstAdminUser(): Promise<void> {
       if (userCount > 0) {
         return resolve();
       }
-      console.log('No user was created, request for creation of the first admin user before launching the server');
+      console.log(
+        'No user was created, request for creation of the first admin user before launching the server'
+      );
       const displayName = process.env.DEFAULT_ADMIN_DISPLAYNAME;
       const username = process.env.DEFAULT_ADMIN_USERNAME;
       const password = process.env.DEFAULT_ADMIN_PASSWORD;
-      userDao.addUser(User.newAdminUser(displayName, username, password)).then(resolve, reject);
+      userDao
+        .addUser(User.newAdminUser(displayName, username, password))
+        .then(resolve, reject);
     }, reject);
   });
 }
@@ -106,24 +126,35 @@ async function run() {
   const port = process.env.PORT || 4000;
   mkdirp.sync(process.env.UPLOADED_DIRECTORY);
   mkdirp.sync(process.env.THUMBNAIL_DIRECTORY);
-  const serviceOpen = await waitForService(process.env.POSTGRES_HOST, +process.env.POSTGRES_PORT)
-    
+  const serviceOpen = await waitForService(
+    process.env.POSTGRES_HOST,
+    +process.env.POSTGRES_PORT
+  );
+
   if (!serviceOpen) {
     return;
   }
-  initializeDatabase().then(() => {
-    // In case no user was created, request for creation of the first admin user before launching the server
-    createFirstAdminUser().then(() => {
-      const server = app();
-      server.listen(port, () => {
-        console.log(`Node Express server listening on http://localhost:${port}`);
-      });
-    }, (reason) => {
-      console.log(`Problem when initialize server: ${reason}`);
-    });
-  }, (reason) => {
-    console.log(`Problem when initialize database: ${reason}`);
-  });
+  initializeDatabase().then(
+    () => {
+      // In case no user was created, request for creation of the first admin user before launching the server
+      createFirstAdminUser().then(
+        () => {
+          const server = app();
+          server.listen(port, () => {
+            console.log(
+              `Node Express server listening on http://localhost:${port}`
+            );
+          });
+        },
+        (reason) => {
+          console.log(`Problem when initialize server: ${reason}`);
+        }
+      );
+    },
+    (reason) => {
+      console.log(`Problem when initialize database: ${reason}`);
+    }
+  );
 }
 
 // Webpack will replace 'require' with '__webpack_require__'
@@ -131,7 +162,7 @@ async function run() {
 // The below code is to ensure that the server is run only when not requiring the bundle.
 declare const __non_webpack_require__: NodeRequire;
 const mainModule = __non_webpack_require__.main;
-const moduleFilename = mainModule && mainModule.filename || '';
+const moduleFilename = (mainModule && mainModule.filename) || '';
 if (moduleFilename === __filename || moduleFilename.includes('iisnode')) {
   run();
 }

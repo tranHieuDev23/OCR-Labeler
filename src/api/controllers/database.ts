@@ -3,7 +3,7 @@ dotenv.config();
 
 import * as PgPromise from 'pg-promise';
 import { lt, gte } from 'semver';
-import { BASE_VERSION_DATABASE_QUERY, FIX_SUGGESTION_VERSION_DATABASE_QUERY, PRE_PUBLISH_VERSION_DATABASE_QUERY, SUGGESTION_VERSION_DATABASE_QUERY } from 'src/environments/constants';
+import { BASE_VERSION_DATABASE_QUERY, FIX_SUGGESTION_VERSION_DATABASE_QUERY, PRE_PUBLISH_VERSION_DATABASE_QUERY, SUGGESTION_VERSION_DATABASE_QUERY,  REVIEW_VERSION_DATABASE_QUERY } from 'src/environments/constants';
 
 const initOpitions = {};
 const pgp = PgPromise(initOpitions);
@@ -20,13 +20,13 @@ const databaseConnection = pgp(connectionInfo);
 export default databaseConnection;
 
 export { pgp };
-
+const REVIEW_VERSION: string = '3.0.0';
 const FIX_SUGGESTION_VERSION: string = '2.1.1';
 const SUGGESTION_VERSION: string = '2.1.0';
 const PRE_PUBLISH_VERSION: string = '2.0.1';
 const BASE_VERSION: string = '1.0.0';
 
-const LATEST_VERSION: string = FIX_SUGGESTION_VERSION;
+const LATEST_VERSION: string = REVIEW_VERSION;
 
 export async function initializeDatabase(): Promise<void> {
     const lastVersion: string = await getSchemaVersion();
@@ -44,6 +44,9 @@ export async function initializeDatabase(): Promise<void> {
     }
     if (lt(lastVersion, FIX_SUGGESTION_VERSION)) {
         await databaseConnection.none(FIX_SUGGESTION_VERSION_DATABASE_QUERY);
+    }
+    if (lt(lastVersion, REVIEW_VERSION)) {
+        await databaseConnection.none(REVIEW_VERSION_DATABASE_QUERY);
     }
     return setSchemaVersion(LATEST_VERSION);
 }

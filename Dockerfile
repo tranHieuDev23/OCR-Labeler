@@ -15,7 +15,7 @@ COPY package.json ./
 RUN npm install
 # Build package
 COPY . .
-RUN npm run build
+RUN npm run build:ssr
 RUN npm prune --production
 
 # Deploy stage
