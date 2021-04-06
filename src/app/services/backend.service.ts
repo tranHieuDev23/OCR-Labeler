@@ -52,6 +52,20 @@ export class BackendService {
       });
     });
   }
+  public loadRegionForLabeled(): Promise<{ imageUrl: string, region: TextRegion }> {
+    return new Promise<{ imageUrl: string, region: TextRegion }>((resolve, reject) => {
+      this.http.post<any>('/api/get-region-for-labeled', {}).toPromise().then((response) => {
+        if (!response) {
+          return resolve(null);
+        }
+        const imageUrl: string = response.imageUrl;
+        const region: TextRegion = TextRegion.parseFromJson(response.region);
+        resolve({ imageUrl, region });
+      }, (error) => {
+        reject(error.error.error);
+      });
+    });
+  }
 
   public verifyLabel(regionId: string, isCorrect: boolean): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -63,6 +77,16 @@ export class BackendService {
     });
   }
 
+  public reviewLabel(regionId: string, isCorrect: boolean): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.http.post<void>('/api/review', { regionId, isCorrect }).toPromise().then(() => {
+        resolve();
+      }, (error) => {
+        reject(error.error.error);
+      });
+    });
+  } 
+  
   public loadUserImages(startFrom: number, itemCount: number, sortOption: ImageComparationOption, filteredStatuses: ImageStatus[]): Promise<{ imagesCount: number, images: UploadedImage[], pageId: number }> {
     return new Promise<{ imagesCount: number, images: UploadedImage[], pageId: number }>((resolve, reject) => {
       this.http.post<any>('/api/get-user-images', { startFrom, itemCount, sortOption, filteredStatuses }).toPromise().then((response) => {

@@ -20,6 +20,7 @@ import User from 'src/app/models/user';
 import imageRouter from 'src/api/routes/image';
 import labelRouter from 'src/api/routes/label';
 import verifyRouter from 'src/api/routes/verify';
+import reviewRouter from 'src/api/routes/review';
 import * as compression from 'compression';
 import exportRouter from 'src/api/routes/export';
 import { initializeDatabase } from 'src/api/controllers/database';
@@ -50,6 +51,7 @@ export function app(): express.Express {
   server.use('/api', imageRouter);
   server.use('/api', labelRouter);
   server.use('/api', verifyRouter);
+  server.use('/api', reviewRouter);
   server.use('/api', exportRouter);
 
   // Server uploaded images from /uploaded
@@ -105,7 +107,7 @@ async function run() {
   mkdirp.sync(process.env.UPLOADED_DIRECTORY);
   mkdirp.sync(process.env.THUMBNAIL_DIRECTORY);
   const serviceOpen = await waitForService(process.env.POSTGRES_HOST, +process.env.POSTGRES_PORT)
-    && await waitForService(process.env.EXPORT_HOST, +process.env.EXPORT_PORT);
+    
   if (!serviceOpen) {
     return;
   }

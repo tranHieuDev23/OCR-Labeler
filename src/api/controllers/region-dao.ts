@@ -169,6 +169,36 @@ class TextRegionDao {
         });
     }
 
+    public getListTextRegions(user: User, status: LabelStatus, sameUser: boolean): Promise<{ imageUrl: string, region: TextRegion }> {
+        return new Promise<{ imageUrl: string, region: TextRegion }>((resolve, reject) => {
+            databaseConnection.oneOrNone(
+                `
+                    WITH ValidItems AS (
+                        SELECT "TextRegions".*, "Images"."imageUrl"
+                            FROM public."TextRegions"
+                            FULL JOIN public."Images" ON "TextRegions"."imageId" = "Images"."imageId"
+                            WHERE "TextRegions"."labeledBy" = $1
+                            AND "TextRegions".status = $2
+                            AND "Images".status = 'Published'
+                            ${sameUser ? `AND "TextRegions"."uploadedBy" = $1` : ''}
+                            LIMIT 1000
+                    ) SELECT * FROM ValidItems OFFSET floor(random() * (SELECT COUNT(*) FROM validItems))
+                        LIMIT 1;
+                `, [user.username, status]
+            ).then((textRegion) => {
+                if (!textRegion) {
+                    resolve(null);
+                    return;
+                }
+                const imageUrl = textRegion.imageUrl;
+                const region = TextRegion.parseFromPostgresResult(textRegion);
+                resolve({ imageUrl, region });
+            }, (reason) => {
+                reject(`[getListTextRegions()] Error happened while getting random text region: ${reason}`);
+            });
+        });
+    }
+
     public labelTextRegion(user: User, regionId: string, label: string): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
             databaseConnection.one(
@@ -228,6 +258,35 @@ class TextRegionDao {
                 ) SELECT COUNT(*) FROM Updated;
             `;
             const action: Promise<any> = databaseConnection.one(isCorrect ? isCorrectQuery : isIncorrectQuery, [user.username, regionId]);
+            action.then((result) => {
+                resolve(+result.count > 0);
+            }, reject);
+        });
+    }
+
+    public reviewTextRegion(user: User, regionId: string, isCorrect: boolean): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            const isCorrectQuery: string = `
+                WITH Updated AS (
+                    UPDATE public."TextRegions"
+                        SET viewedInReview = true
+                        WHERE "regionId" = $2
+                        AND "labeledBy" = $1
+                        AND "status" = 'NotVerified'
+                        RETURNING *
+                ) SELECT COUNT(*) FROM Updated;
+            `;
+            // const isIncorrectQuery: string = `
+            //     WITH Updated AS (
+            //         UPDATE public."TextRegions"
+            //             SET label = NULL, status= 'NotLabeled', "verifiedBy" = $1
+            //             WHERE "regionId" = $2
+            //             AND "labeledBy" != $1
+            //             AND "status" = 'NotVerified'
+            //             RETURNING *
+            //     ) SELECT COUNT(*) FROM Updated;
+            // `;
+            const action: Promise<any> = databaseConnection.one( isCorrectQuery , [user.username, regionId]);
             action.then((result) => {
                 resolve(+result.count > 0);
             }, reject);

@@ -26,6 +26,7 @@ const BASE_VERSION_DATABASE_QUERY = `
         status text NOT NULL,
         "uploadedBy" text NOT NULL,
         "labeledBy" text,
+        "viewedInReview" boolean DEFAULT false NOT NULL,
         "verifiedBy" text
     );
     CREATE TABLE IF NOT EXISTS public."Users" (
