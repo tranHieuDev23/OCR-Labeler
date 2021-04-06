@@ -26,7 +26,6 @@ const BASE_VERSION_DATABASE_QUERY = `
         status text NOT NULL,
         "uploadedBy" text NOT NULL,
         "labeledBy" text,
-        "viewedInReview" boolean DEFAULT false NOT NULL,
         "verifiedBy" text
     );
     CREATE TABLE IF NOT EXISTS public."Users" (
@@ -95,6 +94,11 @@ const SUGGESTION_VERSION_DATABASE_QUERY = `
         suggestion text;
 `;
 
+const REVIEW_VERSION_DATABASE_QUERY = `
+    ALTER TABLE public."TextRegions" ADD COLUMN IF NOT EXISTS
+    "viewedInReview" boolean DEFAULT false NOT NULL;
+`
+
 const FIX_SUGGESTION_VERSION_DATABASE_QUERY = `
     WITH ImagesWithoutSuggestion AS (
         SELECT DISTINCT "imageId" FROM public."TextRegions"
@@ -111,5 +115,6 @@ export {
     BASE_VERSION_DATABASE_QUERY,
     PRE_PUBLISH_VERSION_DATABASE_QUERY,
     SUGGESTION_VERSION_DATABASE_QUERY,
-    FIX_SUGGESTION_VERSION_DATABASE_QUERY
+    FIX_SUGGESTION_VERSION_DATABASE_QUERY,
+    REVIEW_VERSION_DATABASE_QUERY,
 };

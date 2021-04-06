@@ -28,7 +28,7 @@ reviewRouter.post('/review', (request, response) => {
         return response.status(updated ? StatusCodes.OK : StatusCodes.BAD_REQUEST).json({});
     }, (reason) => {
         console.log(`[/verify] Error happened while verifying text region: ${reason}`);
-        return response.status(StatusCodes.UNAUTHORIZED).json({ error: 'Can\t verify the image' });
+        return response.status(StatusCodes.UNAUTHORIZED).json({ error: 'Can\t review the image' });
     });
 });
 

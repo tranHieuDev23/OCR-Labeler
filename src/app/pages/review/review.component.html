@@ -96,13 +96,22 @@
     ></app-zoomable-image>
   </div>
   <div nz-col [nzSpan]="24" [nzMd]="12">
-    <span nz-typography id="label"
+    <!-- <span nz-typography id="label"
       ><b>{{ region.label }}</b></span
-    ><br />
+    > -->
+    <input
+    id="label-input"
+    nz-input
+    [nzSize]="large"
+    placeholder="..."
+    autocomplete="off"
+    [(ngModel)]="region.label"
+  />
+    <br />
     <button nz-button nzType="primary" (click)="submit(true)">Yes</button>
-    <button nz-button nzType="primary" nzDanger (click)="submit(false)">
+    <!-- <button nz-button nzType="primary" nzDanger (click)="submit(false)">
       Edit
-    </button>
+    </button> -->
     <button nz-button nzType="primary" (click)="loadRegion()">
       Switch region
     </button>

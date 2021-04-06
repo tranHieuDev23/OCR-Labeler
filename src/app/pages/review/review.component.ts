@@ -45,6 +45,8 @@ export class ReviewComponent implements OnInit {
       this.notification.success('Text region reviewed successfully', '');
       this.loadRegion();
     }, (reason) => {
+      console.log(this.region.label,"label");
+      
       this.notification.error('Failed to review the text region', `Reason: ${reason}`);
     });
   }

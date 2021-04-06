@@ -179,6 +179,7 @@ class TextRegionDao {
                             FULL JOIN public."Images" ON "TextRegions"."imageId" = "Images"."imageId"
                             WHERE "TextRegions"."labeledBy" = $1
                             AND "TextRegions".status = $2
+                            AND "TextRegions"."viewedInReview" = false 
                             AND "Images".status = 'Published'
                             ${sameUser ? `AND "TextRegions"."uploadedBy" = $1` : ''}
                             LIMIT 1000
@@ -269,7 +270,7 @@ class TextRegionDao {
             const isCorrectQuery: string = `
                 WITH Updated AS (
                     UPDATE public."TextRegions"
-                        SET viewedInReview = true
+                        SET "viewedInReview" = true
                         WHERE "regionId" = $2
                         AND "labeledBy" = $1
                         AND "status" = 'NotVerified'
