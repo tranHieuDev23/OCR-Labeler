@@ -1,11 +1,14 @@
 import { Location } from '@angular/common';
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NzContextMenuService, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
+import {
+  NzContextMenuService,
+  NzDropdownMenuComponent,
+} from 'ng-zorro-antd/dropdown';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import {
   RegionClickedEvent,
-  RegionSelectorComponent
+  RegionSelectorComponent,
 } from 'src/app/components/region-selector/region-selector.component';
 import { ImageComparationOption } from 'src/app/models/image-compare-funcs';
 import ImageStatus, { isPublishedStatus } from 'src/app/models/image-status';
@@ -20,8 +23,10 @@ import { ThumbnailService } from 'src/app/services/thumbnail.service';
   styleUrls: ['./manage-image.component.scss'],
 })
 export class ManageImageComponent implements OnInit {
-  @ViewChild(RegionSelectorComponent, { static: false }) regionSelector: RegionSelectorComponent;
-  @ViewChild('regionContextMenu', { static: false }) regionContextMenu: NzDropdownMenuComponent;
+  @ViewChild(RegionSelectorComponent, { static: false })
+  regionSelector: RegionSelectorComponent;
+  @ViewChild('regionContextMenu', { static: false })
+  regionContextMenu: NzDropdownMenuComponent;
 
   public imageUrl: string;
   public croppedRegions: TextRegion[];
@@ -67,9 +72,16 @@ export class ManageImageComponent implements OnInit {
           (queryParams['sort'] as ImageComparationOption) ||
           ImageComparationOption.UPLOAD_LATEST_FIRST;
         const statuses: string = queryParams['statuses'] || '';
-        this.filteredStatuses = statuses.split(',').map(item => item.trim()).filter(item => item.length > 0).map(item => item as ImageStatus);
+        this.filteredStatuses = statuses
+          .split(',')
+          .map((item) => item.trim())
+          .filter((item) => item.length > 0)
+          .map((item) => item as ImageStatus);
         const users: string = queryParams['users'] || '';
-        this.filteredUsers = users.split(',').map(item => item.trim()).filter(item => item.length > 0);
+        this.filteredUsers = users
+          .split(',')
+          .map((item) => item.trim())
+          .filter((item) => item.length > 0);
         this.fileChangeEvent(this.imageId);
       });
     });
@@ -102,8 +114,12 @@ export class ManageImageComponent implements OnInit {
         ).then(
           (regionImages) => {
             this.croppedRegions = result.textRegions;
+            console.log(this.croppedRegions, 'this.croppedRegions');
+
             this.croppedRegionImages = regionImages;
-            this.croppedRegionRegions = this.croppedRegions.map(item => item.region.vertices);
+            this.croppedRegionRegions = this.croppedRegions.map(
+              (item) => item.region.vertices
+            );
           },
           (reason) => {
             this.notification.error('Failed to load file', `Reason: ${reason}`);
@@ -165,7 +181,9 @@ export class ManageImageComponent implements OnInit {
           .then((regionImage) => {
             this.croppedRegions.push(newTextRegion);
             this.croppedRegionImages.push(regionImage);
-            this.croppedRegionRegions = this.croppedRegions.map(item => item.region.vertices);
+            this.croppedRegionRegions = this.croppedRegions.map(
+              (item) => item.region.vertices
+            );
             this.regionSelector.clearSelected();
             this.selectedRegion = null;
             this.selectedRegionImage = null;
@@ -215,7 +233,9 @@ export class ManageImageComponent implements OnInit {
         this.notification.success('Text region deleted successfully', '');
         this.croppedRegions.splice(id, 1);
         this.croppedRegionImages.splice(id, 1);
-        this.croppedRegionRegions = this.croppedRegions.map(item => item.region.vertices);
+        this.croppedRegionRegions = this.croppedRegions.map(
+          (item) => item.region.vertices
+        );
         this.closeModal();
       },
       (reason) => {
@@ -266,7 +286,7 @@ export class ManageImageComponent implements OnInit {
           queryParams: {
             sort: this.imageComparator,
             statuses: this.filteredStatuses.join(','),
-            users: this.filteredUsers.join(',')
+            users: this.filteredUsers.join(','),
           },
         });
       },

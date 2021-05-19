@@ -1,0 +1,58 @@
+<nz-row class="options" nzJustify="start" [nzGutter]="{ md: 8 }">
+    <nz-col nzSpan="24" [nzMd]="isVertical? 24 : 12" [nzLg]="isVertical? 24 : 8">
+        <span nz-typography>Filter type</span> <br />
+        <nz-select [nzMaxTagCount]="1" [nzMaxTagPlaceholder]="tagPlaceHolder" nzMode="multiple"
+            nzPlaceHolder="Filter image type" [(ngModel)]="filterOptions.filteredImageTypeIds" class="filter-select"
+            (ngModelChange)="refresh()">
+            <nz-option nzLabel="No type" [nzValue]="null"></nz-option>
+            <nz-option *ngFor="let item of filterImageTypeOptions" [nzLabel]="item.displayName" [nzValue]="item.typeId">
+            </nz-option>
+        </nz-select>
+    </nz-col>
+    <nz-col *ngIf="canFilterStatus" nzSpan="24" [nzMd]="isVertical? 24 : 12" [nzLg]="isVertical? 24 : 8">
+        <span nz-typography>Filter status</span> <br />
+        <nz-select [nzMaxTagCount]="1" [nzMaxTagPlaceholder]="tagPlaceHolder" nzMode="multiple"
+            nzPlaceHolder="Filter image status" [(ngModel)]="filterOptions.filteredStatuses" class="filter-select"
+            (ngModelChange)="refresh()">
+            <nz-option *ngFor="let item of filterStatusOptions" [nzLabel]="getImageStatusString(item)" [nzValue]="item">
+            </nz-option>
+        </nz-select>
+    </nz-col>
+    <nz-col *ngIf="canFilterUser" nzSpan="24" [nzMd]="isVertical? 24 : 12" [nzLg]="isVertical? 24 : 8">
+        <span nz-typography>Filter uploader</span> <br />
+        <nz-select [nzMaxTagCount]="1" [nzMaxTagPlaceholder]="tagPlaceHolder" nzMode="multiple"
+            nzPlaceHolder="Filter uploader" [(ngModel)]="filterOptions.filteredUsers" class="filter-select"
+            (ngModelChange)="refresh()">
+            <nz-option *ngFor="let item of filterUserOptions" [nzLabel]="item.displayName" [nzValue]="item.username">
+            </nz-option>
+        </nz-select>
+    </nz-col>
+    <nz-col nzSpan="24" [nzMd]="isVertical? 24 : 12" [nzLg]="isVertical? 24 : 8">
+        <span nz-typography>Filter upload time</span> <br />
+        <nz-range-picker [nzShowTime]="true" [(ngModel)]="filterOptions.filteredUploadTime" (ngModelChange)="refresh()">
+        </nz-range-picker>
+    </nz-col>
+    <nz-col nzSpan="24" [nzMd]="isVertical? 24 : 12" [nzLg]="isVertical? 24 : 8">
+        <span nz-typography>Filter tags</span> <br />
+        <nz-select [nzMaxTagCount]="1" [nzMaxTagPlaceholder]="tagPlaceHolder" nzMode="multiple"
+            nzPlaceHolder="Filter image tags" [(ngModel)]="filterOptions.filteredTags" class="filter-select"
+            (ngModelChange)="refresh()">
+            <ng-template ngFor let-group [ngForOf]="filterTagGroupOptions">
+                <nz-option nzDisabled="true" nzCustomContent="true">
+                    <span nz-typography nzType="secondary">{{ group.displayName }}</span>
+                </nz-option>
+                <nz-option *ngFor="let tag of group.tagValues" [nzValue]="tag.imageTagId" [nzLabel]="tag.displayName">
+                </nz-option>
+            </ng-template>
+        </nz-select>
+    </nz-col>
+    <nz-col nzSpan="24" [nzMd]="isVertical? 24 : 12" [nzLg]="isVertical? 24 : 8">
+        <span nz-typography>Sort by</span> <br />
+        <nz-select class="sort-select" [(ngModel)]="filterOptions.sortOption" (ngModelChange)="refresh()">
+            <nz-option *ngFor="let item of sortOptions" [nzLabel]="getSortOptionString(item)" [nzValue]="item">
+            </nz-option>
+        </nz-select>
+    </nz-col>
+</nz-row>
+<button class="reset-filter-button" nz-button (click)="resetOptions()">Reset filter</button>
+<ng-template #tagPlaceHolder let-selectedList>and {{ selectedList.length }} more</ng-template>
