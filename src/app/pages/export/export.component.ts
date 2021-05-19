@@ -1,6 +1,14 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
+import { ExportProgress } from 'src/app/models/export-progress';
+import { ExportResult } from 'src/app/models/export-result';
+import { ImageFilterOptions } from 'src/app/models/image-filter-options';
+import ImageStatus from 'src/app/models/image-status';
+import UploadedImage from 'src/app/models/uploaded-image';
 import { BackendService } from 'src/app/services/backend.service';
+
+// const DEFAULT_IMAGES_PER_PAGE = 12;
 
 @Component({
   selector: 'app-export',
@@ -13,6 +21,7 @@ export class ExportComponent implements OnInit {
   public lastExported: Date = null;
 
   constructor(
+    // private readonly router: Router,
     private backend: BackendService,
     private notification: NzNotificationService
   ) {}
