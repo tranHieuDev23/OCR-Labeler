@@ -63,7 +63,7 @@ export class ImageFilterOptions {
   public getJson(): any {
     return {
       sortOption: this.sortOption,
-      filteredImageTypeIds: this.filteredImageTypeIds,
+      // filteredImageTypeIds: this.filteredImageTypeIds,
       filteredStatuses: this.filteredStatuses,
       filteredUsers: this.filteredUsers,
       filteredUploadTime:

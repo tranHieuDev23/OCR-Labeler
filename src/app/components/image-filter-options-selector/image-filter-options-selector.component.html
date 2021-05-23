@@ -1,13 +1,13 @@
 <nz-row class="options" nzJustify="start" [nzGutter]="{ md: 8 }">
     <nz-col nzSpan="24" [nzMd]="isVertical? 24 : 12" [nzLg]="isVertical? 24 : 8">
         <span nz-typography>Filter type</span> <br />
-        <nz-select [nzMaxTagCount]="1" [nzMaxTagPlaceholder]="tagPlaceHolder" nzMode="multiple"
+        <!-- <nz-select [nzMaxTagCount]="1" [nzMaxTagPlaceholder]="tagPlaceHolder" nzMode="multiple"
             nzPlaceHolder="Filter image type" [(ngModel)]="filterOptions.filteredImageTypeIds" class="filter-select"
             (ngModelChange)="refresh()">
             <nz-option nzLabel="No type" [nzValue]="null"></nz-option>
             <nz-option *ngFor="let item of filterImageTypeOptions" [nzLabel]="item.displayName" [nzValue]="item.typeId">
             </nz-option>
-        </nz-select>
+        </nz-select> -->
     </nz-col>
     <nz-col *ngIf="canFilterStatus" nzSpan="24" [nzMd]="isVertical? 24 : 12" [nzLg]="isVertical? 24 : 8">
         <span nz-typography>Filter status</span> <br />

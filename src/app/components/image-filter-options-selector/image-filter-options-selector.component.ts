@@ -59,7 +59,7 @@ export class ImageFilterOptionsSelectorComponent implements OnInit {
       this.filterUserOptions = this.canFilterUser
         ? await this.authService.getAllUser()
         : [];
-      this.filterTagGroupOptions = options[1];
+      // this.filterTagGroupOptions = options[1];
       this.sortOptions = [
         ImageSortOption.UPLOAD_LATEST_FIRST,
         ImageSortOption.UPLOAD_OLDEST_FIRST,

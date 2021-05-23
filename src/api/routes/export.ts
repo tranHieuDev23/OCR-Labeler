@@ -5,8 +5,12 @@ import Axios from 'axios';
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { jwtMiddlewareFactory } from './jwt-middleware';
+import User from 'src/app/models/user';
+import { ImageFilterOptions } from 'src/app/models/image-filter-options';
+import ImageDao from '../controllers/image-dao';
 
 const exportRouter: Router = Router();
+const imageDao = ImageDao.getInstance();
 
 const uploadedFolder = process.env.UPLOADED_DIRECTORY;
 
@@ -21,6 +25,43 @@ const exportJwtMiddleware: Router = jwtMiddlewareFactory(
   (user) => user.canExport
 );
 exportRouter.use(exportJwtMiddleware);
+
+exportRouter.post('/get-exportable-images', async (request, response) => {
+  const user: User = response.locals.user;
+  let startFrom: number = request.body.startFrom;
+  const itemCount: number = request.body.itemCount;
+  const filterOptions: ImageFilterOptions = ImageFilterOptions.parseFromJson(
+    request.body.filterOptions
+  );
+
+  let pageId: number = startFrom / itemCount + 1;
+  try {
+    const imagesCount = await imageDao.getImagesCountExport(filterOptions);
+    if (imagesCount <= startFrom) {
+      console.log(
+        `[/get-exportable-images] User ${user.username} is trying to access more image than allowed: ` +
+          `startFrom=${startFrom}, imagesCount=${imagesCount}. Reset to page one.`
+      );
+      startFrom = 0;
+      pageId = 1;
+    }
+    const images = await imageDao.getImagesExport(
+      startFrom,
+      itemCount,
+      filterOptions
+    );
+    return response.json({
+      imagesCount,
+      images,
+      pageId,
+    });
+  } catch (e) {
+    console.log(`[/get-exportable-images] Problem when retrieving image: ${e}`);
+    return response
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: 'Internal server error' });
+  }
+});
 
 exportRouter.post('/request-export', (request, response) => {
   Axios.post(
