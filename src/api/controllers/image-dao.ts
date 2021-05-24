@@ -486,7 +486,7 @@ class ImageDao {
     });
   }
 
-  // viet them ham getImagesExport
+  //  getImagesExport
   public async getImagesExport(
     startFrom: number,
     itemCount: number,

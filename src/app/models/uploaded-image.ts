@@ -4,8 +4,6 @@ import { ImageTag } from './image-tag';
 import { ImageType } from './image-type';
 import User from './user';
 
-// thêm 3 trường originalFileName, ImageTag, description
-
 class UploadedImage {
   constructor(
     public readonly imageId: string,
@@ -14,9 +12,8 @@ class UploadedImage {
     public readonly textRegions: TextRegion[],
     public readonly uploadedBy: User,
     public readonly uploadedDate: Date,
-    public readonly status: ImageStatus // public readonly imageType: ImageType,
-  ) // public readonly originalFilename: string,
-  // public readonly tags: ImageTag[],
+    public readonly status: ImageStatus // public readonly imageType: ImageType, // public readonly originalFilename: string,
+  ) // public readonly tags: ImageTag[],
   // public readonly description: string
   {}
 
