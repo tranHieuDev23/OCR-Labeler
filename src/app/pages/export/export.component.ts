@@ -36,7 +36,7 @@ export class ExportComponent implements OnInit {
 
   ngOnInit(): void {
     const filterOptions = ImageFilterOptions.getDefaultOptions();
-    filterOptions.filteredStatuses = [ImageStatus.Verified];
+    filterOptions.filteredStatuses = [ImageStatus.Processing];
     this.loadPage(1, DEFAULT_IMAGES_PER_PAGE, filterOptions).then();
   }
 

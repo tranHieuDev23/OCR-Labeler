@@ -7,8 +7,8 @@ import ImageStatus, {
 } from 'src/app/models/image-status';
 import User from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
-import { ImageTagService } from 'src/app/services/image-tag.service';
-import { ImageTypeService } from 'src/app/services/image-type-service.service';
+// import { ImageTagService } from 'src/app/services/image-tag.service';
+// import { ImageTypeService } from 'src/app/services/image-type-service.service';
 import { ImageFilterOptions } from 'src/app/models/image-filter-options';
 import {
   getImageSortOptionString,
@@ -40,21 +40,21 @@ export class ImageFilterOptionsSelectorComponent implements OnInit {
   constructor(
     private readonly router: Router,
     private readonly notificationService: NzNotificationService,
-    private readonly imageTypeService: ImageTypeService,
-    private readonly authService: AuthService,
-    private readonly imageTagService: ImageTagService
-  ) {}
+    // private readonly imageTypeService: ImageTypeService,
+    private readonly authService: AuthService
+  ) // private readonly imageTagService: ImageTagService
+  {}
 
   ngOnInit(): void {
     if (!this.filterOptions) {
       this.filterOptions = ImageFilterOptions.getDefaultOptions();
     }
     (async () => {
-      const options = await Promise.all([
-        this.imageTypeService.getAllImageTypesWithoutLabel(),
-        this.imageTagService.getAllImageTagGroups(),
-      ]);
-      this.filterImageTypeOptions = options[0];
+      // const options = await Promise.all([
+      //   this.imageTypeService.getAllImageTypesWithoutLabel(),
+      //   this.imageTagService.getAllImageTagGroups(),
+      // ]);
+      // this.filterImageTypeOptions = options[0];
       this.filterStatusOptions = getAllImageStatuses();
       this.filterUserOptions = this.canFilterUser
         ? await this.authService.getAllUser()

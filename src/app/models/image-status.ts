@@ -4,7 +4,7 @@ enum ImageStatus {
   NotProcessed = 'NotProcessed',
   PrePublished = 'PrePublished',
   Published = 'Published',
-  Verified = 'Verified',
+  // Verified = 'Verified',
 }
 
 export function getAllImageStatuses(): ImageStatus[] {
@@ -14,7 +14,7 @@ export function getAllImageStatuses(): ImageStatus[] {
     ImageStatus.NotProcessed,
     ImageStatus.PrePublished,
     ImageStatus.Published,
-    ImageStatus.Verified,
+    // ImageStatus.Verified,
   ];
 }
 
