@@ -37,7 +37,7 @@
     "@types/semver": "^7.3.4",
     "@types/sharp": "^0.26.1",
     "aws-sdk": "^2.798.0",
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "bcrypt": "^5.0.0",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.5",

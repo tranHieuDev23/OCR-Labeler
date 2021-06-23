@@ -1,5 +1,5 @@
 # Build stage
-FROM node:14.15.1-buster AS build
+FROM node:14.17.0-buster AS build
 # Native dependencies
 RUN apt update && apt install -y \
    python3 \
@@ -16,10 +16,9 @@ RUN npm install
 # Build package
 COPY . .
 RUN npm run build:ssr
-RUN npm prune --production
 
 # Deploy stage
-FROM node:14.15.1-buster
+FROM node:14.17.0-buster
 # Create app directory
 WORKDIR /usr/src/app
 # Copy source from build to deploy
