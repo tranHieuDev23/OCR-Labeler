@@ -26,6 +26,7 @@ WORKDIR /usr/src/app
 COPY --from=build /build/dist ./dist
 COPY --from=build /build/node_modules ./node_modules
 COPY --from=build /build/package.json .
+
 # Run server
 EXPOSE 3200
 CMD ["npm", "run", "serve:ssr"]

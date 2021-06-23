@@ -1,0 +1,56 @@
+<div>
+  <h1 nz-typography>Review images</h1>
+</div>
+<nz-empty *ngIf="!listRegions.length" [nzNotFoundContent]="emptyContent">
+  <ng-template #emptyContent>
+    <p nz-typography>No text region needs reviewing</p>
+  </ng-template>
+</nz-empty>
+<br>
+<div *ngIf="listRegions.length" nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32, xl: 32, xxl: 32 }">
+  <div
+  *ngFor="let item of listRegions"
+  nz-col
+  nzSpan="24"
+  nzLg="16"
+  nzXl="12"
+  style="margin-top: 8px; margin-bottom: 8px"
+  > 
+  <nz-card [nzHoverable]="true" style="width:480px"  [nzCover]="coverTemplate" [nzActions]="[submitLabel]">
+  </nz-card>
+  <ng-template #coverTemplate>
+      <app-zoomable-image
+        [imageSrc]="item.imageUrl"
+        [region]="item.region.region.vertices"
+      ></app-zoomable-image>
+  </ng-template>
+  <ng-template #submitLabel>
+  <div>
+    <input
+      nz-input
+      [nzSize]="large"
+      autocomplete="off"
+      [(ngModel)]="item.region.label"
+      (keydown.enter)="relabel(item.region,false)"
+    />
+  </div>
+  <button nz-button nzSize="default" nzType="primary" (click)="relabel(item.region,false)">Relabel</button>
+  <button nz-button nzSize="default" nzType="primary" (click)="hide(item.region,true)">Hide</button>
+  </ng-template>
+</div>
+</div>
+<div id="pagination">
+  <div *ngIf="imagesCount" id="pagination">
+    <nz-pagination
+      [nzPageIndex]="currentPage"
+      [nzPageSize]="imagesPerPage"
+      [nzTotal]="imagesCount"
+      nzShowQuickJumper
+      nzShowSizeChanger
+      [nzPageSizeOptions]="[4, 8, 12, 16]"
+      (nzPageIndexChange)="changePage($event)"
+      (nzPageSizeChange)="changePageSize($event)"
+    >
+    </nz-pagination>
+  </div>
+</div>

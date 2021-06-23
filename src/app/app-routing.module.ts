@@ -23,6 +23,12 @@ const routes: Routes = [
     canActivate: [UserLoggedInGuard]
   },
   {
+    path: 'review',
+    loadChildren: () =>
+      import('./pages/review/review.module').then((m) => m.ReviewModule),
+    canActivate: [UserLoggedInGuard]
+  },
+  {
     path: 'verify',
     loadChildren: () =>
       import('./pages/verify/verify.module').then((m) => m.VerifyModule),

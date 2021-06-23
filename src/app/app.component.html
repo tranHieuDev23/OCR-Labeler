@@ -19,6 +19,9 @@
           <li *ngIf="loggedInUser.canLabel" nz-menu-item>
             <a routerLink="/label">Label texts</a>
           </li>
+          <li *ngIf="loggedInUser.canLabel" nz-menu-item>
+            <a routerLink="/review">Review results</a>
+          </li>
           <li *ngIf="loggedInUser.canVerify" nz-menu-item>
             <a routerLink="/verify">Verify results</a>
           </li>

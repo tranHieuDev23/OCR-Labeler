@@ -1,4 +1,4 @@
-import ImageStatus from "src/app/models/image-status";
+import ImageStatus from 'src/app/models/image-status';
 
 const AUTH_COOKIE_NAME: string = 'ocr-auth';
 
@@ -94,6 +94,11 @@ const SUGGESTION_VERSION_DATABASE_QUERY = `
         suggestion text;
 `;
 
+const REVIEW_VERSION_DATABASE_QUERY = `
+    ALTER TABLE public."TextRegions" ADD COLUMN IF NOT EXISTS
+    "viewedInReview" boolean DEFAULT false NOT NULL;
+`;
+
 const FIX_SUGGESTION_VERSION_DATABASE_QUERY = `
     WITH ImagesWithoutSuggestion AS (
         SELECT DISTINCT "imageId" FROM public."TextRegions"
@@ -106,9 +111,10 @@ const FIX_SUGGESTION_VERSION_DATABASE_QUERY = `
 `;
 
 export {
-    AUTH_COOKIE_NAME,
-    BASE_VERSION_DATABASE_QUERY,
-    PRE_PUBLISH_VERSION_DATABASE_QUERY,
-    SUGGESTION_VERSION_DATABASE_QUERY,
-    FIX_SUGGESTION_VERSION_DATABASE_QUERY
+  AUTH_COOKIE_NAME,
+  BASE_VERSION_DATABASE_QUERY,
+  PRE_PUBLISH_VERSION_DATABASE_QUERY,
+  SUGGESTION_VERSION_DATABASE_QUERY,
+  FIX_SUGGESTION_VERSION_DATABASE_QUERY,
+  REVIEW_VERSION_DATABASE_QUERY,
 };

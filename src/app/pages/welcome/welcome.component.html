@@ -12,6 +12,8 @@
                 nzType="primary"><i nz-icon nzType="appstore"></i>Manage all images</button>
         <button *ngIf="loggedInUser.canLabel" routerLink="/label" nz-button nzSize="large" nzType="primary"><i nz-icon
                         nzType="edit"></i>Label text regions</button>
+        <button *ngIf="loggedInUser.canLabel" routerLink="/review" nz-button nzSize="large" nzType="primary"><i nz-icon
+                        nzType="check-circle"></i>Review label results</button>                
         <button *ngIf="loggedInUser.canVerify" routerLink="/verify" nz-button nzSize="large" nzType="primary"><i nz-icon
                         nzType="search"></i>Verify label results</button>
         <button *ngIf="loggedInUser.canExport" routerLink="/export" nz-button nzSize="large" nzType="primary"><i nz-icon
