@@ -5,6 +5,7 @@ import { ReviewRoutingModule } from './review-routing.module';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { FormsModule } from '@angular/forms';
+import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzNotificationModule } from 'ng-zorro-antd/notification';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -23,6 +24,7 @@ import { NzPaginationModule } from 'ng-zorro-antd/pagination';
     NzGridModule,
     FormsModule,
     ZoomableImageModule,
+    NzCardModule,
     NzPaginationModule,
   ],
   exports: [ReviewComponent],
