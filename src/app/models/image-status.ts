@@ -3,7 +3,8 @@ enum ImageStatus {
   Processed = 'Processed',
   NotProcessed = 'NotProcessed',
   PrePublished = 'PrePublished',
-  Published = 'Published'
+  Published = 'Published',
+  // Verified = 'Verified',
 }
 
 export function getAllImageStatuses(): ImageStatus[] {
@@ -12,19 +13,26 @@ export function getAllImageStatuses(): ImageStatus[] {
     ImageStatus.Processed,
     ImageStatus.NotProcessed,
     ImageStatus.PrePublished,
-    ImageStatus.Published
+    ImageStatus.Published,
+    // ImageStatus.Verified,
   ];
 }
 
 export function isPublishedStatus(status: ImageStatus): boolean {
-  return status === ImageStatus.PrePublished || status === ImageStatus.Published;
+  return (
+    status === ImageStatus.PrePublished || status === ImageStatus.Published
+  );
 }
 
-export function getImageStatusFilterClause(filteredStatuses: ImageStatus[]): string {
+export function getImageStatusFilterClause(
+  filteredStatuses: ImageStatus[]
+): string {
   if (!filteredStatuses || filteredStatuses.length == 0) {
     return '';
   }
-  return `AND "Images".status IN (${filteredStatuses.map(item => `'${item}'`).join(',')})`
+  return `AND "Images".status IN (${filteredStatuses
+    .map((item) => `'${item}'`)
+    .join(',')})`;
 }
 
 export function getImageStatusColor(status: ImageStatus): string {

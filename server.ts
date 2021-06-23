@@ -57,7 +57,7 @@ export function app(): express.Express {
   server.use('/api', labelRouter);
   server.use('/api', verifyRouter);
   server.use('/api', reviewRouter);
-  server.use('/api', exportRouter);
+  server.use('/api/export', exportRouter);
 
   // Server uploaded images from /uploaded
   server.get(
