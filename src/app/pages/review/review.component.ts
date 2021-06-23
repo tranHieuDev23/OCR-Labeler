@@ -108,9 +108,6 @@ export class ReviewComponent implements OnInit {
       }
     );
   }
-  save(event): void {
-    console.log('You entered: ', event.target.value);
-  }
 
   changePage(event: number): void {
     if (event === this.currentPage) {
