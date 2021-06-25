@@ -4,18 +4,14 @@ import ImageStatus from './image-status';
 export class ImageFilterOptions {
   constructor(
     public sortOption: ImageSortOption,
-    public filteredImageTypeIds: string[],
     public filteredStatuses: ImageStatus[],
     public filteredUsers: string[],
-    public filteredUploadTime: Date[],
-    public filteredTags: string[]
+    public filteredUploadTime: Date[]
   ) {}
 
   public static getDefaultOptions(): ImageFilterOptions {
     return new ImageFilterOptions(
       ImageSortOption.UPLOAD_LATEST_FIRST,
-      [],
-      [],
       [],
       [],
       []
@@ -52,18 +48,15 @@ export class ImageFilterOptions {
     }
     return new ImageFilterOptions(
       sortOption,
-      filteredImageTypeIds,
       filteredStatuses,
       filteredUsers,
-      filteredUploadTime,
-      filteredTags
+      filteredUploadTime
     );
   }
 
   public getJson(): any {
     return {
       sortOption: this.sortOption,
-      // filteredImageTypeIds: this.filteredImageTypeIds,
       filteredStatuses: this.filteredStatuses,
       filteredUsers: this.filteredUsers,
       filteredUploadTime:
@@ -73,7 +66,6 @@ export class ImageFilterOptions {
               this.filteredUploadTime[1].getTime(),
             ]
           : [],
-      filteredTags: this.filteredTags,
     };
   }
 
@@ -84,11 +76,6 @@ export class ImageFilterOptions {
     if (this.sortOption !== other.sortOption) {
       return false;
     }
-    if (
-      !this.isArrayEqual(this.filteredImageTypeIds, other.filteredImageTypeIds)
-    ) {
-      return false;
-    }
     if (!this.isArrayEqual(this.filteredStatuses, other.filteredStatuses)) {
       return false;
     }
@@ -96,9 +83,6 @@ export class ImageFilterOptions {
       return false;
     }
     if (!this.isArrayEqual(this.filteredUploadTime, other.filteredUploadTime)) {
-      return false;
-    }
-    if (!this.isArrayEqual(this.filteredTags, other.filteredTags)) {
       return false;
     }
     return true;

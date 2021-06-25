@@ -34,8 +34,7 @@ export class ImageFilterOptionsSelectorComponent implements OnInit {
   constructor(
     private readonly router: Router,
     private readonly notificationService: NzNotificationService,
-    // private readonly imageTypeService: ImageTypeService,
-    private readonly authService: AuthService // private readonly imageTagService: ImageTagService
+    private readonly authService: AuthService
   ) {}
 
   ngOnInit(): void {

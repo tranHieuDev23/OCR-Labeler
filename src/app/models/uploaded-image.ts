@@ -10,9 +10,7 @@ class UploadedImage {
     public readonly textRegions: TextRegion[],
     public readonly uploadedBy: User,
     public readonly uploadedDate: Date,
-    public readonly status: ImageStatus,
-    public readonly originalFilename: string,
-    public readonly description: string
+    public readonly status: ImageStatus
   ) {}
 
   static parseFromJson(obj: any): UploadedImage {
@@ -30,8 +28,6 @@ class UploadedImage {
       : null;
     const uploadedDate: Date = new Date(obj.uploadedDate);
     const status: ImageStatus = obj.status as ImageStatus;
-    const originalFilename: string = obj.originalFilename;
-    const description: string = obj.description;
     return new UploadedImage(
       imageId,
       imageUrl,
@@ -39,9 +35,7 @@ class UploadedImage {
       textRegions,
       uploadedBy,
       uploadedDate,
-      status,
-      originalFilename,
-      description
+      status
     );
   }
 }

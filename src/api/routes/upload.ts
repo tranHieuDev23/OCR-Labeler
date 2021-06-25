@@ -119,9 +119,7 @@ uploadRouter.post(
               [],
               user,
               new Date(),
-              ImageStatus.NotProcessed,
-              '',
-              ''
+              ImageStatus.NotProcessed
             );
             imageDao.addImage(newImage).then(
               () => {

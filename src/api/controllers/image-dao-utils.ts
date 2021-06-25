@@ -34,9 +34,6 @@ class ParameterizedSubquery {
 export function getFilterClause(
   filterOptions: ImageFilterOptions
 ): ParameterizedSubquery {
-  const emptyFilterTypes: boolean =
-    !filterOptions.filteredImageTypeIds ||
-    filterOptions.filteredImageTypeIds.length === 0;
   const emptyFilterStatuses: boolean =
     !filterOptions.filteredStatuses ||
     filterOptions.filteredStatuses.length === 0;
@@ -45,35 +42,8 @@ export function getFilterClause(
   const emptyFilterUploadTime: boolean =
     filterOptions.filteredUploadTime === null ||
     filterOptions.filteredUploadTime.length !== 2;
-  const emptyFilterTags: boolean =
-    filterOptions.filteredTags === null ||
-    filterOptions.filteredTags.length === 0;
   const conditionClauses: string[] = [];
   const parameters: any[] = [];
-  if (!emptyFilterTypes) {
-    const hasNullValue =
-      filterOptions.filteredImageTypeIds.findIndex((item) => item === null) !==
-      -1;
-    const nonNullTypeIds = filterOptions.filteredImageTypeIds.filter(
-      (item) => item !== null
-    );
-    if (hasNullValue && nonNullTypeIds.length > 0) {
-      conditionClauses.push(`(
-                "Images"."imageType" IN (${nonNullTypeIds
-                  .map(() => '?')
-                  .join(',')})
-                OR "Images"."imageType" IS null
-            )`);
-      parameters.push(...nonNullTypeIds);
-    } else if (hasNullValue) {
-      conditionClauses.push('"Images"."imageType" IS null');
-    } else if (nonNullTypeIds.length > 0) {
-      conditionClauses.push(
-        `"Images"."imageType" IN (${nonNullTypeIds.map(() => '?').join(',')})`
-      );
-      parameters.push(...nonNullTypeIds);
-    }
-  }
   if (!emptyFilterStatuses) {
     conditionClauses.push(
       `"Images".status IN (${filterOptions.filteredStatuses
@@ -96,15 +66,6 @@ export function getFilterClause(
       filterOptions.filteredUploadTime[0].getTime(),
       filterOptions.filteredUploadTime[1].getTime()
     );
-  }
-  if (!emptyFilterTags) {
-    conditionClauses.push(`"Images"."imageId" IN (
-            SELECT DISTINCT "ImageHasTag"."imageId" FROM public."ImageHasTag"
-            WHERE "ImageHasTag"."imageTagId" IN (${filterOptions.filteredTags
-              .map(() => '?')
-              .join(',')})
-        )`);
-    parameters.push(...filterOptions.filteredTags);
   }
   if (conditionClauses.length === 0) {
     return new ParameterizedSubquery();

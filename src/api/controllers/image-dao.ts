@@ -189,9 +189,7 @@ class ImageDao {
                   [],
                   user,
                   new Date(+item.uploadedDate),
-                  item.status as ImageStatus,
-                  '',
-                  ''
+                  item.status as ImageStatus
                 )
               );
             }
@@ -204,6 +202,52 @@ class ImageDao {
           }
         );
     });
+  }
+
+  //  getImagesExport
+  public async getImagesExport(
+    startFrom: number,
+    itemCount: number,
+    filterOptions: ImageFilterOptions
+  ) {
+    try {
+      const filterClause = getFilterClauseExport(filterOptions);
+      const getImagesQuery = toOrdinal(`
+              SELECT * FROM public."Images" JOIN public."Users" ON "Images"."uploadedBy" = "Users".username
+                  WHERE ${filterClause.subquery}
+                  ${getOrderByClauseExport(filterOptions.sortOption)}
+                  OFFSET ? LIMIT ?;
+          `);
+      const imageResults = await databaseConnection.any(getImagesQuery, [
+        ...filterClause.parameters,
+        startFrom,
+        itemCount,
+      ]);
+      if (imageResults.length === 0) {
+        return [];
+      }
+
+      const images: UploadedImage[] = [];
+      for (const item of imageResults) {
+        const ofUser = User.parseFromJson(item);
+        images.push(
+          new UploadedImage(
+            item.imageId,
+            item.imageUrl,
+            item.thumbnailUrl,
+            [],
+            ofUser,
+            new Date(+item.uploadedDate),
+            item.status as ImageStatus
+          )
+        );
+      }
+      return images;
+    } catch (e) {
+      throw new Error(
+        `[getImages()] Error happened while reading from database: ${e}`
+      );
+    }
   }
 
   public getUserImagesCount(
@@ -264,9 +308,7 @@ class ImageDao {
                   [],
                   user,
                   new Date(+item.uploadedDate),
-                  item.status as ImageStatus,
-                  '',
-                  ''
+                  item.status as ImageStatus
                 )
               );
             }
@@ -335,9 +377,7 @@ class ImageDao {
                         regions,
                         user,
                         new Date(+image.uploadedDate),
-                        image.status as ImageStatus,
-                        '',
-                        ''
+                        image.status as ImageStatus
                       )
                     );
                   },
@@ -404,9 +444,7 @@ class ImageDao {
                         regions,
                         user,
                         new Date(+image.uploadedDate),
-                        image.status as ImageStatus,
-                        '',
-                        ''
+                        image.status as ImageStatus
                       )
                     );
                   },
@@ -487,54 +525,6 @@ class ImageDao {
           }
         );
     });
-  }
-
-  //  getImagesExport
-  public async getImagesExport(
-    startFrom: number,
-    itemCount: number,
-    filterOptions: ImageFilterOptions
-  ) {
-    try {
-      const filterClause = getFilterClauseExport(filterOptions);
-      const getImagesQuery = toOrdinal(`
-            SELECT * FROM public."Images" JOIN public."Users" ON "Images"."uploadedBy" = "Users".username
-                WHERE ${filterClause.subquery}
-                ${getOrderByClauseExport(filterOptions.sortOption)}
-                OFFSET ? LIMIT ?;
-        `);
-      const imageResults = await databaseConnection.any(getImagesQuery, [
-        ...filterClause.parameters,
-        startFrom,
-        itemCount,
-      ]);
-      if (imageResults.length === 0) {
-        return [];
-      }
-
-      const images: UploadedImage[] = [];
-      for (const item of imageResults) {
-        const ofUser = User.parseFromJson(item);
-        images.push(
-          new UploadedImage(
-            item.imageId,
-            item.imageUrl,
-            item.thumbnailUrl,
-            [],
-            ofUser,
-            new Date(+item.uploadedDate),
-            item.status as ImageStatus,
-            item.originalFilename,
-            item.description
-          )
-        );
-      }
-      return images;
-    } catch (e) {
-      throw new Error(
-        `[getImages()] Error happened while reading from database: ${e}`
-      );
-    }
   }
 }
 
