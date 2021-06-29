@@ -411,23 +411,23 @@ export class BackendService {
     );
   }
 
-  public requestExport(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      this.http
-        .post('/api/request-export', {})
-        .toPromise()
-        .then(
-          () => {
-            resolve();
-          },
-          (error) => {
-            reject(error.error.error);
-          }
-        );
-    });
-  }
+  // public requestExport(): Promise<void> {
+  //   return new Promise<void>((resolve, reject) => {
+  //     this.http
+  //       .post('/api/request-export', {})
+  //       .toPromise()
+  //       .then(
+  //         () => {
+  //           resolve();
+  //         },
+  //         (error) => {
+  //           reject(error.error.error);
+  //         }
+  //       );
+  //   });
+  // }
 
-  public downloadExport(): void {
-    window.open('/api/download-export', 'blank');
-  }
+  // public downloadExport(): void {
+  //   window.open('/api/download-export', 'blank');
+  // }
 }
