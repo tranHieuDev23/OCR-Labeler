@@ -36,7 +36,7 @@ exportRouter.post('/get-exportable-images', async (request, response) => {
 
   let pageId: number = startFrom / itemCount + 1;
   try {
-    const imagesCount = await imageDao.getImagesCountExport(filterOptions);
+    const imagesCount = await imageDao.getImagesCount(filterOptions);
     if (imagesCount <= startFrom) {
       console.log(
         `[/get-exportable-images] User ${user.username} is trying to access more image than allowed: ` +
@@ -45,7 +45,7 @@ exportRouter.post('/get-exportable-images', async (request, response) => {
       startFrom = 0;
       pageId = 1;
     }
-    const images = await imageDao.getImagesExport(
+    const images = await imageDao.getImages(
       startFrom,
       itemCount,
       filterOptions

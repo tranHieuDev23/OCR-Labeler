@@ -108,7 +108,7 @@ class ImageDao {
     return new ImageDao();
   }
 
-  public async getImagesCountExport(
+  public async getImagesCount(
     filterOptions: ImageFilterOptions
   ): Promise<number> {
     try {
@@ -127,85 +127,7 @@ class ImageDao {
     }
   }
 
-  public getImagesCount(
-    filteredStatuses: ImageStatus[],
-    filteredUsers: string[]
-  ): Promise<number> {
-    return new Promise<number>((resolve, reject) => {
-      databaseConnection
-        .one(
-          `
-                    SELECT COUNT(*) FROM public."Images"
-                        WHERE ${getFilterClause(
-                          filteredStatuses,
-                          filteredUsers
-                        )};
-                `
-        )
-        .then(
-          (result) => {
-            resolve(+result.count);
-          },
-          (reason) => {
-            reject(
-              `[getImagesCount()] Error happened while writing into database: ${reason}`
-            );
-          }
-        );
-    });
-  }
-
-  public getImages(
-    startFrom: number,
-    itemCount: number,
-    sortOption: ImageComparationOption,
-    filteredStatuses: ImageStatus[],
-    filteredUsers: string[]
-  ): Promise<UploadedImage[]> {
-    return new Promise<UploadedImage[]>((resolve, reject) => {
-      databaseConnection
-        .any(
-          `
-                    SELECT * FROM public."Images" JOIN public."Users" ON "Images"."uploadedBy" = "Users".username
-                        WHERE ${getFilterClause(
-                          filteredStatuses,
-                          filteredUsers
-                        )}
-                        ${getOrderByClause(sortOption)}
-                        OFFSET $1 LIMIT $2;
-                `,
-          [startFrom, itemCount]
-        )
-        .then(
-          (results) => {
-            const images: UploadedImage[] = [];
-            for (let item of results) {
-              const user = User.parseFromJson(item);
-              images.push(
-                new UploadedImage(
-                  item.imageId,
-                  item.imageUrl,
-                  item.thumbnailUrl,
-                  [],
-                  user,
-                  new Date(+item.uploadedDate),
-                  item.status as ImageStatus
-                )
-              );
-            }
-            resolve(images);
-          },
-          (reason) => {
-            reject(
-              `[getImages()] Error happened while writing into database: ${reason}`
-            );
-          }
-        );
-    });
-  }
-
-  //  getImagesExport
-  public async getImagesExport(
+  public async getImages(
     startFrom: number,
     itemCount: number,
     filterOptions: ImageFilterOptions

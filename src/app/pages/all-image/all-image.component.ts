@@ -1,128 +1,107 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NzContextMenuService, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
-import { NzNotificationService } from 'ng-zorro-antd/notification';
-import { ImageComparationOption } from 'src/app/models/image-compare-funcs';
-import ImageStatus, { getAllImageStatuses, getImageStatusString } from 'src/app/models/image-status';
+import {
+  NzContextMenuService,
+  NzDropdownMenuComponent,
+} from 'ng-zorro-antd/dropdown';
+import ImageStatus from 'src/app/models/image-status';
 import UploadedImage from 'src/app/models/uploaded-image';
 import { AuthService } from 'src/app/services/auth.service';
 import { BackendService } from 'src/app/services/backend.service';
-
-const DEFAULT_SORT_OPTION = ImageComparationOption.UPLOAD_LATEST_FIRST;
+import { ImageFilterOptions } from 'src/app/models/image-filter-options';
+import { NzNotificationService } from 'ng-zorro-antd/notification';
+import { ExportDatasetService } from 'src/app/services/export-dataset.service';
 const DEFAULT_IMAGES_PER_PAGE: number = 12;
 
 @Component({
   selector: 'app-all-image',
   templateUrl: './all-image.component.html',
-  styleUrls: ['./all-image.component.scss']
+  styleUrls: ['./all-image.component.scss'],
 })
 export class AllImageComponent implements OnInit {
-  @ViewChild("contextMenu") contextMenu: NzDropdownMenuComponent;
+  @ViewChild('contextMenu') contextMenu: NzDropdownMenuComponent;
 
   public currentPage: number = null;
   public imagesPerPage: number = DEFAULT_IMAGES_PER_PAGE;
   public imagesCount: number = null;
-  public uploadedImages: UploadedImage[] = [];
-  public loading: boolean = true;
-
-  public sortOptions: { label: string, value: ImageComparationOption }[] = [
-    { label: 'Upload date (Latest first)', value: ImageComparationOption.UPLOAD_LATEST_FIRST },
-    { label: 'Upload date (Oldest first)', value: ImageComparationOption.UPLOAD_OLDEST_FIRST },
-    { label: 'Status (Asc.)', value: ImageComparationOption.STATUS_ASC },
-    { label: 'Status (Desc.)', value: ImageComparationOption.STATUS_DESC },
-    { label: 'User (Asc.)', value: ImageComparationOption.USER_ASC },
-    { label: 'User (Desc.)', value: ImageComparationOption.USER_DESC }
-  ];
-  public selectedSortOption: ImageComparationOption = DEFAULT_SORT_OPTION;
-
-  public filterStatusOptions: { label: string, value: ImageStatus }[] = getAllImageStatuses().map(item => {
-    return { label: getImageStatusString(item), value: item };
-  });
-  public filteredStatuses: ImageStatus[] = [];
-
-  public filterUserOptions: { label: string, value: string }[] = [];
-  public filteredUsers: string[] = [];
-
+  public images: UploadedImage[] = [];
+  public isLoadingImage = false;
+  public filterOptions: ImageFilterOptions = null;
   public isDeleteModalVisible: boolean = false;
   private selectedImages: UploadedImage[] = [];
 
   constructor(
-    private auth: AuthService,
     private backend: BackendService,
     private router: Router,
-    private route: ActivatedRoute,
     private contextService: NzContextMenuService,
-    private notificationService: NzNotificationService
-  ) { }
-
+    private notification: NzNotificationService,
+    private exportDatasetService: ExportDatasetService
+  ) {}
   ngOnInit(): void {
-    this.auth.getAllUser().then((users) => {
-      this.filterUserOptions = users.map(item => { return { label: item.displayName, value: item.username } });
-    });
-    this.route.queryParams.subscribe((params) => {
-      const pageId: number = params['page'] || 1;
-      const sortOption: ImageComparationOption = params['sort'] as ImageComparationOption || DEFAULT_SORT_OPTION;
-      const statuses: string = params['statuses'] || '';
-      const filteredStatuses: ImageStatus[] = statuses.split(',').map(item => item.trim()).filter(item => item.length > 0).map(item => item as ImageStatus);
-      const users: string = params['users'] || '';
-      const filteredUsers: string[] = users.split(',').map(item => item.trim()).filter(item => item.length > 0);
-      const imagePerPage: number = params['pageSize'] || DEFAULT_IMAGES_PER_PAGE;
-      this.loadPage(pageId, sortOption, filteredStatuses, filteredUsers, imagePerPage);
-    });
+    const filterOptions = ImageFilterOptions.getDefaultOptions();
+    filterOptions.filteredStatuses = [ImageStatus.Processing];
+    this.loadPage(1, DEFAULT_IMAGES_PER_PAGE, filterOptions).then();
   }
 
-  refresh(): void {
-    const queryParams = {};
-    if (this.currentPage > 1) {
-      queryParams['page'] = this.currentPage;
-    }
-    if (this.selectedSortOption !== DEFAULT_SORT_OPTION) {
-      queryParams['sort'] = this.selectedSortOption;
-    }
-    if (this.filteredStatuses.length > 0) {
-      queryParams['statuses'] = this.filteredStatuses.join(',');
-    }
-    if (this.filteredUsers.length > 0) {
-      queryParams['users'] = this.filteredUsers.join(',');
-    }
-    if (this.imagesPerPage !== DEFAULT_IMAGES_PER_PAGE) {
-      queryParams['pageSize'] = this.imagesPerPage;
-    }
-    this.router.navigate(['/all-image'], { queryParams });
+  async changeFilterOptions(filterOptions: ImageFilterOptions) {
+    this.filterOptions = filterOptions;
+    await this.reloadCurrentPage();
   }
 
-  loadPage(pageId: number, sortOption: ImageComparationOption, filteredStatuses: ImageStatus[], filteredUsers: string[], imagesPerPage: number): void {
-    this.loading = true;
+  async changePage(event: number) {
+    if (event === this.currentPage) {
+      return;
+    }
+    this.currentPage = event;
+    await this.reloadCurrentPage();
+  }
+
+  async changePageSize(event: number) {
+    if (event === this.imagesPerPage) {
+      return;
+    }
+    this.imagesPerPage = event;
+    await this.reloadCurrentPage();
+  }
+
+  private async loadPage(
+    pageId: number,
+    imagesPerPage: number,
+    filterOptions: ImageFilterOptions
+  ) {
+    this.isLoadingImage = true;
     this.currentPage = pageId;
-    this.selectedSortOption = sortOption;
-    this.filteredStatuses = filteredStatuses;
-    this.filteredUsers = filteredUsers;
+    this.filterOptions = filterOptions;
     this.imagesPerPage = imagesPerPage;
-    this.backend.loadAllUserImages(
-      imagesPerPage * (pageId - 1),
-      imagesPerPage,
-      sortOption,
-      filteredStatuses,
-      filteredUsers)
-      .then((result) => {
-        this.currentPage = result.pageId;
-        this.imagesCount = result.imagesCount;
-        this.uploadedImages = result.images;
-        this.loading = false;
-      }, (reason) => {
-        this.notificationService.error('An error happened while loading page', `Reason: ${reason}`);
-        this.router.navigateByUrl('/');
-      });
+    try {
+      const result = await this.exportDatasetService.getExportableImage(
+        imagesPerPage * (pageId - 1),
+        imagesPerPage,
+        this.filterOptions
+      );
+      this.currentPage = result.pageId;
+      this.imagesCount = result.imagesCount;
+      this.images = result.images;
+      this.isLoadingImage = false;
+    } catch (error) {
+      this.notification.error(
+        'An error happened while loading page',
+        `${error}`
+      );
+      this.router.navigateByUrl('/');
+    }
+  }
+
+  private async reloadCurrentPage() {
+    await this.loadPage(
+      this.currentPage,
+      this.imagesPerPage,
+      this.filterOptions
+    );
   }
 
   onImageClicked(id: number): void {
-    this.router.navigate([`/manage-image/${this.uploadedImages[id].imageId}`], {
-      queryParams: {
-        sort: this.selectedSortOption,
-        statuses: this.filteredStatuses.join(','),
-        users: this.filteredUsers.join(',')
-      }
-    });
+    this.router.navigate([`/manage-image/${this.images[id].imageId}`]);
   }
 
   onImagesSelected(images: UploadedImage[]): void {
@@ -134,12 +113,24 @@ export class AllImageComponent implements OnInit {
   }
 
   onDeleteModalOk(): void {
-    this.backend.deleteImageList(this.selectedImages.map(item => item.imageId)).then(() => {
-      this.isDeleteModalVisible = false;
-      this.loadPage(this.currentPage, this.selectedSortOption, this.filteredStatuses, this.filteredUsers, this.imagesPerPage);
-    }, (reason) => {
-      this.notificationService.error('Failed to delete images', `Reason: ${reason}`);
-    });
+    this.backend
+      .deleteImageList(this.selectedImages.map((item) => item.imageId))
+      .then(
+        () => {
+          this.isDeleteModalVisible = false;
+          this.loadPage(
+            this.currentPage,
+            this.imagesPerPage,
+            this.filterOptions
+          );
+        },
+        (reason) => {
+          this.notification.error(
+            'Failed to delete images',
+            `Reason: ${reason}`
+          );
+        }
+      );
   }
 
   onDeleteModalCancel(): void {
@@ -152,21 +143,5 @@ export class AllImageComponent implements OnInit {
     }
     this.contextService.create(event, this.contextMenu);
     return false;
-  }
-
-  changePage(event: number): void {
-    if (event === this.currentPage) {
-      return;
-    }
-    this.currentPage = event;
-    this.refresh();
-  }
-
-  changePageSize(event: number): void {
-    if (event === this.imagesPerPage) {
-      return;
-    }
-    this.imagesPerPage = event;
-    this.refresh();
   }
 }

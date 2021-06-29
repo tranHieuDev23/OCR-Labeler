@@ -2,7 +2,7 @@
   <h1 nz-typography>All uploaded image</h1>
   <p nz-typography>Select an image to manage its text regions, or delete it</p>
 </div>
-<nz-row nzJustify="start" [nzGutter]="{ md: 8 }" style="margin-bottom: 16px">
+<!-- <nz-row nzJustify="start" [nzGutter]="{ md: 8 }" style="margin-bottom: 16px">
   <nz-col nzSpan="24" nzLg="6">
     Sort by <br />
     <nz-select
@@ -55,13 +55,16 @@
       </nz-option>
     </nz-select>
   </nz-col>
-</nz-row>
+</nz-row> -->
+
+<app-image-filter-options-selector [filterOptions]="filterOptions" (newOptions)="changeFilterOptions($event)">
+</app-image-filter-options-selector>
 
 <ng-template #tagPlaceHolder let-selectedList
   >and {{ selectedList.length }} more</ng-template
 >
 
-<app-image-grid
+<!-- <app-image-grid
   [images]="uploadedImages"
   emptyText="You haven't uploaded any image"
   (imageClicked)="onImageClicked($event)"
@@ -69,6 +72,9 @@
   [loading]="loading"
   (contextmenu)="onContextMenu($event)"
 >
+</app-image-grid> -->
+<app-image-grid [images]="images" emptyText="You haven't uploaded any image" [loading]="isLoadingImage" (contextmenu)="onContextMenu($event)" (imageClicked)="onImageClicked($event)"
+(imagesSelected)="onImagesSelected($event)">
 </app-image-grid>
 <div *ngIf="imagesCount" id="pagination">
   <nz-pagination
