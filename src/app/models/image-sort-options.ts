@@ -1,56 +1,53 @@
-export enum ImageSortOption {
-  UPLOAD_LATEST_FIRST = 'UPLOAD_LATEST_FIRST',
-  UPLOAD_OLDEST_FIRST = 'UPLOAD_OLDEST_FIRST',
-  STATUS_ASC = 'STATUS_ASC',
-  STATUS_DESC = 'STATUS_DESC',
-  USER_ASC = 'USER_ASC',
-  USER_DESC = 'USER_DESC',
-}
+import { ImageComparationOption } from './image-compare-funcs';
 
 export function getAllImageSortOptions() {
   return [
-    ImageSortOption.UPLOAD_LATEST_FIRST,
-    ImageSortOption.UPLOAD_OLDEST_FIRST,
-    ImageSortOption.STATUS_ASC,
-    ImageSortOption.STATUS_DESC,
-    ImageSortOption.USER_ASC,
-    ImageSortOption.USER_DESC,
+    ImageComparationOption.UPLOAD_LATEST_FIRST,
+    ImageComparationOption.UPLOAD_OLDEST_FIRST,
+    ImageComparationOption.STATUS_ASC,
+    ImageComparationOption.STATUS_DESC,
+    ImageComparationOption.USER_ASC,
+    ImageComparationOption.USER_DESC,
   ];
 }
 
-export function getImageSortOptionString(option: ImageSortOption): string {
+export function getImageSortOptionString(
+  option: ImageComparationOption
+): string {
   switch (option) {
-    case ImageSortOption.UPLOAD_LATEST_FIRST:
+    case ImageComparationOption.UPLOAD_LATEST_FIRST:
       return 'Upload date (Latest first)';
-    case ImageSortOption.UPLOAD_OLDEST_FIRST:
+    case ImageComparationOption.UPLOAD_OLDEST_FIRST:
       return 'Upload date (Oldest first)';
-    case ImageSortOption.STATUS_ASC:
+    case ImageComparationOption.STATUS_ASC:
       return 'Status (Asc.)';
-    case ImageSortOption.STATUS_DESC:
+    case ImageComparationOption.STATUS_DESC:
       return 'Status (Desc.)';
-    case ImageSortOption.USER_ASC:
+    case ImageComparationOption.USER_ASC:
       return 'User (Asc.)';
-    case ImageSortOption.USER_DESC:
+    case ImageComparationOption.USER_DESC:
       return 'User (Desc.)';
     default:
       return '';
   }
 }
 
-export function getOppositeOption(option: ImageSortOption): ImageSortOption {
+export function getOppositeOption(
+  option: ImageComparationOption
+): ImageComparationOption {
   switch (option) {
-    case ImageSortOption.UPLOAD_LATEST_FIRST:
-      return ImageSortOption.UPLOAD_OLDEST_FIRST;
-    case ImageSortOption.UPLOAD_OLDEST_FIRST:
-      return ImageSortOption.UPLOAD_LATEST_FIRST;
-    case ImageSortOption.STATUS_ASC:
-      return ImageSortOption.STATUS_DESC;
-    case ImageSortOption.STATUS_DESC:
-      return ImageSortOption.STATUS_ASC;
-    case ImageSortOption.USER_ASC:
-      return ImageSortOption.USER_DESC;
-    case ImageSortOption.USER_DESC:
-      return ImageSortOption.USER_ASC;
+    case ImageComparationOption.UPLOAD_LATEST_FIRST:
+      return ImageComparationOption.UPLOAD_OLDEST_FIRST;
+    case ImageComparationOption.UPLOAD_OLDEST_FIRST:
+      return ImageComparationOption.UPLOAD_LATEST_FIRST;
+    case ImageComparationOption.STATUS_ASC:
+      return ImageComparationOption.STATUS_DESC;
+    case ImageComparationOption.STATUS_DESC:
+      return ImageComparationOption.STATUS_ASC;
+    case ImageComparationOption.USER_ASC:
+      return ImageComparationOption.USER_DESC;
+    case ImageComparationOption.USER_DESC:
+      return ImageComparationOption.USER_ASC;
     default:
       return null;
   }

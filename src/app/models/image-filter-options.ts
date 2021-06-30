@@ -1,9 +1,9 @@
-import { ImageSortOption } from './image-sort-options';
+import { ImageComparationOption } from './image-compare-funcs';
 import ImageStatus from './image-status';
 
 export class ImageFilterOptions {
   constructor(
-    public sortOption: ImageSortOption,
+    public sortOption: ImageComparationOption,
     public filteredStatuses: ImageStatus[],
     public filteredUsers: string[],
     public filteredUploadTime: Date[]
@@ -11,7 +11,7 @@ export class ImageFilterOptions {
 
   public static getDefaultOptions(): ImageFilterOptions {
     return new ImageFilterOptions(
-      ImageSortOption.UPLOAD_LATEST_FIRST,
+      ImageComparationOption.UPLOAD_LATEST_FIRST,
       [],
       [],
       []
@@ -22,7 +22,8 @@ export class ImageFilterOptions {
     if (!obj) {
       return null;
     }
-    const sortOption: ImageSortOption = obj.sortOption as ImageSortOption;
+    const sortOption: ImageComparationOption =
+      obj.sortOption as ImageComparationOption;
     const filteredImageTypeIds: string[] = [];
     if (obj.filteredImageTypeIds) {
       for (const item of obj.filteredImageTypeIds) {

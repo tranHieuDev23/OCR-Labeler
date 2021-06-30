@@ -1,6 +1,4 @@
-import UploadedImage from './uploaded-image';
 import { ImageFilterOptions } from 'src/app/models/image-filter-options';
-import { ImageSortOption } from 'src/app/models/image-sort-options';
 export enum ImageComparationOption {
   UPLOAD_LATEST_FIRST = 'UPLOAD_LATEST_FIRST',
   UPLOAD_OLDEST_FIRST = 'UPLOAD_OLDEST_FIRST',
@@ -9,6 +7,7 @@ export enum ImageComparationOption {
   USER_ASC = 'USER_ASC',
   USER_DESC = 'USER_DESC',
 }
+import UploadedImage from 'src/app/models/uploaded-image';
 
 export function getOrderByClause(option: ImageComparationOption): string {
   switch (option) {
@@ -50,7 +49,6 @@ export function getOppositeOption(
   }
 }
 
-/// viết thêm , image-compare-funcs = image-dao-untils
 class ParameterizedSubquery {
   constructor(
     public readonly subquery: string = 'true',
@@ -58,7 +56,7 @@ class ParameterizedSubquery {
   ) {}
 }
 
-export function getFilterClauseExport(
+export function getFilterClause(
   filterOptions: ImageFilterOptions
 ): ParameterizedSubquery {
   const emptyFilterStatuses: boolean =
@@ -101,21 +99,59 @@ export function getFilterClauseExport(
   return new ParameterizedSubquery(subquery, parameters);
 }
 
-export function getOrderByClauseExport(option: ImageSortOption): string {
+export function getCompareWithImageClause(
+  image: UploadedImage,
+  filterOptions: ImageFilterOptions,
+  isNext: boolean
+): ParameterizedSubquery {
+  const option = isNext
+    ? filterOptions.sortOption
+    : getOppositeOption(filterOptions.sortOption);
+  let sortValue: any;
+  let sortColumn: string;
+  let comparator: string;
   switch (option) {
-    case ImageSortOption.UPLOAD_LATEST_FIRST:
-      return 'ORDER BY "Images"."uploadedDate" DESC, "Images"."imageId" DESC';
-    case ImageSortOption.UPLOAD_OLDEST_FIRST:
-      return 'ORDER BY "Images"."uploadedDate", "Images"."imageId"';
-    case ImageSortOption.STATUS_ASC:
-      return 'ORDER BY "Images".status, "Images"."imageId"';
-    case ImageSortOption.STATUS_DESC:
-      return 'ORDER BY "Images".status DESC, "Images"."imageId" DESC';
-    case ImageSortOption.USER_ASC:
-      return 'ORDER BY "Images"."uploadedBy", "Images"."imageId"';
-    case ImageSortOption.USER_DESC:
-      return 'ORDER BY "Images"."uploadedBy" DESC, "Images"."imageId" DESC';
+    case ImageComparationOption.UPLOAD_LATEST_FIRST:
+    case ImageComparationOption.UPLOAD_OLDEST_FIRST:
+      sortValue = image.uploadedDate.getTime();
+      sortColumn = '"Images"."uploadedDate"';
+      break;
+    case ImageComparationOption.STATUS_ASC:
+    case ImageComparationOption.STATUS_DESC:
+      sortValue = image.status;
+      sortColumn = '"Images"."status"';
+      break;
+    case ImageComparationOption.USER_ASC:
+    case ImageComparationOption.USER_DESC:
+      sortValue = image.uploadedBy.username;
+      sortColumn = '"Images"."uploadedBy"';
+      break;
     default:
-      return '';
+      return new ParameterizedSubquery();
   }
+  switch (option) {
+    case ImageComparationOption.UPLOAD_OLDEST_FIRST:
+    case ImageComparationOption.STATUS_ASC:
+    case ImageComparationOption.USER_ASC:
+      comparator = '<';
+      break;
+    case ImageComparationOption.UPLOAD_LATEST_FIRST:
+    case ImageComparationOption.STATUS_DESC:
+    case ImageComparationOption.USER_DESC:
+      comparator = '>';
+      break;
+  }
+  const filterClause = getFilterClause(filterOptions);
+  const subquery = `
+        WHERE (? ${comparator} ${sortColumn} OR (? = ${sortColumn} AND ? ${comparator} "Images"."imageId"))
+        AND ${filterClause.subquery}
+        ${getOrderByClause(option)}
+    `;
+  const parameters = [
+    sortValue,
+    sortValue,
+    image.imageId,
+    ...filterClause.parameters,
+  ];
+  return new ParameterizedSubquery(subquery, parameters);
 }

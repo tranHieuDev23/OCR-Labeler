@@ -1,9 +1,8 @@
 import {
-  getOppositeOption,
   getOrderByClause,
   ImageComparationOption,
-  getFilterClauseExport,
-  getOrderByClauseExport,
+  getFilterClause,
+  getCompareWithImageClause,
 } from 'src/app/models/image-compare-funcs';
 import ImageStatus, {
   getImageStatusFilterClause,
@@ -18,89 +17,6 @@ import { toOrdinal } from 'pg-parameterize';
 const userDao: UserDao = UserDao.getInstance();
 const regionDao: TextRegionDao = TextRegionDao.getInstance();
 
-function getFilterClause(
-  filteredStatuses: ImageStatus[],
-  filteredUsers: string[]
-): string {
-  const emptyFilterStatuses: boolean =
-    !filteredStatuses || filteredStatuses.length === 0;
-  const emptyFilterUsers: boolean =
-    !filteredUsers || filteredUsers.length === 0;
-  if (emptyFilterStatuses && emptyFilterUsers) {
-    return 'true';
-  }
-  const statusClause: string = emptyFilterStatuses
-    ? ''
-    : `"Images".status IN (${filteredStatuses
-        .map((item) => `'${item}'`)
-        .join(',')})`;
-  const userClause: string = emptyFilterUsers
-    ? ''
-    : `"Images"."uploadedBy" IN (${filteredUsers
-        .map((item) => `'${item}'`)
-        .join(',')})`;
-  return `${statusClause} ${
-    !emptyFilterStatuses && !emptyFilterUsers ? 'AND' : ''
-  } ${userClause}`;
-}
-
-function getCompareWithImageClause(
-  option: ImageComparationOption,
-  image: UploadedImage,
-  filteredStatuses: ImageStatus[],
-  filteredUsers: string[],
-  isNext: boolean
-): string {
-  if (isNext) {
-    option = getOppositeOption(option);
-  }
-  let bigger: string;
-  let smaller: string;
-  let idComparator: string;
-  switch (option) {
-    case ImageComparationOption.UPLOAD_LATEST_FIRST:
-      bigger = `'${image.uploadedDate.getTime()}'`;
-      smaller = `"Images"."uploadedDate"`;
-      idComparator = '<';
-      break;
-    case ImageComparationOption.UPLOAD_OLDEST_FIRST:
-      bigger = `"Images"."uploadedDate"`;
-      smaller = `'${image.uploadedDate.getTime()}'`;
-      idComparator = '>';
-      break;
-    case ImageComparationOption.STATUS_ASC:
-      bigger = `'${image.status}'`;
-      smaller = `"Images".status`;
-      idComparator = '<';
-      break;
-    case ImageComparationOption.STATUS_DESC:
-      bigger = `"Images".status`;
-      smaller = `'${image.status}'`;
-      idComparator = '>';
-      break;
-    case ImageComparationOption.USER_ASC:
-      bigger = `'${image.uploadedBy.username}'`;
-      smaller = `"Images"."uploadedBy"`;
-      idComparator = '<';
-      break;
-    case ImageComparationOption.USER_DESC:
-      bigger = `"Images"."uploadedBy"`;
-      smaller = `'${image.uploadedBy.username}'`;
-      idComparator = '>';
-      break;
-    default:
-      return '';
-  }
-  return `
-        WHERE (${bigger} > ${smaller}
-        OR (${bigger} = ${smaller} AND '${
-    image.imageId
-  }' ${idComparator} "Images"."imageId"))
-        AND ${getFilterClause(filteredStatuses, filteredUsers)}
-        ${getOrderByClause(option)}
-    `;
-}
-
 class ImageDao {
   private constructor() {}
 
@@ -112,7 +28,7 @@ class ImageDao {
     filterOptions: ImageFilterOptions
   ): Promise<number> {
     try {
-      const filterClause = getFilterClauseExport(filterOptions);
+      const filterClause = getFilterClause(filterOptions);
       const query = toOrdinal(`
                 SELECT COUNT(*) FROM public."Images"
                     WHERE ${filterClause.subquery};
@@ -133,11 +49,11 @@ class ImageDao {
     filterOptions: ImageFilterOptions
   ) {
     try {
-      const filterClause = getFilterClauseExport(filterOptions);
+      const filterClause = getFilterClause(filterOptions);
       const getImagesQuery = toOrdinal(`
               SELECT * FROM public."Images" JOIN public."Users" ON "Images"."uploadedBy" = "Users".username
                   WHERE ${filterClause.subquery}
-                  ${getOrderByClauseExport(filterOptions.sortOption)}
+                  ${getOrderByClause(filterOptions.sortOption)}
                   OFFSET ? LIMIT ?;
           `);
       const imageResults = await databaseConnection.any(getImagesQuery, [
@@ -328,23 +244,20 @@ class ImageDao {
 
   public getNeighborImage(
     image: UploadedImage,
-    sortOption: ImageComparationOption,
-    filteredStatuses: ImageStatus[],
-    filteredUsers: string[],
+    filterOptions: ImageFilterOptions,
     isNext: boolean
   ): Promise<UploadedImage> {
     return new Promise<UploadedImage>((resolve, reject) => {
+      const compareWithImageClause = getCompareWithImageClause(
+        image,
+        filterOptions,
+        isNext
+      );
       databaseConnection
         .oneOrNone(
           `
                     SELECT * FROM public."Images"
-                        ${getCompareWithImageClause(
-                          sortOption,
-                          image,
-                          filteredStatuses,
-                          filteredUsers,
-                          isNext
-                        )}
+                    ${compareWithImageClause.subquery}
                         LIMIT 1;
                 `
         )

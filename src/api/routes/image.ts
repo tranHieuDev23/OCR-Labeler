@@ -15,6 +15,7 @@ import { join } from 'path';
 import { ImageComparationOption } from 'src/app/models/image-compare-funcs';
 import { jwtMiddlewareFactory } from './jwt-middleware';
 import User from 'src/app/models/user';
+import { ImageFilterOptions } from 'src/app/models/image-filter-options';
 
 const imageRouter: Router = Router();
 
@@ -101,9 +102,9 @@ imageRouter.post(
   (request, response) => {
     const user: User = response.locals.user;
     const imageId: string = request.body.imageId;
-    const sortOption: ImageComparationOption = request.body.sortOption;
-    const filteredStatuses: ImageStatus[] = request.body.filteredStatuses;
-    const filteredUsers: string[] = request.body.filteredUsers;
+    const filterOptions: ImageFilterOptions = ImageFilterOptions.parseFromJson(
+      request.body.filterOptions
+    );
     const isNext: boolean = request.body.isNext;
     imageDao.getImage(imageId).then(
       (image) => {
@@ -118,43 +119,35 @@ imageRouter.post(
             .status(StatusCodes.UNAUTHORIZED)
             .json({ error: "Trying to access other's images" });
         }
-        imageDao
-          .getNeighborImage(
-            image,
-            sortOption,
-            filteredStatuses,
-            filteredUsers,
-            isNext
-          )
-          .then(
-            (nextImage) => {
-              if (!nextImage) {
-                return response
-                  .status(StatusCodes.BAD_REQUEST)
-                  .json({ error: 'No next image' });
-              }
-              if (
-                nextImage.uploadedBy.username !== user.username &&
-                !user.canManageAllImage
-              ) {
-                console.log(
-                  `[/get-neighbor-image] User ${user.username} is trying to access other's images!`
-                );
-                return response
-                  .status(StatusCodes.UNAUTHORIZED)
-                  .json({ error: "Trying to access other's images" });
-              }
-              return response.json(nextImage);
-            },
-            (reason) => {
+        imageDao.getNeighborImage(image, filterOptions, isNext).then(
+          (nextImage) => {
+            if (!nextImage) {
+              return response
+                .status(StatusCodes.BAD_REQUEST)
+                .json({ error: 'No next image' });
+            }
+            if (
+              nextImage.uploadedBy.username !== user.username &&
+              !user.canManageAllImage
+            ) {
               console.log(
-                `[/get-neighbor-image] Problem when retrieving image: ${reason}`
+                `[/get-neighbor-image] User ${user.username} is trying to access other's images!`
               );
               return response
-                .status(StatusCodes.INTERNAL_SERVER_ERROR)
-                .json({ error: 'Internal server error' });
+                .status(StatusCodes.UNAUTHORIZED)
+                .json({ error: "Trying to access other's images" });
             }
-          );
+            return response.json(nextImage);
+          },
+          (reason) => {
+            console.log(
+              `[/get-neighbor-image] Problem when retrieving image: ${reason}`
+            );
+            return response
+              .status(StatusCodes.INTERNAL_SERVER_ERROR)
+              .json({ error: 'Internal server error' });
+          }
+        );
       },
       (reason) => {
         console.log(

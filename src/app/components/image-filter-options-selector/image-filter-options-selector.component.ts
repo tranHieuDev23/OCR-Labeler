@@ -8,10 +8,8 @@ import ImageStatus, {
 import User from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { ImageFilterOptions } from 'src/app/models/image-filter-options';
-import {
-  getImageSortOptionString,
-  ImageSortOption,
-} from 'src/app/models/image-sort-options';
+import { getImageSortOptionString } from 'src/app/models/image-sort-options';
+import { ImageComparationOption } from 'src/app/models/image-compare-funcs';
 
 @Component({
   selector: 'app-image-filter-options-selector',
@@ -29,7 +27,7 @@ export class ImageFilterOptionsSelectorComponent implements OnInit {
 
   public filterStatusOptions: ImageStatus[] = [];
   public filterUserOptions: User[] = [];
-  public sortOptions: ImageSortOption[] = [];
+  public sortOptions: ImageComparationOption[] = [];
 
   constructor(
     private readonly router: Router,
@@ -47,16 +45,16 @@ export class ImageFilterOptionsSelectorComponent implements OnInit {
         ? await this.authService.getAllUser()
         : [];
       this.sortOptions = [
-        ImageSortOption.UPLOAD_LATEST_FIRST,
-        ImageSortOption.UPLOAD_OLDEST_FIRST,
-        ImageSortOption.STATUS_ASC,
-        ImageSortOption.STATUS_DESC,
+        ImageComparationOption.UPLOAD_LATEST_FIRST,
+        ImageComparationOption.UPLOAD_OLDEST_FIRST,
+        ImageComparationOption.STATUS_ASC,
+        ImageComparationOption.STATUS_DESC,
       ];
       if (this.canFilterUser) {
         this.sortOptions = [
           ...this.sortOptions,
-          ImageSortOption.USER_ASC,
-          ImageSortOption.USER_DESC,
+          ImageComparationOption.USER_ASC,
+          ImageComparationOption.USER_DESC,
         ];
       }
     })().then(
@@ -75,7 +73,7 @@ export class ImageFilterOptionsSelectorComponent implements OnInit {
     return getImageStatusString(status);
   }
 
-  public getSortOptionString(option: ImageSortOption): string {
+  public getSortOptionString(option: ImageComparationOption): string {
     return getImageSortOptionString(option);
   }
 

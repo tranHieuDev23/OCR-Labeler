@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ImageComparationOption } from '../models/image-compare-funcs';
+import { ImageFilterOptions } from '../models/image-filter-options';
 import ImageStatus from '../models/image-status';
 import { TextRegion, Region } from '../models/text-region';
 import UploadedImage from '../models/uploaded-image';
@@ -253,17 +254,13 @@ export class BackendService {
 
   public loadNextImage(
     imageId: string,
-    sortOption: ImageComparationOption,
-    filteredStatuses: ImageStatus[],
-    filteredUsers: string[]
+    filterOptions: ImageFilterOptions
   ): Promise<UploadedImage> {
     return new Promise<UploadedImage>((resolve, reject) => {
       this.http
         .post('/api/get-neighbor-image', {
           imageId,
-          sortOption,
-          filteredStatuses,
-          filteredUsers,
+          filterOptions,
           isNext: true,
         })
         .toPromise()
@@ -280,17 +277,13 @@ export class BackendService {
 
   public loadPrevImage(
     imageId: string,
-    sortOption: ImageComparationOption,
-    filteredStatuses: ImageStatus[],
-    filteredUsers: string[]
+    filterOptions: ImageFilterOptions
   ): Promise<UploadedImage> {
     return new Promise<UploadedImage>((resolve, reject) => {
       this.http
         .post('/api/get-neighbor-image', {
           imageId,
-          sortOption,
-          filteredStatuses,
-          filteredUsers,
+          filterOptions,
           isNext: false,
         })
         .toPromise()
@@ -410,24 +403,4 @@ export class BackendService {
       }
     );
   }
-
-  // public requestExport(): Promise<void> {
-  //   return new Promise<void>((resolve, reject) => {
-  //     this.http
-  //       .post('/api/request-export', {})
-  //       .toPromise()
-  //       .then(
-  //         () => {
-  //           resolve();
-  //         },
-  //         (error) => {
-  //           reject(error.error.error);
-  //         }
-  //       );
-  //   });
-  // }
-
-  // public downloadExport(): void {
-  //   window.open('/api/download-export', 'blank');
-  // }
 }

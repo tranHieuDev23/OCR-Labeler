@@ -16,7 +16,7 @@ import { TextRegion, Region, Coordinate } from 'src/app/models/text-region';
 import UploadedImage from 'src/app/models/uploaded-image';
 import { BackendService } from 'src/app/services/backend.service';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
-
+import { ImageFilterOptions } from 'src/app/models/image-filter-options';
 @Component({
   selector: 'app-manage-image',
   templateUrl: './manage-image.component.html',
@@ -50,6 +50,7 @@ export class ManageImageComponent implements OnInit {
   private filteredStatuses: ImageStatus[];
   private filteredUsers: string[];
   private keyPressed: boolean = false;
+  private filterOptions: ImageFilterOptions;
 
   constructor(
     private backend: BackendService,
@@ -68,15 +69,6 @@ export class ManageImageComponent implements OnInit {
       this.route.params.subscribe((params) => {
         this.initialize();
         this.imageId = params['id'];
-        this.imageComparator =
-          (queryParams['sort'] as ImageComparationOption) ||
-          ImageComparationOption.UPLOAD_LATEST_FIRST;
-        const statuses: string = queryParams['statuses'] || '';
-        this.filteredStatuses = statuses
-          .split(',')
-          .map((item) => item.trim())
-          .filter((item) => item.length > 0)
-          .map((item) => item as ImageStatus);
         const users: string = queryParams['users'] || '';
         this.filteredUsers = users
           .split(',')
@@ -301,23 +293,13 @@ export class ManageImageComponent implements OnInit {
 
   nextImage(): void {
     this.loadOtherImage(
-      this.backend.loadNextImage(
-        this.imageId,
-        this.imageComparator,
-        this.filteredStatuses,
-        this.filteredUsers
-      )
+      this.backend.loadNextImage(this.imageId, this.filterOptions)
     );
   }
 
   prevImage(): void {
     this.loadOtherImage(
-      this.backend.loadPrevImage(
-        this.imageId,
-        this.imageComparator,
-        this.filteredStatuses,
-        this.filteredUsers
-      )
+      this.backend.loadPrevImage(this.imageId, this.filterOptions)
     );
   }
 }
