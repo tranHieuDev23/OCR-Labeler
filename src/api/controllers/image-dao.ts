@@ -89,62 +89,54 @@ class ImageDao {
   }
 
   public getUserImagesCount(
-    user: User,
-    filteredStatuses: ImageStatus[]
+    filterOptions: ImageFilterOptions
   ): Promise<number> {
     return new Promise<number>((resolve, reject) => {
-      databaseConnection
-        .one(
-          `
-                    SELECT COUNT(*) FROM public."Images"
-                        WHERE "Images"."uploadedBy" = $1
-                        ${getImageStatusFilterClause(filteredStatuses)};
-                `,
-          [user.username]
-        )
-        .then(
-          (result) => {
-            resolve(+result.count);
-          },
-          (reason) => {
-            reject(
-              `[getUserImagesCount()] Error happened while writing into database: ${reason}`
-            );
-          }
-        );
+      const filterClause = getFilterClause(filterOptions);
+      const query = toOrdinal(`
+      SELECT COUNT(*) FROM public."Images"
+          WHERE ${filterClause.subquery};
+      `);
+      databaseConnection.one(query, filterClause.parameters).then(
+        (result) => {
+          resolve(+result.count);
+        },
+        (reason) => {
+          reject(
+            `[getUserImagesCount()] Error happened while writing into database: ${reason}`
+          );
+        }
+      );
     });
   }
 
   public getUserImages(
-    user: User,
     startFrom: number,
     itemCount: number,
-    sortOption: ImageComparationOption,
-    filteredStatuses: ImageStatus[]
+    filterOptions: ImageFilterOptions
   ): Promise<UploadedImage[]> {
     return new Promise<UploadedImage[]>((resolve, reject) => {
+      const filterClause = getFilterClause(filterOptions);
+      const getImagesQuery = toOrdinal(`
+                SELECT * FROM public."Images" JOIN public."Users" ON "Images"."uploadedBy" = "Users".username
+                    WHERE ${filterClause.subquery}
+                    ${getOrderByClause(filterOptions.sortOption)}
+                    OFFSET ? LIMIT ?;
+            `);
       databaseConnection
-        .any(
-          `
-                    SELECT * FROM public."Images"
-                        WHERE "Images"."uploadedBy" = $1
-                        ${getImageStatusFilterClause(filteredStatuses)}
-                        ${getOrderByClause(sortOption)}
-                        OFFSET $2 LIMIT $3;
-                `,
-          [user.username, startFrom, itemCount]
-        )
+        .any(getImagesQuery, [...filterClause.parameters, startFrom, itemCount])
         .then(
           (results) => {
             const images: UploadedImage[] = [];
-            for (let item of results) {
+            for (const item of results) {
+              const ofUser = User.parseFromJson(item);
               images.push(
                 new UploadedImage(
                   item.imageId,
                   item.imageUrl,
                   item.thumbnailUrl,
                   [],
-                  user,
+                  ofUser,
                   new Date(+item.uploadedDate),
                   item.status as ImageStatus
                 )
@@ -253,14 +245,13 @@ class ImageDao {
         filterOptions,
         isNext
       );
+      const query = toOrdinal(`
+      SELECT * FROM public."Images"
+          ${compareWithImageClause.subquery}
+          LIMIT 1;
+      `);
       databaseConnection
-        .oneOrNone(
-          `
-                    SELECT * FROM public."Images"
-                    ${compareWithImageClause.subquery}
-                        LIMIT 1;
-                `
-        )
+        .oneOrNone(query, [...compareWithImageClause.parameters])
         .then(
           (image) => {
             if (!image) {

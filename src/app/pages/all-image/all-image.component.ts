@@ -11,6 +11,7 @@ import { BackendService } from 'src/app/services/backend.service';
 import { ImageFilterOptions } from 'src/app/models/image-filter-options';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { ExportDatasetService } from 'src/app/services/export-dataset.service';
+import { JsonCompressService } from 'src/app/services/json-compress.service';
 const DEFAULT_IMAGES_PER_PAGE: number = 12;
 
 @Component({
@@ -35,7 +36,8 @@ export class AllImageComponent implements OnInit {
     private router: Router,
     private contextService: NzContextMenuService,
     private notification: NzNotificationService,
-    private exportDatasetService: ExportDatasetService
+    private exportDatasetService: ExportDatasetService,
+    private readonly jsonCompress: JsonCompressService
   ) {}
   ngOnInit(): void {
     const filterOptions = ImageFilterOptions.getDefaultOptions();
@@ -101,7 +103,12 @@ export class AllImageComponent implements OnInit {
   }
 
   onImageClicked(id: number): void {
-    this.router.navigate([`/manage-image/${this.images[id].imageId}`]);
+    console.log(this.filterOptions, 'filterOptions');
+    this.router.navigate([`/manage-image/${this.images[id].imageId}`], {
+      queryParams: {
+        filter: this.jsonCompress.compress(this.filterOptions),
+      },
+    });
   }
 
   onImagesSelected(images: UploadedImage[]): void {

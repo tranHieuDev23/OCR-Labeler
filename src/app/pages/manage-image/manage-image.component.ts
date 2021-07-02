@@ -17,6 +17,10 @@ import UploadedImage from 'src/app/models/uploaded-image';
 import { BackendService } from 'src/app/services/backend.service';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
 import { ImageFilterOptions } from 'src/app/models/image-filter-options';
+import { AuthService } from 'src/app/services/auth.service';
+import { JsonCompressService } from 'src/app/services/json-compress.service';
+import { PlatformService } from 'src/app/services/platform.service';
+import User from 'src/app/models/user';
 @Component({
   selector: 'app-manage-image',
   templateUrl: './manage-image.component.html',
@@ -46,37 +50,57 @@ export class ManageImageComponent implements OnInit {
   public contextMenuShowAdd: boolean = false;
 
   private imageId: string;
-  private imageComparator: ImageComparationOption;
-  private filteredStatuses: ImageStatus[];
-  private filteredUsers: string[];
   private keyPressed: boolean = false;
   private filterOptions: ImageFilterOptions;
 
   constructor(
+    private readonly auth: AuthService,
     private backend: BackendService,
     private route: ActivatedRoute,
     private location: Location,
     private notification: NzNotificationService,
     private thumbnail: ThumbnailService,
     private router: Router,
-    private contextService: NzContextMenuService
+    private contextService: NzContextMenuService,
+    private readonly jsonCompress: JsonCompressService,
+    private readonly platformService: PlatformService
   ) {
     this.initialize();
   }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe((queryParams) => {
-      this.route.params.subscribe((params) => {
-        this.initialize();
-        this.imageId = params['id'];
-        const users: string = queryParams['users'] || '';
-        this.filteredUsers = users
-          .split(',')
-          .map((item) => item.trim())
-          .filter((item) => item.length > 0);
-        this.fileChangeEvent(this.imageId);
+    (async () => {
+      const user = await this.auth.getCurrentUser();
+      this.route.queryParams.subscribe((queryParams) => {
+        this.route.params.subscribe((params) => {
+          this.imageId = params.id;
+          const filter: string = queryParams.filter;
+          this.filterOptions = filter
+            ? ImageFilterOptions.parseFromJson(
+                this.jsonCompress.decompress(filter)
+              )
+            : this.getDefaultFilterOptions(user);
+          this.fileChangeEvent(this.imageId);
+        });
       });
-    });
+    })().then(
+      () => {},
+      (e) => {
+        this.notification.error('Cannot initialize page', e);
+        if (this.platformService.isBrowser()) {
+          this.location.back();
+        }
+      }
+    );
+  }
+
+  private getDefaultFilterOptions(user: User): ImageFilterOptions {
+    return new ImageFilterOptions(
+      ImageComparationOption.UPLOAD_LATEST_FIRST,
+      [],
+      [user.username],
+      []
+    );
   }
 
   initialize(): void {
@@ -106,8 +130,6 @@ export class ManageImageComponent implements OnInit {
         ).then(
           (regionImages) => {
             this.croppedRegions = result.textRegions;
-            console.log(this.croppedRegions, 'this.croppedRegions');
-
             this.croppedRegionImages = regionImages;
             this.croppedRegionRegions = this.croppedRegions.map(
               (item) => item.region.vertices
@@ -276,9 +298,7 @@ export class ManageImageComponent implements OnInit {
         window.scrollTo(0, 0);
         this.router.navigate([`/manage-image/${nextImage.imageId}`], {
           queryParams: {
-            sort: this.imageComparator,
-            statuses: this.filteredStatuses.join(','),
-            users: this.filteredUsers.join(','),
+            filter: this.jsonCompress.compress(this.filterOptions.getJson()),
           },
         });
       },

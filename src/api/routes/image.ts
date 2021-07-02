@@ -35,10 +35,12 @@ imageRouter.post(
     const user: User = response.locals.user;
     let startFrom: number = request.body.startFrom;
     const itemCount: number = request.body.itemCount;
-    const sortOption: ImageComparationOption = request.body.sortOption;
-    const filteredStatuses: ImageStatus[] = request.body.filteredStatuses;
+    const filterOptions: ImageFilterOptions = ImageFilterOptions.parseFromJson(
+      request.body.filterOptions
+    );
+    filterOptions.filteredUsers = [user.username];
     let pageId: number = startFrom / itemCount + 1;
-    imageDao.getUserImagesCount(user, filteredStatuses).then((imagesCount) => {
+    imageDao.getUserImagesCount(filterOptions).then((imagesCount) => {
       if (imagesCount <= startFrom) {
         console.log(
           `[/get-user-images] User ${user.username} is trying to access more image than allowed: startFrom=${startFrom}, imagesCount=${imagesCount}. Reset to page one.`
@@ -46,25 +48,23 @@ imageRouter.post(
         startFrom = 0;
         pageId = 1;
       }
-      imageDao
-        .getUserImages(user, startFrom, itemCount, sortOption, filteredStatuses)
-        .then(
-          (images) => {
-            return response.json({
-              imagesCount,
-              images,
-              pageId,
-            });
-          },
-          (reason) => {
-            console.log(
-              `[/get-user-images] Problem when retrieving image: ${reason}`
-            );
-            return response
-              .status(StatusCodes.INTERNAL_SERVER_ERROR)
-              .json({ error: 'Internal server error' });
-          }
-        );
+      imageDao.getUserImages(startFrom, itemCount, filterOptions).then(
+        (images) => {
+          return response.json({
+            imagesCount,
+            images,
+            pageId,
+          });
+        },
+        (reason) => {
+          console.log(
+            `[/get-user-images] Problem when retrieving image: ${reason}`
+          );
+          return response
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ error: 'Internal server error' });
+        }
+      );
     });
   }
 );
