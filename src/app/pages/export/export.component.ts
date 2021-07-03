@@ -4,9 +4,7 @@ import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { ExportProgress } from 'src/app/models/export-progress';
 import { ExportResult } from 'src/app/models/export-result';
 import { ImageFilterOptions } from 'src/app/models/image-filter-options';
-import ImageStatus from 'src/app/models/image-status';
 import UploadedImage from 'src/app/models/uploaded-image';
-// import { BackendService } from 'src/app/services/backend.service';
 import { ExportDatasetService } from 'src/app/services/export-dataset.service';
 
 const DEFAULT_IMAGES_PER_PAGE = 12;

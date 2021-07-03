@@ -8,7 +8,6 @@ import UploadedImage from 'src/app/models/uploaded-image';
 import { BackendService } from 'src/app/services/backend.service';
 import { ImageFilterOptions } from 'src/app/models/image-filter-options';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
-import { ExportDatasetService } from 'src/app/services/export-dataset.service';
 import { JsonCompressService } from 'src/app/services/json-compress.service';
 const DEFAULT_IMAGES_PER_PAGE: number = 12;
 
@@ -34,7 +33,6 @@ export class AllImageComponent implements OnInit {
     private router: Router,
     private contextService: NzContextMenuService,
     private notification: NzNotificationService,
-    private exportDatasetService: ExportDatasetService,
     private readonly jsonCompress: JsonCompressService
   ) {}
   ngOnInit(): void {

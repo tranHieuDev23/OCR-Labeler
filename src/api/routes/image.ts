@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import ImageStatus from 'src/app/models/image-status';
 import LabelStatus from 'src/app/models/label-status';
@@ -12,7 +12,6 @@ import ImageDao from '../controllers/image-dao';
 import TextRegionDao from '../controllers/region-dao';
 import * as fs from 'fs';
 import { join } from 'path';
-import { ImageComparationOption } from 'src/app/models/image-compare-funcs';
 import { jwtMiddlewareFactory } from './jwt-middleware';
 import User from 'src/app/models/user';
 import { ImageFilterOptions } from 'src/app/models/image-filter-options';
