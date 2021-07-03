@@ -168,11 +168,11 @@ export class ManageImageComponent implements OnInit {
         return;
       case 'ArrowLeft':
         event.preventDefault();
-        this.nextImage();
+        this.prevImage();
         return;
       case 'ArrowRight':
         event.preventDefault();
-        this.prevImage();
+        this.nextImage();
         return;
     }
   }

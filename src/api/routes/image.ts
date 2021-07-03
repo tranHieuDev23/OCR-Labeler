@@ -40,7 +40,7 @@ imageRouter.post(
     );
     filterOptions.filteredUsers = [user.username];
     let pageId: number = startFrom / itemCount + 1;
-    imageDao.getUserImagesCount(filterOptions).then((imagesCount) => {
+    imageDao.getImagesCount(filterOptions).then((imagesCount) => {
       if (imagesCount <= startFrom) {
         console.log(
           `[/get-user-images] User ${user.username} is trying to access more image than allowed: startFrom=${startFrom}, imagesCount=${imagesCount}. Reset to page one.`
@@ -59,6 +59,46 @@ imageRouter.post(
         (reason) => {
           console.log(
             `[/get-user-images] Problem when retrieving image: ${reason}`
+          );
+          return response
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ error: 'Internal server error' });
+        }
+      );
+    });
+  }
+);
+
+imageRouter.post(
+  '/get-all-user-images',
+  uploadJwtMiddleware,
+  (request, response) => {
+    const user: User = response.locals.user;
+    let startFrom: number = request.body.startFrom;
+    const itemCount: number = request.body.itemCount;
+    const filterOptions: ImageFilterOptions = ImageFilterOptions.parseFromJson(
+      request.body.filterOptions
+    );
+    let pageId: number = startFrom / itemCount + 1;
+    imageDao.getImagesCount(filterOptions).then((imagesCount) => {
+      if (imagesCount <= startFrom) {
+        console.log(
+          `[/get-all-user-images] User ${user.username} is trying to access more image than allowed: startFrom=${startFrom}, imagesCount=${imagesCount}. Reset to page one.`
+        );
+        startFrom = 0;
+        pageId = 1;
+      }
+      imageDao.getUserImages(startFrom, itemCount, filterOptions).then(
+        (images) => {
+          return response.json({
+            imagesCount,
+            images,
+            pageId,
+          });
+        },
+        (reason) => {
+          console.log(
+            `[/get-all-user-images] Problem when retrieving image: ${reason}`
           );
           return response
             .status(StatusCodes.INTERNAL_SERVER_ERROR)

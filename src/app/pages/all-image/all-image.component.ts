@@ -1,12 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   NzContextMenuService,
   NzDropdownMenuComponent,
 } from 'ng-zorro-antd/dropdown';
-import ImageStatus from 'src/app/models/image-status';
 import UploadedImage from 'src/app/models/uploaded-image';
-import { AuthService } from 'src/app/services/auth.service';
 import { BackendService } from 'src/app/services/backend.service';
 import { ImageFilterOptions } from 'src/app/models/image-filter-options';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
@@ -41,7 +39,6 @@ export class AllImageComponent implements OnInit {
   ) {}
   ngOnInit(): void {
     const filterOptions = ImageFilterOptions.getDefaultOptions();
-    filterOptions.filteredStatuses = [ImageStatus.Processing];
     this.loadPage(1, DEFAULT_IMAGES_PER_PAGE, filterOptions).then();
   }
 
@@ -76,7 +73,7 @@ export class AllImageComponent implements OnInit {
     this.filterOptions = filterOptions;
     this.imagesPerPage = imagesPerPage;
     try {
-      const result = await this.exportDatasetService.getExportableImage(
+      const result = await this.backend.loadAllUserImages(
         imagesPerPage * (pageId - 1),
         imagesPerPage,
         this.filterOptions

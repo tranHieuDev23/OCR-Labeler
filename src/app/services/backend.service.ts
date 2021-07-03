@@ -199,9 +199,7 @@ export class BackendService {
   public loadAllUserImages(
     startFrom: number,
     itemCount: number,
-    sortOption: ImageComparationOption,
-    filteredStatuses: ImageStatus[],
-    filteredUsers: string[]
+    filterOptions: ImageFilterOptions
   ): Promise<{ imagesCount: number; images: UploadedImage[]; pageId: number }> {
     return new Promise<{
       imagesCount: number;
@@ -212,9 +210,7 @@ export class BackendService {
         .post<any>('/api/get-all-user-images', {
           startFrom,
           itemCount,
-          sortOption,
-          filteredStatuses,
-          filteredUsers,
+          filterOptions: filterOptions.getJson(),
         })
         .toPromise()
         .then(

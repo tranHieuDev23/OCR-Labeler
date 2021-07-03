@@ -110,6 +110,19 @@ const FIX_SUGGESTION_VERSION_DATABASE_QUERY = `
         AND "Images".status = '${ImageStatus.Published}';
 `;
 
+const REVAMP_EXPORT_VERSION_DATABASE_QUERY = `
+    CREATE TABLE IF NOT EXISTS public."ExportResults" (
+        "exportId" text PRIMARY KEY,
+        "requestTime" bigint NOT NULL,
+        "validTo" bigint NOT NULL,
+        "filterOptions" text NOT NULL,
+        "imageCount" int NOT NULL,
+        "exportFilename" text NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS "EXPORT_ID_INDEX" ON public."ExportResults" USING hash ("exportId");
+    CREATE UNIQUE INDEX IF NOT EXISTS "EXPORT_VALID_TO_INDEX" ON public."ExportResults" USING btree ("validTo");
+`;
+
 export {
   AUTH_COOKIE_NAME,
   BASE_VERSION_DATABASE_QUERY,
@@ -117,4 +130,5 @@ export {
   SUGGESTION_VERSION_DATABASE_QUERY,
   FIX_SUGGESTION_VERSION_DATABASE_QUERY,
   REVIEW_VERSION_DATABASE_QUERY,
+  REVAMP_EXPORT_VERSION_DATABASE_QUERY,
 };

@@ -88,28 +88,6 @@ class ImageDao {
     }
   }
 
-  public getUserImagesCount(
-    filterOptions: ImageFilterOptions
-  ): Promise<number> {
-    return new Promise<number>((resolve, reject) => {
-      const filterClause = getFilterClause(filterOptions);
-      const query = toOrdinal(`
-      SELECT COUNT(*) FROM public."Images"
-          WHERE ${filterClause.subquery};
-      `);
-      databaseConnection.one(query, filterClause.parameters).then(
-        (result) => {
-          resolve(+result.count);
-        },
-        (reason) => {
-          reject(
-            `[getUserImagesCount()] Error happened while writing into database: ${reason}`
-          );
-        }
-      );
-    });
-  }
-
   public getUserImages(
     startFrom: number,
     itemCount: number,
