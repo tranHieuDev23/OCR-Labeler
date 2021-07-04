@@ -11,7 +11,7 @@ class UploadedImage {
     public readonly uploadedBy: User,
     public readonly uploadedDate: Date,
     public readonly status: ImageStatus
-  ) { }
+  ) {}
 
   static parseFromJson(obj: any): UploadedImage {
     const imageId: string = obj.imageId;
@@ -23,7 +23,9 @@ class UploadedImage {
         textRegions.push(TextRegion.parseFromJson(item));
       }
     }
-    const uploadedBy: User = obj.uploadedBy ? User.parseFromJson(obj.uploadedBy) : null;
+    const uploadedBy: User = obj.uploadedBy
+      ? User.parseFromJson(obj.uploadedBy)
+      : null;
     const uploadedDate: Date = new Date(obj.uploadedDate);
     const status: ImageStatus = obj.status as ImageStatus;
     return new UploadedImage(

@@ -1,24 +1,79 @@
-<h1 nz-typography>Export dataset</h1>
-<div *ngIf="exported">
-    <div *ngIf="state == 'EXPORTING'">
-        <p nz-typography>Dataset export request is being handled. You can still download the latest version of the
-            dataset.</p>
-    </div>
-    <div *ngIf="state == 'READY'">
-        <p nz-typography>Dataset exported.</p>
-    </div>
-    <p nz-typography>The latest version was exported at {{ lastExported }}</p>
+<div class="carded-content">
+  <h1 nz-typography>Export dataset</h1>
+  <nz-tabset>
+    <nz-tab nzTitle="Request export">
+      <app-image-filter-options-selector [filterOptions]="filterOptions" (newOptions)="changeFilterOptions($event)">
+      </app-image-filter-options-selector>
+      <br />
+      <button nz-button class="action-button" [disabled]="!images || images.length === 0" (click)="requestExport()">
+        <i nz-icon nzType="export" nzTheme="outline"></i> Request export
+      </button>
+      <app-image-grid [images]="images" emptyText="No image to export" [loading]="isLoadingImage">
+      </app-image-grid>
+      <div *ngIf="imagesCount" class="pagination">
+        <nz-pagination [nzPageIndex]="currentPage" [nzPageSize]="imagesPerPage" [nzTotal]="imagesCount"
+          nzShowQuickJumper nzShowSizeChanger [nzPageSizeOptions]="[12, 24, 60, 120, 240]"
+          (nzPageIndexChange)="changePage($event)" (nzPageSizeChange)="changePageSize($event)">
+        </nz-pagination>
+      </div>
+    </nz-tab>
+
+    <nz-tab nzTitle="Download dataset" (nzSelect)="onExportStatusTabsSelected()">
+      <button nz-button class="action-button" [disabled]="isLoadingStatus" (click)="refreshExportStatues()">
+        <i nz-icon nzType="redo" nzTheme="outline"></i> Refresh
+      </button>
+      <nz-list *ngIf="exportResults" nzBordered nzItemLayout="horizontal" [nzLoading]="isLoadingStatus">
+        <nz-list-empty *ngIf="exportResults.length === 0" nzNoResult="Nothing was exported">
+        </nz-list-empty>
+        <nz-list-item *ngFor="let item of exportResults">
+          <nz-list-item-meta>
+            <nz-list-item-meta-title>
+              {{ item.exportFilename }}
+            </nz-list-item-meta-title>
+            <nz-list-item-meta-description>
+              {{ item.imageCount }} images <br />
+              Requested time: {{ item.requestTime | date:'short' }}<br />
+              Available until: {{ item.validTo | date:'short' }}
+            </nz-list-item-meta-description>
+          </nz-list-item-meta>
+          <ul nz-list-item-actions>
+            <nz-list-item-action>
+              <a (click)="download(item.exportId)">
+                <i nz-icon nzType="download" nzTheme="outline"></i>
+                {{ 'Download' | emptyStringOnMobile }}
+              </a>
+            </nz-list-item-action>
+            <nz-list-item-action>
+              <a nz-typography nzType="danger" (click)="delete(item.exportId)">
+                <i nz-icon nzType="delete" nzTheme="outline"></i>
+                {{ 'Delete' | emptyStringOnMobile }}
+              </a>
+            </nz-list-item-action>
+          </ul>
+        </nz-list-item>
+      </nz-list>
+    </nz-tab>
+
+    <nz-tab nzTitle="Requests in queue" (nzSelect)="onExportStatusTabsSelected()">
+      <button nz-button class="action-button" [disabled]="isLoadingStatus" (click)="refreshExportStatues()">
+        <i nz-icon nzType="redo" nzTheme="outline"></i> Refresh
+      </button>
+      <nz-list *ngIf="exportProgresses" nzBordered nzItemLayout="vertical" [nzLoading]="isLoadingStatus">
+        <nz-list-empty *ngIf="exportProgresses.length === 0" nzNoResult="Nothing is exporting">
+        </nz-list-empty>
+        <nz-list-item *ngFor="let item of exportProgresses">
+          <nz-list-item-meta>
+            <nz-list-item-meta-title>
+              {{ item.exportFilename }}
+            </nz-list-item-meta-title>
+            <nz-list-item-meta-description>
+              Requested time: {{ item.requestTime | date:'short' }}<br />
+              Status: {{ item.status }} <br />
+              Completion: {{ item.percentage | percent }}
+            </nz-list-item-meta-description>
+          </nz-list-item-meta>
+        </nz-list-item>
+      </nz-list>
+    </nz-tab>
+  </nz-tabset>
 </div>
-<div *ngIf="!exported">
-    <div *ngIf="state == 'EXPORTING'">
-        <p nz-typography>Dataset export request is being handled.</p>
-    </div>
-    <div *ngIf="state == 'READY'">
-        <p nz-typography>No dataset exported. Start by making an export request.</p>
-    </div>
-</div>
-<button nz-button nzSize="large" nzType="primary" (click)="requestExport()" [disabled]="state == 'EXPORTING'"
-    style="margin-right: 4px;"><i nz-icon nzType="export" nzTheme="outline"></i>Request export
-</button>
-<button nz-button nzSize="large" nzType="primary" (click)="download()" [disabled]="!exported"><i nz-icon
-        nzType="download" nzTheme="outline"></i>Download</button>

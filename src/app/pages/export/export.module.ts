@@ -6,7 +6,12 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzNotificationModule } from 'ng-zorro-antd/notification';
 import { ExportRoutingModule } from './export-routing.module';
-
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
+import { ImageFilterOptionsSelectorModule } from 'src/app/components/image-filter-options-selector/image-filter-options-selector.module';
+import { ImageGridModule } from 'src/app/components/image-grid/image-grid.module';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
+import { NzListModule } from 'ng-zorro-antd/list';
+import { EmptyStringOnMobileModule } from 'src/app/pipes/empty-string-on-mobile/empty-string-on-mobile.module';
 
 
 @NgModule({
@@ -17,10 +22,14 @@ import { ExportRoutingModule } from './export-routing.module';
     NzButtonModule,
     NzIconModule,
     NzNotificationModule,
-    ExportRoutingModule
+    NzTabsModule,
+    NzPaginationModule,
+    NzListModule,
+    ImageFilterOptionsSelectorModule,
+    ImageGridModule,
+    ExportRoutingModule,
+    EmptyStringOnMobileModule
   ],
-  exports: [
-    ExportComponent
-  ]
+  exports: [ExportComponent],
 })
-export class ExportModule { }
+export class ExportModule {}

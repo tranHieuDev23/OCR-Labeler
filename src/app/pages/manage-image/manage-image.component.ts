@@ -1,27 +1,36 @@
 import { Location } from '@angular/common';
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NzContextMenuService, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
+import {
+  NzContextMenuService,
+  NzDropdownMenuComponent,
+} from 'ng-zorro-antd/dropdown';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import {
   RegionClickedEvent,
-  RegionSelectorComponent
+  RegionSelectorComponent,
 } from 'src/app/components/region-selector/region-selector.component';
-import { ImageComparationOption } from 'src/app/models/image-compare-funcs';
+import { ImageComparationOption } from 'src/app/models/image-dao-util';
 import ImageStatus, { isPublishedStatus } from 'src/app/models/image-status';
 import { TextRegion, Region, Coordinate } from 'src/app/models/text-region';
 import UploadedImage from 'src/app/models/uploaded-image';
 import { BackendService } from 'src/app/services/backend.service';
 import { ThumbnailService } from 'src/app/services/thumbnail.service';
-
+import { ImageFilterOptions } from 'src/app/models/image-filter-options';
+import { AuthService } from 'src/app/services/auth.service';
+import { JsonCompressService } from 'src/app/services/json-compress.service';
+import { PlatformService } from 'src/app/services/platform.service';
+import User from 'src/app/models/user';
 @Component({
   selector: 'app-manage-image',
   templateUrl: './manage-image.component.html',
   styleUrls: ['./manage-image.component.scss'],
 })
 export class ManageImageComponent implements OnInit {
-  @ViewChild(RegionSelectorComponent, { static: false }) regionSelector: RegionSelectorComponent;
-  @ViewChild('regionContextMenu', { static: false }) regionContextMenu: NzDropdownMenuComponent;
+  @ViewChild(RegionSelectorComponent, { static: false })
+  regionSelector: RegionSelectorComponent;
+  @ViewChild('regionContextMenu', { static: false })
+  regionContextMenu: NzDropdownMenuComponent;
 
   public imageUrl: string;
   public croppedRegions: TextRegion[];
@@ -41,38 +50,57 @@ export class ManageImageComponent implements OnInit {
   public contextMenuShowAdd: boolean = false;
 
   private imageId: string;
-  private imageComparator: ImageComparationOption;
-  private filteredStatuses: ImageStatus[];
-  private filteredUsers: string[];
   private keyPressed: boolean = false;
+  private filterOptions: ImageFilterOptions;
 
   constructor(
+    private readonly auth: AuthService,
     private backend: BackendService,
     private route: ActivatedRoute,
     private location: Location,
     private notification: NzNotificationService,
     private thumbnail: ThumbnailService,
     private router: Router,
-    private contextService: NzContextMenuService
+    private contextService: NzContextMenuService,
+    private readonly jsonCompress: JsonCompressService,
+    private readonly platformService: PlatformService
   ) {
     this.initialize();
   }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe((queryParams) => {
-      this.route.params.subscribe((params) => {
-        this.initialize();
-        this.imageId = params['id'];
-        this.imageComparator =
-          (queryParams['sort'] as ImageComparationOption) ||
-          ImageComparationOption.UPLOAD_LATEST_FIRST;
-        const statuses: string = queryParams['statuses'] || '';
-        this.filteredStatuses = statuses.split(',').map(item => item.trim()).filter(item => item.length > 0).map(item => item as ImageStatus);
-        const users: string = queryParams['users'] || '';
-        this.filteredUsers = users.split(',').map(item => item.trim()).filter(item => item.length > 0);
-        this.fileChangeEvent(this.imageId);
+    (async () => {
+      const user = await this.auth.getCurrentUser();
+      this.route.queryParams.subscribe((queryParams) => {
+        this.route.params.subscribe((params) => {
+          this.imageId = params.id;
+          const filter: string = queryParams.filter;
+          this.filterOptions = filter
+            ? ImageFilterOptions.parseFromJson(
+                this.jsonCompress.decompress(filter)
+              )
+            : this.getDefaultFilterOptions(user);
+          this.fileChangeEvent(this.imageId);
+        });
       });
-    });
+    })().then(
+      () => {},
+      (e) => {
+        this.notification.error('Cannot initialize page', e);
+        if (this.platformService.isBrowser()) {
+          this.location.back();
+        }
+      }
+    );
+  }
+
+  private getDefaultFilterOptions(user: User): ImageFilterOptions {
+    return new ImageFilterOptions(
+      ImageComparationOption.UPLOAD_LATEST_FIRST,
+      [],
+      [user.username],
+      []
+    );
   }
 
   initialize(): void {
@@ -103,7 +131,9 @@ export class ManageImageComponent implements OnInit {
           (regionImages) => {
             this.croppedRegions = result.textRegions;
             this.croppedRegionImages = regionImages;
-            this.croppedRegionRegions = this.croppedRegions.map(item => item.region.vertices);
+            this.croppedRegionRegions = this.croppedRegions.map(
+              (item) => item.region.vertices
+            );
           },
           (reason) => {
             this.notification.error('Failed to load file', `Reason: ${reason}`);
@@ -138,11 +168,11 @@ export class ManageImageComponent implements OnInit {
         return;
       case 'ArrowLeft':
         event.preventDefault();
-        this.nextImage();
+        this.prevImage();
         return;
       case 'ArrowRight':
         event.preventDefault();
-        this.prevImage();
+        this.nextImage();
         return;
     }
   }
@@ -165,7 +195,9 @@ export class ManageImageComponent implements OnInit {
           .then((regionImage) => {
             this.croppedRegions.push(newTextRegion);
             this.croppedRegionImages.push(regionImage);
-            this.croppedRegionRegions = this.croppedRegions.map(item => item.region.vertices);
+            this.croppedRegionRegions = this.croppedRegions.map(
+              (item) => item.region.vertices
+            );
             this.regionSelector.clearSelected();
             this.selectedRegion = null;
             this.selectedRegionImage = null;
@@ -215,7 +247,9 @@ export class ManageImageComponent implements OnInit {
         this.notification.success('Text region deleted successfully', '');
         this.croppedRegions.splice(id, 1);
         this.croppedRegionImages.splice(id, 1);
-        this.croppedRegionRegions = this.croppedRegions.map(item => item.region.vertices);
+        this.croppedRegionRegions = this.croppedRegions.map(
+          (item) => item.region.vertices
+        );
         this.closeModal();
       },
       (reason) => {
@@ -264,9 +298,7 @@ export class ManageImageComponent implements OnInit {
         window.scrollTo(0, 0);
         this.router.navigate([`/manage-image/${nextImage.imageId}`], {
           queryParams: {
-            sort: this.imageComparator,
-            statuses: this.filteredStatuses.join(','),
-            users: this.filteredUsers.join(',')
+            filter: this.jsonCompress.compress(this.filterOptions.getJson()),
           },
         });
       },
@@ -281,23 +313,13 @@ export class ManageImageComponent implements OnInit {
 
   nextImage(): void {
     this.loadOtherImage(
-      this.backend.loadNextImage(
-        this.imageId,
-        this.imageComparator,
-        this.filteredStatuses,
-        this.filteredUsers
-      )
+      this.backend.loadNextImage(this.imageId, this.filterOptions)
     );
   }
 
   prevImage(): void {
     this.loadOtherImage(
-      this.backend.loadPrevImage(
-        this.imageId,
-        this.imageComparator,
-        this.filteredStatuses,
-        this.filteredUsers
-      )
+      this.backend.loadPrevImage(this.imageId, this.filterOptions)
     );
   }
 }

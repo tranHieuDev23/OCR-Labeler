@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzNotificationModule } from 'ng-zorro-antd/notification';
-
+import { ImageFilterOptionsSelectorModule } from 'src/app/components/image-filter-options-selector/image-filter-options-selector.module';
 
 @NgModule({
   declarations: [MyImagesComponent],
@@ -31,7 +31,8 @@ import { NzNotificationModule } from 'ng-zorro-antd/notification';
     ImageGridModule,
     NzDropDownModule,
     NzModalModule,
-    NzNotificationModule
-  ]
+    NzNotificationModule,
+    ImageFilterOptionsSelectorModule,
+  ],
 })
-export class MyImagesModule { }
+export class MyImagesModule {}
