@@ -1,12 +1,9 @@
 import {
   getOrderByClause,
-  ImageComparationOption,
   getFilterClause,
   getCompareWithImageClause,
-} from 'src/app/models/image-compare-funcs';
-import ImageStatus, {
-  getImageStatusFilterClause,
-} from 'src/app/models/image-status';
+} from 'src/app/models/image-dao-util';
+import ImageStatus from 'src/app/models/image-status';
 import { ImageFilterOptions } from 'src/app/models/image-filter-options';
 import UploadedImage from 'src/app/models/uploaded-image';
 import User from 'src/app/models/user';

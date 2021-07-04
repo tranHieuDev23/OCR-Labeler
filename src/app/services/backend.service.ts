@@ -1,8 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ImageComparationOption } from '../models/image-compare-funcs';
 import { ImageFilterOptions } from '../models/image-filter-options';
-import ImageStatus from '../models/image-status';
 import { TextRegion, Region } from '../models/text-region';
 import UploadedImage from '../models/uploaded-image';
 

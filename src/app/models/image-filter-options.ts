@@ -1,4 +1,4 @@
-import { ImageComparationOption } from './image-compare-funcs';
+import { ImageComparationOption } from './image-dao-util';
 import ImageStatus from './image-status';
 
 export class ImageFilterOptions {

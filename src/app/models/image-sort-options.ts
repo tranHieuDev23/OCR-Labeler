@@ -1,4 +1,4 @@
-import { ImageComparationOption } from './image-compare-funcs';
+import { ImageComparationOption } from './image-dao-util';
 
 export function getAllImageSortOptions() {
   return [

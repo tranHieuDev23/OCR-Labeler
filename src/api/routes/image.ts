@@ -26,6 +26,9 @@ const thumbnailFolder = process.env.THUMBNAIL_DIRECTORY;
 const uploadJwtMiddleware: Router = jwtMiddlewareFactory(
   (user) => user.canUpload || user.canManageAllImage
 );
+const canManageAllImageJwtMiddleware = jwtMiddlewareFactory(
+  (user) => user.canManageAllImage
+);
 
 imageRouter.post(
   '/get-user-images',
@@ -70,7 +73,7 @@ imageRouter.post(
 
 imageRouter.post(
   '/get-all-user-images',
-  uploadJwtMiddleware,
+  canManageAllImageJwtMiddleware,
   (request, response) => {
     const user: User = response.locals.user;
     let startFrom: number = request.body.startFrom;

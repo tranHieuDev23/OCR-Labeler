@@ -9,7 +9,7 @@ import User from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { ImageFilterOptions } from 'src/app/models/image-filter-options';
 import { getImageSortOptionString } from 'src/app/models/image-sort-options';
-import { ImageComparationOption } from 'src/app/models/image-compare-funcs';
+import { ImageComparationOption } from 'src/app/models/image-dao-util';
 
 @Component({
   selector: 'app-image-filter-options-selector',

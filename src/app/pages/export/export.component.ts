@@ -4,6 +4,7 @@ import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { ExportProgress } from 'src/app/models/export-progress';
 import { ExportResult } from 'src/app/models/export-result';
 import { ImageFilterOptions } from 'src/app/models/image-filter-options';
+import ImageStatus from 'src/app/models/image-status';
 import UploadedImage from 'src/app/models/uploaded-image';
 import { ExportDatasetService } from 'src/app/services/export-dataset.service';
 
@@ -34,6 +35,7 @@ export class ExportComponent implements OnInit {
 
   ngOnInit(): void {
     const filterOptions = ImageFilterOptions.getDefaultOptions();
+    filterOptions.filteredStatuses = [ImageStatus.Published];
     this.loadPage(1, DEFAULT_IMAGES_PER_PAGE, filterOptions).then();
   }
 

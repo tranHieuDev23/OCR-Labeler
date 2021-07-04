@@ -10,7 +10,7 @@ import {
   RegionClickedEvent,
   RegionSelectorComponent,
 } from 'src/app/components/region-selector/region-selector.component';
-import { ImageComparationOption } from 'src/app/models/image-compare-funcs';
+import { ImageComparationOption } from 'src/app/models/image-dao-util';
 import ImageStatus, { isPublishedStatus } from 'src/app/models/image-status';
 import { TextRegion, Region, Coordinate } from 'src/app/models/text-region';
 import UploadedImage from 'src/app/models/uploaded-image';
