@@ -14,9 +14,9 @@ export enum ImageComparationOption {
 export function getOrderByClause(option: ImageComparationOption): string {
   switch (option) {
     case ImageComparationOption.UPLOAD_LATEST_FIRST:
-      return 'ORDER BY "Images"."uploadedDate" DESC, "Images"."imageId"';
+      return 'ORDER BY "Images"."uploadedDate" DESC, "Images"."imageId" DESC';
     case ImageComparationOption.UPLOAD_OLDEST_FIRST:
-      return 'ORDER BY "Images"."uploadedDate", "Images"."imageId" DESC';
+      return 'ORDER BY "Images"."uploadedDate", "Images"."imageId"';
     case ImageComparationOption.STATUS_ASC:
       return 'ORDER BY "Images".status, "Images"."imageId"';
     case ImageComparationOption.STATUS_DESC:
